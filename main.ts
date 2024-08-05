@@ -12,7 +12,7 @@ function setupNeovide() {
   const vim = getNeovideExtendedVimContext();
   if (vim.g.neovide) {
     vim.g.neovide_scale_factor = 0.75;
-    vim.g.neovide_transparency = 0.8;
+    // Doesn't appear to be doing anything, but should leave remote nvim server instances intact when closing
     vim.g.neovide_detach_on_quit = 'always_detach';
   }
 }

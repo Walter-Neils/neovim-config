@@ -89,6 +89,26 @@ else {
   });
 }
 
+// Open splits
+applyKeyMapping({
+  mode: 'n',
+  inputStroke: '<leader>s',
+  outputStroke: '<cmd>:vsplit<CR>',
+  options: {
+    desc: 'vertical split'
+  }
+});
+
+// Open splits
+applyKeyMapping({
+  mode: 'n',
+  inputStroke: '<leader>h',
+  outputStroke: '<cmd>:split<CR>',
+  options: {
+    desc: 'horizontal split'
+  }
+});
+
 // Clear highlights on ESC
 applyKeyMapping({
   mode: 'n',
