@@ -12,6 +12,8 @@ function setupNeovide() {
   const vim = getNeovideExtendedVimContext();
   if (vim.g.neovide) {
     vim.g.neovide_scale_factor = 0.75;
+    vim.g.neovide_transparency = 0.8;
+    vim.g.neovide_detach_on_quit = 'always_detach';
   }
 }
 

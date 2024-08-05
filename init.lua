@@ -136,6 +136,8 @@ local function setupNeovide()
     local vim = getNeovideExtendedVimContext()
     if vim.g.neovide then
         vim.g.neovide_scale_factor = 0.75
+        vim.g.neovide_transparency = 0.8
+        vim.g.neovide_detach_on_quit = "always_detach"
     end
 end
 local function setupLazy()
