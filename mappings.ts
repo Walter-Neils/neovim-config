@@ -1,5 +1,4 @@
 import { applyKeyMapping } from "./lua/helpers/keymap";
-import { getCMP } from "./lua/plugins/cmp";
 import { CONFIGURATION } from "./lua/toggles";
 
 
@@ -51,23 +50,44 @@ for (const direction in MOVEMENT_DIRECTION_KEYS) {
 }
 
 // Buffer switching
-applyKeyMapping({
-  mode: 'n',
-  inputStroke: `<A-h>`,
-  outputStroke: `<cmd>:bprev <CR>`,
-  options: {
-    desc: `previous buffer`
-  }
-});
+if (!CONFIGURATION.useBarBar) {
+  applyKeyMapping({
+    mode: 'n',
+    inputStroke: `<A-h>`,
+    outputStroke: `<cmd>:bprev <CR>`,
+    options: {
+      desc: `previous buffer`
+    }
+  });
 
-applyKeyMapping({
-  mode: 'n',
-  inputStroke: `<A-l>`,
-  outputStroke: `<cmd>:bnext <CR>`,
-  options: {
-    desc: `next buffer`
-  }
-});
+  applyKeyMapping({
+    mode: 'n',
+    inputStroke: `<A-l>`,
+    outputStroke: `<cmd>:bnext <CR>`,
+    options: {
+      desc: `next buffer`
+    }
+  });
+}
+else {
+  applyKeyMapping({
+    mode: 'n',
+    inputStroke: `<A-h>`,
+    outputStroke: `<cmd>:BufferPrevious <CR>`,
+    options: {
+      desc: `previous buffer`
+    }
+  });
+
+  applyKeyMapping({
+    mode: 'n',
+    inputStroke: `<A-l>`,
+    outputStroke: `<cmd>:BufferNext <CR>`,
+    options: {
+      desc: `next buffer`
+    }
+  });
+}
 
 // Clear highlights on ESC
 applyKeyMapping({

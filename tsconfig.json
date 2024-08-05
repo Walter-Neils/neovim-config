@@ -11,6 +11,7 @@
     "noHeader": true,
     "luaTarget": "JIT",
     "luaBundle": "init.lua",
-    "luaBundleEntry": "main.ts"
+    "luaBundleEntry": "main.ts",
+    "noImplicitSelf": true
   }
 }

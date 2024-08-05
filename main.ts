@@ -1,10 +1,19 @@
-import { LazyModuleInterface, LazyPlugin } from "./ambient/lazy";
+import { LazyModuleInterface } from "./ambient/lazy";
+import { getNeovideExtendedVimContext } from "./lua/integrations/neovide";
 import { getPlugins } from "./lua/plugins/init";
 import { THEME_APPLIERS } from "./lua/theme";
+
 
 vim.api.nvim_create_user_command('ResetInstallData', function(this: void) {
   vim.notify("Configuration reset");
 }, {});
+
+function setupNeovide() {
+  const vim = getNeovideExtendedVimContext();
+  if (vim.g.neovide) {
+    vim.g.neovide_scale_factor = 0.75;
+  }
+}
 
 function setupLazy(this: void) {
   const lazyPath = vim.fn.stdpath("data") + "/lazy/lazy.nvim";
@@ -15,6 +24,7 @@ function setupLazy(this: void) {
   vim.opt.rtp.prepend(lazyPath);
 }
 
+setupNeovide();
 setupLazy();
 const lazy = require<LazyModuleInterface>("lazy");
 lazy.setup(

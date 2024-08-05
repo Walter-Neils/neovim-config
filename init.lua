@@ -21,6 +21,16 @@ local function require(file, ...)
     end
 end
 ____modules = {
+["lua.integrations.neovide"] = function(...) 
+local ____exports = {}
+function ____exports.isNeovideSession()
+    return vim.g.neovide ~= nil
+end
+function ____exports.getNeovideExtendedVimContext()
+    return vim
+end
+return ____exports
+ end,
 ["lua.toggles"] = function(...) 
 local ____exports = {}
 ____exports.CONFIGURATION = {
@@ -33,7 +43,7 @@ ____exports.CONFIGURATION = {
     useIndentBlankline = true,
     useTreeDevIcons = true,
     useLualine = true,
-    useBarBar = false,
+    useBarBar = true,
     lspconfig = {useInlayHints = false}
 }
 return ____exports
@@ -109,6 +119,8 @@ return ____exports
  end,
 ["main"] = function(...) 
 local ____exports = {}
+local ____neovide = require("lua.integrations.neovide")
+local getNeovideExtendedVimContext = ____neovide.getNeovideExtendedVimContext
 local ____init = require("lua.plugins.init")
 local getPlugins = ____init.getPlugins
 local ____theme = require("lua.theme")
@@ -120,6 +132,12 @@ vim.api.nvim_create_user_command(
     end,
     {}
 )
+local function setupNeovide()
+    local vim = getNeovideExtendedVimContext()
+    if vim.g.neovide then
+        vim.g.neovide_scale_factor = 0.75
+    end
+end
 local function setupLazy()
     local lazyPath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
     if not vim.loop.fs_stat(lazyPath) then
@@ -135,6 +153,7 @@ local function setupLazy()
     end
     vim.opt.rtp:prepend(lazyPath)
 end
+setupNeovide()
 setupLazy()
 local lazy = require("lazy")
 lazy.setup(getPlugins())
@@ -162,85 +181,6 @@ function ____exports.applyKeyMapping(map)
 end
 return ____exports
  end,
-["lua.plugins.cmp"] = function(...) 
-local ____exports = {}
-local KIND_ICONS = {
-    Text = "",
-    Method = "󰆧",
-    Function = "󰊕",
-    Constructor = "",
-    Field = "󰇽",
-    Variable = "󰂡",
-    Class = "󰠱",
-    Interface = "",
-    Module = "",
-    Property = "󰜢",
-    Unit = "",
-    Value = "󰎠",
-    Enum = "",
-    Keyword = "󰌋",
-    Snippet = "",
-    Color = "󰏘",
-    File = "󰈙",
-    Reference = "",
-    Folder = "󰉋",
-    EnumMember = "",
-    Constant = "󰏿",
-    Struct = "",
-    Event = "",
-    Operator = "󰆕",
-    TypeParameter = "󰅲"
-}
-function ____exports.getCMP(self)
-    local target = "cmp"
-    local cmp = require(target)
-    return cmp
-end
-local plugin = {
-    [1] = "hrsh7th/nvim-cmp",
-    dependencies = {
-        "hrsh7th/cmp-nvim-lsp",
-        "neovim/nvim-lspconfig",
-        "onsails/lspkind.nvim",
-        "hrsh7th/cmp-vsnip",
-        "hrsh7th/vim-vsnip"
-    },
-    config = function()
-        local cmp = ____exports.getCMP(nil)
-        cmp.setup({
-            window = {completion = {winhighlight = "Normal:Pmenu,FloatBorder:Pmenu,Search:None", col_offset = -3, side_padding = 0}},
-            formatting = {format = function(_entry, vim_item)
-                local icons = KIND_ICONS
-                local icon = icons[vim_item.kind]
-                icon = (" " .. icon) .. " "
-                vim_item.menu = ("  (" .. tostring(vim_item.kind)) .. ")  "
-                vim_item.kind = string.format("%s %s", icon, vim_item.kind)
-                return vim_item
-            end},
-            snippet = {expand = function(args)
-                vim.fn["vsnip#anonymous"](args.body)
-            end},
-            sources = cmp.config.sources({{name = "nvim_lsp"}}),
-            mapping = {
-                ["<C-b>"] = cmp.mapping.scroll_docs(-4),
-                ["<C-f>"] = cmp.mapping.scroll_docs(1),
-                ["<C-Space>"] = cmp.mapping.complete(),
-                ["<Tab>"] = cmp.mapping(function(fallback)
-                    if cmp.visible() then
-                        cmp.select_next_item()
-                    else
-                        fallback()
-                    end
-                end),
-                ["<C-e>"] = cmp.mapping.abort(),
-                ["<CR>"] = cmp.mapping.confirm({select = false})
-            }
-        })
-    end
-}
-____exports.default = plugin
-return ____exports
- end,
 ["mappings"] = function(...) 
 local ____exports = {}
 local ____keymap = require("lua.helpers.keymap.index")
@@ -257,8 +197,13 @@ for direction in pairs(MOVEMENT_DIRECTION_KEYS) do
     local key = MOVEMENT_DIRECTION_KEYS[direction]
     applyKeyMapping({mode = "n", inputStroke = ("<C-" .. key.key) .. ">", outputStroke = "<C-w>" .. key.key, options = {desc = "switch window " .. direction}})
 end
-applyKeyMapping({mode = "n", inputStroke = "<A-h>", outputStroke = "<cmd>:bprev <CR>", options = {desc = "previous buffer"}})
-applyKeyMapping({mode = "n", inputStroke = "<A-l>", outputStroke = "<cmd>:bnext <CR>", options = {desc = "next buffer"}})
+if not CONFIGURATION.useBarBar then
+    applyKeyMapping({mode = "n", inputStroke = "<A-h>", outputStroke = "<cmd>:bprev <CR>", options = {desc = "previous buffer"}})
+    applyKeyMapping({mode = "n", inputStroke = "<A-l>", outputStroke = "<cmd>:bnext <CR>", options = {desc = "next buffer"}})
+else
+    applyKeyMapping({mode = "n", inputStroke = "<A-h>", outputStroke = "<cmd>:BufferPrevious <CR>", options = {desc = "previous buffer"}})
+    applyKeyMapping({mode = "n", inputStroke = "<A-l>", outputStroke = "<cmd>:BufferNext <CR>", options = {desc = "next buffer"}})
+end
 applyKeyMapping({mode = "n", inputStroke = "<Esc>", outputStroke = "<cmd>noh<CR>", options = {desc = "general clear highlights"}})
 applyKeyMapping({mode = "n", inputStroke = "<leader>x", outputStroke = "<cmd>:bd<CR>:bnext<CR>", options = {desc = "Close current buffer"}})
 applyKeyMapping({mode = "n", inputStroke = "<C-n>", outputStroke = "<cmd>NvimTreeToggle<CR>", options = {desc = "toggle file tree"}})
@@ -314,6 +259,85 @@ local plugin = {
         vim.g.barbar_auto_setup = false
     end,
     opts = {animation = true, insert_at_start = true}
+}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.cmp"] = function(...) 
+local ____exports = {}
+local KIND_ICONS = {
+    Text = "",
+    Method = "󰆧",
+    Function = "󰊕",
+    Constructor = "",
+    Field = "󰇽",
+    Variable = "󰂡",
+    Class = "󰠱",
+    Interface = "",
+    Module = "",
+    Property = "󰜢",
+    Unit = "",
+    Value = "󰎠",
+    Enum = "",
+    Keyword = "󰌋",
+    Snippet = "",
+    Color = "󰏘",
+    File = "󰈙",
+    Reference = "",
+    Folder = "󰉋",
+    EnumMember = "",
+    Constant = "󰏿",
+    Struct = "",
+    Event = "",
+    Operator = "󰆕",
+    TypeParameter = "󰅲"
+}
+function ____exports.getCMP()
+    local target = "cmp"
+    local cmp = require(target)
+    return cmp
+end
+local plugin = {
+    [1] = "hrsh7th/nvim-cmp",
+    dependencies = {
+        "hrsh7th/cmp-nvim-lsp",
+        "neovim/nvim-lspconfig",
+        "onsails/lspkind.nvim",
+        "hrsh7th/cmp-vsnip",
+        "hrsh7th/vim-vsnip"
+    },
+    config = function()
+        local cmp = ____exports.getCMP()
+        cmp.setup({
+            window = {completion = {winhighlight = "Normal:Pmenu,FloatBorder:Pmenu,Search:None", col_offset = -3, side_padding = 0}},
+            formatting = {format = function(_entry, vim_item)
+                local icons = KIND_ICONS
+                local icon = icons[vim_item.kind]
+                icon = (" " .. icon) .. " "
+                vim_item.menu = ("  (" .. tostring(vim_item.kind)) .. ")  "
+                vim_item.kind = string.format("%s %s", icon, vim_item.kind)
+                return vim_item
+            end},
+            snippet = {expand = function(args)
+                vim.fn["vsnip#anonymous"](args.body)
+            end},
+            sources = cmp.config.sources({{name = "nvim_lsp"}}),
+            mapping = {
+                ["<C-b>"] = cmp.mapping.scroll_docs(-4),
+                ["<C-f>"] = cmp.mapping.scroll_docs(1),
+                ["<C-Space>"] = cmp.mapping.complete(),
+                ["<Tab>"] = cmp.mapping(function(fallback)
+                    if cmp.visible() then
+                        cmp.select_next_item()
+                    else
+                        fallback()
+                    end
+                end),
+                ["<C-e>"] = cmp.mapping.abort(),
+                ["<CR>"] = cmp.mapping.confirm({select = false})
+            }
+        })
+    end
 }
 ____exports.default = plugin
 return ____exports
@@ -396,9 +420,9 @@ function on_attach(client, bufnr)
             local ____try, ____hasReturned, ____returnValue = pcall(function()
                 if client.server_capabilities.inlayHintProvider then
                     if vim.lsp.buf.inlay_hint == nil then
-                        vim:notify("Failed to enable inlay hints: neovim builtin inlay_hints unavailable")
+                        vim.notify("Failed to enable inlay hints: neovim builtin inlay_hints unavailable")
                     else
-                        vim.lsp.buf.inlay_hint:enable(true, {bufnr = bufnr})
+                        vim.lsp.buf.inlay_hint.enable(true, {bufnr = bufnr})
                     end
                     return true
                 end
@@ -410,20 +434,20 @@ function on_attach(client, bufnr)
                 return ____returnValue
             end
         end
-        vim:notify("Failed to enable LSP hints: " .. tostring(____error))
+        vim.notify("Failed to enable LSP hints: " .. tostring(____error))
     end
 end
 function configureLSP()
     local target = "lspconfig"
-    local lspconfig = require(nil, target)
+    local lspconfig = require(target)
     local capabilities
     if CONFIGURATION.useCMP then
         local target = "cmp_nvim_lsp"
-        capabilities = require(nil, target):default_capabilities()
+        capabilities = require(target).default_capabilities()
     end
-    lspconfig.tsserver:setup({capabilities = capabilities, on_attach = on_attach})
-    lspconfig.lua_ls:setup({capabilities = capabilities, on_attach = on_attach})
-    vim.diagnostic:config({update_in_insert = true, virtual_text = not CONFIGURATION.useLSPLines})
+    lspconfig.tsserver.setup({capabilities = capabilities, on_attach = on_attach})
+    lspconfig.lua_ls.setup({capabilities = capabilities, on_attach = on_attach})
+    vim.diagnostic.config({update_in_insert = true, virtual_text = not CONFIGURATION.useLSPLines})
 end
 local plugin = {[1] = "neovim/nvim-lspconfig", config = configureLSP}
 ____exports.default = plugin
