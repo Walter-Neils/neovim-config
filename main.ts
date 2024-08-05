@@ -1,0 +1,33 @@
+import { LazyModuleInterface, LazyPlugin } from "./ambient/lazy";
+import { getPlugins } from "./lua/plugins/init";
+import { THEME_APPLIERS } from "./lua/theme";
+
+function setupLazy(this: void) {
+  const lazyPath = vim.fn.stdpath("data") + "/lazy/lazy.nvim";
+  if (!vim.loop.fs_stat(lazyPath)) {
+    const repo = "https://github.com/folke/lazy.nvim.git";
+    vim.fn.system(["git", "clone", "--filter=blob:none", repo, "--branch=stable", lazyPath]);
+  }
+  vim.opt.rtp.prepend(lazyPath);
+}
+
+setupLazy();
+const lazy = require<LazyModuleInterface>("lazy");
+lazy.setup(
+  getPlugins()
+);
+
+THEME_APPLIERS.TokyoNight();
+
+vim.opt.clipboard = "unnamedplus"; // System-wide copy & paste
+
+vim.opt.expandtab = true;
+vim.opt.shiftwidth = 2;
+vim.opt.smartindent = true;
+vim.opt.tabstop = 2;
+vim.opt.softtabstop = 2;
+vim.opt.number = true;
+vim.opt.numberwidth = 2;
+vim.opt.ruler = false;
+
+require<unknown>("mappings");
