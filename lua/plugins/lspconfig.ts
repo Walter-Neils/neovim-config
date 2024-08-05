@@ -24,18 +24,41 @@ function on_attach(this: void, client: LSPClient, bufnr: number) {
     let error: any | undefined;
     try {
       if (client.server_capabilities.inlayHintProvider) {
-        if (vim.lsp.buf.inlay_hint === undefined) {
+        if (vim.lsp.inlay_hint === undefined) {
           vim.notify(`Failed to enable inlay hints: neovim builtin inlay_hints unavailable`);
         }
         else {
-          vim.lsp.buf.inlay_hint.enable(true, { bufnr });
+          vim.lsp.inlay_hint.enable(true, { bufnr });
         }
         return;
+      }
+      else {
+        vim.notify("Server does not support inlay hints");
       }
     } catch (e: any) { error = e; }
     vim.notify(`Failed to enable LSP hints: ${error}`);
   }
 }
+
+if (CONFIGURATION.lspconfig.useInlayHints) {
+  vim.api.nvim_create_autocmd('InsertEnter', {
+    callback: () => {
+      if (CONFIGURATION.lspconfig.inlayHints.displayMode === 'only-in-normal-mode') {
+        vim.lsp.inlay_hint.enable(false);
+      }
+    }
+  });
+
+  vim.api.nvim_create_autocmd('InsertLeave', {
+    callback: () => {
+      if (CONFIGURATION.lspconfig.inlayHints.displayMode === 'only-in-normal-mode') {
+        vim.lsp.inlay_hint.enable(true);
+      }
+    }
+  });
+}
+
+
 
 
 function configureLSP(this: void) {

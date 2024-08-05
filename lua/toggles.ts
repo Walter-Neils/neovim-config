@@ -13,6 +13,9 @@ export const CONFIGURATION = {
   lspconfig: {
     // Activate builtin lsp_hints functionality on LSP server attach
     // Only works with nightly neovim ^0.10.0
-    useInlayHints: false
+    useInlayHints: true,
+    inlayHints: {
+      displayMode: 'only-in-normal-mode'
+    }
   }
 } as const;

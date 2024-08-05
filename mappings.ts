@@ -1,7 +1,6 @@
 import { applyKeyMapping } from "./lua/helpers/keymap";
 import { CONFIGURATION } from "./lua/toggles";
 
-
 vim.g.mapleader = " "; // Use space key as leader
 
 const MOVEMENT_DIRECTION_KEYS = {

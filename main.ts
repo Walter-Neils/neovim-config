@@ -11,6 +11,7 @@ vim.api.nvim_create_user_command('ResetInstallData', function(this: void) {
 function setupNeovide() {
   const vim = getNeovideExtendedVimContext();
   if (vim.g.neovide) {
+    vim.notify("Applying neovide");
     vim.g.neovide_scale_factor = 0.75;
     // Doesn't appear to be doing anything, but should leave remote nvim server instances intact when closing
     vim.g.neovide_detach_on_quit = 'always_detach';

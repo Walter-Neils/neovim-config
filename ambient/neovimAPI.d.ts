@@ -9,6 +9,8 @@ type VimHLColorParams = {
   link?: string
 };
 
+type VimAutocmdEvent = 'BufAdd' | 'BufDelete' | 'BufEnter' | 'BufFilePost' | 'BufFilePre' | 'BufHidden' | 'BufLeave' | 'BufModifiedSet' | 'BufNew' | 'BufNewFile' | 'BufRead' | 'BufReadCmd' | 'BufReadPre' | 'BufUnload' | 'BufWinEnter' | 'BufWinLeave' | 'BufWipeout' | 'BufWrite' | 'BufWriteCmd' | 'BufWritePost' | 'ChanInfo' | 'ChanOpen' | 'CmdUndefined' | 'CmdlineChanged' | 'CmdlineEnter' | 'CmdlineLeave' | 'CmdwinEnter' | 'CmdwinLeave' | 'ColorScheme' | 'ColorSchemePre' | 'CompleteChanged' | 'CompleteDonePre' | 'CompleteDone' | 'CursorHold' | 'CursorHoldI' | 'CursorMoved' | 'CursorMovedI' | 'DiffUpdated' | 'DirChanged' | 'DirChangedPre' | 'ExitPre' | 'FileAppendCmd' | 'FileAppendPost' | 'FileAppendPre' | 'FileChangedRO' | 'FileChangedShell' | 'FileChangedShellPost' | 'FileReadCmd' | 'FileReadPost' | 'FileReadPre' | 'FileType' | 'FileWriteCmd' | 'FileWritePost' | 'FileWritePre' | 'FilterReadPost' | 'FilterReadPre' | 'FilterWritePost' | 'FilterWritePre' | 'FocusGained' | 'FocusLost' | 'FuncUndefined' | 'UIEnter' | 'UILeave' | 'InsertChange' | 'InsertCharPre' | 'InsertEnter' | 'InsertLeavePre' | 'InsertLeave' | 'MenuPopup' | 'ModeChanged' | 'OptionSet' | 'QuickFixCmdPre' | 'QuickFixCmdPost' | 'QuitPre' | 'RemoteReply' | 'SearchWrapped' | 'RecordingEnter' | 'RecordingLeave' | 'SafeState' | 'SessionLoadPost' | 'SessionWritePost' | 'ShellCmdPost' | 'Signal' | 'ShellFilterPost' | 'SourcePre' | 'SourcePost' | 'SourceCmd' | 'SpellFileMissing' | 'StdinReadPost' | 'StdinReadPre' | 'SwapExists' | 'Syntax' | 'TabEnter' | 'TabLeave' | 'TabNew' | 'TabNewEntered' | 'TabClosed' | 'TermOpen' | 'TermEnter' | 'TermLeave' | 'TermClose' | 'TermRequest' | 'TermResponse' | 'TextChanged' | 'TextChangedI' | 'TextChangedP' | 'TextChangedT' | 'TextYankPost' | 'User' | 'UserGettingBored' | 'VimEnter' | 'VimLeave' | 'VimLeavePre' | 'VimResized' | 'VimResume' | 'VimSuspend' | 'WinClosed' | 'WinEnter' | 'WinLeave' | 'WinNew' | 'WinScrolled' | 'WinResized';
+
 type VimAPI = {
   cmd: (this: void, params: string) => void,
   notify: (this: void, value: any) => void,
@@ -16,9 +18,17 @@ type VimAPI = {
     nvim_set_hl: (this: void, arg1: number, arg2: string, params: VimHLColorParams) => void,
     nvim_create_user_command: (this: void, commandName: string, luaFunc: (this: void, args?: unknown) => void, options?: {
       nargs?: number
+    }) => void,
+    nvim_create_autocmd: (this: void, eventName: VimAutocmdEvent, config: {
+      group?: string,
+      callback: (this: void) => void
     }) => void
   },
   lsp: {
+    inlay_hint: {
+      enable: (this: void, enable: boolean, filter?: { bufnr?: number }) => void,
+      is_enabled: (this: void) => void
+    },
     buf: {
       format: (this: void, opts: { async?: boolean }) => void,
       code_action: (this: void) => void,
@@ -27,9 +37,6 @@ type VimAPI = {
       hover: (this: void) => void,
       implementation: (this: void) => void,
       type_definition: (this: void) => void,
-      inlay_hint: {
-        enable: (this: void, enable: boolean, opt?: { bufnr: number }) => void
-      }
     }
   },
   diagnostic: {

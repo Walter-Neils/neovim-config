@@ -2,7 +2,7 @@ import { LazyPlugin } from "../../ambient/lazy";
 
 const plugin: LazyPlugin = {
   1: 'mrcjkb/rustaceanvim',
-  version: '^3',
+  version: '^5',
   ft: ['rust'],
   dependencies: [
     "nvim-lua/plenary.nvim",

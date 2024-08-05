@@ -44,7 +44,7 @@ ____exports.CONFIGURATION = {
     useTreeDevIcons = true,
     useLualine = true,
     useBarBar = true,
-    lspconfig = {useInlayHints = false}
+    lspconfig = {useInlayHints = true, inlayHints = {displayMode = "only-in-normal-mode"}}
 }
 return ____exports
  end,
@@ -135,6 +135,7 @@ vim.api.nvim_create_user_command(
 local function setupNeovide()
     local vim = getNeovideExtendedVimContext()
     if vim.g.neovide then
+        vim.notify("Applying neovide")
         vim.g.neovide_scale_factor = 0.75
         vim.g.neovide_detach_on_quit = "always_detach"
     end
@@ -422,12 +423,14 @@ function on_attach(client, bufnr)
             end
             local ____try, ____hasReturned, ____returnValue = pcall(function()
                 if client.server_capabilities.inlayHintProvider then
-                    if vim.lsp.buf.inlay_hint == nil then
+                    if vim.lsp.inlay_hint == nil then
                         vim.notify("Failed to enable inlay hints: neovim builtin inlay_hints unavailable")
                     else
-                        vim.lsp.buf.inlay_hint.enable(true, {bufnr = bufnr})
+                        vim.lsp.inlay_hint.enable(true, {bufnr = bufnr})
                     end
                     return true
+                else
+                    vim.notify("Server does not support inlay hints")
                 end
             end)
             if not ____try then
@@ -453,6 +456,24 @@ function configureLSP()
     vim.diagnostic.config({update_in_insert = true, virtual_text = not CONFIGURATION.useLSPLines})
 end
 local plugin = {[1] = "neovim/nvim-lspconfig", config = configureLSP}
+if CONFIGURATION.lspconfig.useInlayHints then
+    vim.api.nvim_create_autocmd(
+        "InsertEnter",
+        {callback = function()
+            if CONFIGURATION.lspconfig.inlayHints.displayMode == "only-in-normal-mode" then
+                vim.lsp.inlay_hint.enable(false)
+            end
+        end}
+    )
+    vim.api.nvim_create_autocmd(
+        "InsertLeave",
+        {callback = function()
+            if CONFIGURATION.lspconfig.inlayHints.displayMode == "only-in-normal-mode" then
+                vim.lsp.inlay_hint.enable(true)
+            end
+        end}
+    )
+end
 ____exports.default = plugin
 return ____exports
  end,
@@ -551,7 +572,7 @@ return ____exports
 local ____exports = {}
 local plugin = {
     [1] = "mrcjkb/rustaceanvim",
-    version = "^3",
+    version = "^5",
     ft = {"rust"},
     dependencies = {"nvim-lua/plenary.nvim", "mfussenegger/nvim-dap"},
     config = function()
