@@ -9,7 +9,7 @@ const plugin: LazyPlugin = {
     "mfussenegger/nvim-dap",
   ],
   config: function(this: void) {
-    (vim.g as any).rustaceanvim  = {
+    (vim.g as any).rustaceanvim = {
       tools: {
         hover_actions: {
           auto_focus: true

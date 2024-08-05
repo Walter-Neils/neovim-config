@@ -8,5 +8,9 @@ export const CONFIGURATION = {
   useIndentBlankline: true,
   useTreeDevIcons: true,
   useLualine: true,
-  useBarBar: true
-};
+  useBarBar: false,
+  lspconfig: {
+    // Activate builtin lsp_hints functionality on LSP server attach
+    useInlayHints: false
+  }
+} as const;

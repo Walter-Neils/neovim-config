@@ -2,6 +2,10 @@ import { LazyModuleInterface, LazyPlugin } from "./ambient/lazy";
 import { getPlugins } from "./lua/plugins/init";
 import { THEME_APPLIERS } from "./lua/theme";
 
+vim.api.nvim_create_user_command('ResetInstallData', function(this: void) {
+  vim.notify("Configuration reset");
+}, {});
+
 function setupLazy(this: void) {
   const lazyPath = vim.fn.stdpath("data") + "/lazy/lazy.nvim";
   if (!vim.loop.fs_stat(lazyPath)) {

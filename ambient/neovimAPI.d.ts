@@ -13,7 +13,10 @@ type VimAPI = {
   cmd: (this: void, params: string) => void,
   notify: (this: void, value: any) => void,
   api: {
-    nvim_set_hl: (this: void, arg1: number, arg2: string, params: VimHLColorParams) => void
+    nvim_set_hl: (this: void, arg1: number, arg2: string, params: VimHLColorParams) => void,
+    nvim_create_user_command: (this: void, commandName: string, luaFunc: (this: void, args?: unknown) => void, options?: {
+      nargs?: number
+    }) => void
   },
   lsp: {
     buf: {
@@ -24,6 +27,9 @@ type VimAPI = {
       hover: (this: void) => void,
       implementation: (this: void) => void,
       type_definition: (this: void) => void,
+      inlay_hint: {
+        enable: (this: void, enable: boolean, opt?: { bufnr: number }) => void
+      }
     }
   },
   diagnostic: {

@@ -33,7 +33,8 @@ ____exports.CONFIGURATION = {
     useIndentBlankline = true,
     useTreeDevIcons = true,
     useLualine = true,
-    useBarBar = true
+    useBarBar = false,
+    lspconfig = {useInlayHints = false}
 }
 return ____exports
  end,
@@ -112,6 +113,13 @@ local ____init = require("lua.plugins.init")
 local getPlugins = ____init.getPlugins
 local ____theme = require("lua.theme")
 local THEME_APPLIERS = ____theme.THEME_APPLIERS
+vim.api.nvim_create_user_command(
+    "ResetInstallData",
+    function()
+        vim.notify("Configuration reset")
+    end,
+    {}
+)
 local function setupLazy()
     local lazyPath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
     if not vim.loop.fs_stat(lazyPath) then
@@ -318,7 +326,15 @@ return ____exports
  end,
 ["lua.plugins.indent-blankline"] = function(...) 
 local ____exports = {}
-local plugin = {[1] = "lukas-reineke/indent-blankline.nvim", main = "ibl", opts = {}}
+local plugin = {
+    [1] = "lukas-reineke/indent-blankline.nvim",
+    version = "^3",
+    config = function()
+        local target = "ibl"
+        local ibl = require(target)
+        ibl.setup()
+    end
+}
 ____exports.default = plugin
 return ____exports
  end,
@@ -367,20 +383,47 @@ return ____exports
  end,
 ["lua.plugins.lspconfig"] = function(...) 
 local ____exports = {}
-local configureLSP
+local on_attach, configureLSP
 local ____toggles = require("lua.toggles")
 local CONFIGURATION = ____toggles.CONFIGURATION
+function on_attach(client, bufnr)
+    if CONFIGURATION.lspconfig.useInlayHints then
+        local ____error
+        do
+            local function ____catch(e)
+                ____error = e
+            end
+            local ____try, ____hasReturned, ____returnValue = pcall(function()
+                if client.server_capabilities.inlayHintProvider then
+                    if vim.lsp.buf.inlay_hint == nil then
+                        vim:notify("Failed to enable inlay hints: neovim builtin inlay_hints unavailable")
+                    else
+                        vim.lsp.buf.inlay_hint:enable(true, {bufnr = bufnr})
+                    end
+                    return true
+                end
+            end)
+            if not ____try then
+                ____hasReturned, ____returnValue = ____catch(____hasReturned)
+            end
+            if ____hasReturned then
+                return ____returnValue
+            end
+        end
+        vim:notify("Failed to enable LSP hints: " .. tostring(____error))
+    end
+end
 function configureLSP()
     local target = "lspconfig"
-    local lspconfig = require(target)
+    local lspconfig = require(nil, target)
     local capabilities
     if CONFIGURATION.useCMP then
         local target = "cmp_nvim_lsp"
-        capabilities = require(target).default_capabilities()
+        capabilities = require(nil, target):default_capabilities()
     end
-    lspconfig.tsserver.setup({capabilities = capabilities})
-    lspconfig.lua_ls.setup({capabilities = capabilities})
-    vim.diagnostic.config({update_in_insert = true, virtual_text = not CONFIGURATION.useLSPLines})
+    lspconfig.tsserver:setup({capabilities = capabilities, on_attach = on_attach})
+    lspconfig.lua_ls:setup({capabilities = capabilities, on_attach = on_attach})
+    vim.diagnostic:config({update_in_insert = true, virtual_text = not CONFIGURATION.useLSPLines})
 end
 local plugin = {[1] = "neovim/nvim-lspconfig", config = configureLSP}
 ____exports.default = plugin
