@@ -4,10 +4,6 @@ import { getPlugins } from "./lua/plugins/init";
 import { THEME_APPLIERS } from "./lua/theme";
 
 
-vim.api.nvim_create_user_command('ResetInstallData', function(this: void) {
-  vim.notify("Configuration reset");
-}, {});
-
 function setupNeovide() {
   const vim = getNeovideExtendedVimContext();
   if (vim.g.neovide) {

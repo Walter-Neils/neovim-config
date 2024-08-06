@@ -17,5 +17,6 @@ export const CONFIGURATION = {
     inlayHints: {
       displayMode: 'only-in-normal-mode'
     }
-  }
+  },
+  useUFO: true
 } as const;

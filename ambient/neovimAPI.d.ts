@@ -9,6 +9,15 @@ type VimHLColorParams = {
   link?: string
 };
 
+type VimLSPProtocolClientCapabilities = {
+  textDocument: {
+    foldingRange: {
+      dynamicRegistration: boolean,
+      lineFoldingOnly: boolean
+    }
+  }
+};
+
 type VimAutocmdEvent = 'BufAdd' | 'BufDelete' | 'BufEnter' | 'BufFilePost' | 'BufFilePre' | 'BufHidden' | 'BufLeave' | 'BufModifiedSet' | 'BufNew' | 'BufNewFile' | 'BufRead' | 'BufReadCmd' | 'BufReadPre' | 'BufUnload' | 'BufWinEnter' | 'BufWinLeave' | 'BufWipeout' | 'BufWrite' | 'BufWriteCmd' | 'BufWritePost' | 'ChanInfo' | 'ChanOpen' | 'CmdUndefined' | 'CmdlineChanged' | 'CmdlineEnter' | 'CmdlineLeave' | 'CmdwinEnter' | 'CmdwinLeave' | 'ColorScheme' | 'ColorSchemePre' | 'CompleteChanged' | 'CompleteDonePre' | 'CompleteDone' | 'CursorHold' | 'CursorHoldI' | 'CursorMoved' | 'CursorMovedI' | 'DiffUpdated' | 'DirChanged' | 'DirChangedPre' | 'ExitPre' | 'FileAppendCmd' | 'FileAppendPost' | 'FileAppendPre' | 'FileChangedRO' | 'FileChangedShell' | 'FileChangedShellPost' | 'FileReadCmd' | 'FileReadPost' | 'FileReadPre' | 'FileType' | 'FileWriteCmd' | 'FileWritePost' | 'FileWritePre' | 'FilterReadPost' | 'FilterReadPre' | 'FilterWritePost' | 'FilterWritePre' | 'FocusGained' | 'FocusLost' | 'FuncUndefined' | 'UIEnter' | 'UILeave' | 'InsertChange' | 'InsertCharPre' | 'InsertEnter' | 'InsertLeavePre' | 'InsertLeave' | 'MenuPopup' | 'ModeChanged' | 'OptionSet' | 'QuickFixCmdPre' | 'QuickFixCmdPost' | 'QuitPre' | 'RemoteReply' | 'SearchWrapped' | 'RecordingEnter' | 'RecordingLeave' | 'SafeState' | 'SessionLoadPost' | 'SessionWritePost' | 'ShellCmdPost' | 'Signal' | 'ShellFilterPost' | 'SourcePre' | 'SourcePost' | 'SourceCmd' | 'SpellFileMissing' | 'StdinReadPost' | 'StdinReadPre' | 'SwapExists' | 'Syntax' | 'TabEnter' | 'TabLeave' | 'TabNew' | 'TabNewEntered' | 'TabClosed' | 'TermOpen' | 'TermEnter' | 'TermLeave' | 'TermClose' | 'TermRequest' | 'TermResponse' | 'TextChanged' | 'TextChangedI' | 'TextChangedP' | 'TextChangedT' | 'TextYankPost' | 'User' | 'UserGettingBored' | 'VimEnter' | 'VimLeave' | 'VimLeavePre' | 'VimResized' | 'VimResume' | 'VimSuspend' | 'WinClosed' | 'WinEnter' | 'WinLeave' | 'WinNew' | 'WinScrolled' | 'WinResized';
 
 type VimAPI = {
@@ -37,6 +46,9 @@ type VimAPI = {
       hover: (this: void) => void,
       implementation: (this: void) => void,
       type_definition: (this: void) => void,
+    },
+    protocol: {
+      make_client_capabilities: (this: void) => VimLSPProtocolClientCapabilities
     }
   },
   diagnostic: {
@@ -59,7 +71,11 @@ type VimAPI = {
     input: (this: void, config: { prompt: string }, callback: (this: void, input: string) => void) => void
   },
   o: {
-    shiftwidth: number
+    shiftwidth: number,
+    foldcolumn: string,
+    foldlevel: number,
+    foldlevelstart: number,
+    foldenable: boolean
   },
   g: {
     mapleader: string,

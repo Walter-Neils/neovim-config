@@ -16,9 +16,6 @@ const plugin: LazyPlugin = {
         }
       },
       server: {
-        on_attach: function(this: void, client: unknown, bufnr: number) {
-          vim.notify(`rustaceanvim attached`);
-        }
       }
     }
   }

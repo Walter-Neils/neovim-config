@@ -44,7 +44,8 @@ ____exports.CONFIGURATION = {
     useTreeDevIcons = true,
     useLualine = true,
     useBarBar = true,
-    lspconfig = {useInlayHints = true, inlayHints = {displayMode = "only-in-normal-mode"}}
+    lspconfig = {useInlayHints = true, inlayHints = {displayMode = "only-in-normal-mode"}},
+    useUFO = true
 }
 return ____exports
  end,
@@ -91,6 +92,9 @@ function ____exports.getPlugins()
     if CONFIGURATION.useBarBar then
         result[#result + 1] = require("lua.plugins.barbar").default
     end
+    if CONFIGURATION.useUFO then
+        result[#result + 1] = require("lua.plugins.ufo").default
+    end
     return result
 end
 return ____exports
@@ -125,13 +129,6 @@ local ____init = require("lua.plugins.init")
 local getPlugins = ____init.getPlugins
 local ____theme = require("lua.theme")
 local THEME_APPLIERS = ____theme.THEME_APPLIERS
-vim.api.nvim_create_user_command(
-    "ResetInstallData",
-    function()
-        vim.notify("Configuration reset")
-    end,
-    {}
-)
 local function setupNeovide()
     local vim = getNeovideExtendedVimContext()
     if vim.g.neovide then
@@ -443,9 +440,13 @@ function on_attach(client, bufnr)
         vim.notify("Failed to enable LSP hints: " .. tostring(____error))
     end
 end
-function configureLSP()
+function ____exports.getLSPConfig()
     local target = "lspconfig"
     local lspconfig = require(target)
+    return lspconfig
+end
+function configureLSP()
+    local lspconfig = ____exports.getLSPConfig()
     local capabilities
     if CONFIGURATION.useCMP then
         local target = "cmp_nvim_lsp"
@@ -576,12 +577,7 @@ local plugin = {
     ft = {"rust"},
     dependencies = {"nvim-lua/plenary.nvim", "mfussenegger/nvim-dap"},
     config = function()
-        vim.g.rustaceanvim = {
-            tools = {hover_actions = {auto_focus = true}},
-            server = {on_attach = function(client, bufnr)
-                vim.notify("rustaceanvim attached")
-            end}
-        }
+        vim.g.rustaceanvim = {tools = {hover_actions = {auto_focus = true}}, server = {}}
     end
 }
 ____exports.default = plugin
@@ -602,6 +598,33 @@ return ____exports
 ["lua.plugins.treesitter"] = function(...) 
 local ____exports = {}
 local plugin = {[1] = "nvim-treesitter/nvim-treesitter"}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.ufo"] = function(...) 
+local ____exports = {}
+local ____lspconfig = require("lua.plugins.lspconfig")
+local getLSPConfig = ____lspconfig.getLSPConfig
+local plugin = {
+    [1] = "kevinhwang91/nvim-ufo",
+    dependencies = {"kevinhwang91/promise-async"},
+    event = "VeryLazy",
+    config = function()
+        vim.o.foldcolumn = "1"
+        vim.o.foldlevel = 99
+        vim.o.foldlevelstart = 99
+        vim.o.foldenable = true
+        local capabilities = vim.lsp.protocol.make_client_capabilities()
+        capabilities.textDocument.foldingRange = {dynamicRegistration = false, lineFoldingOnly = true}
+        local lspconfig = getLSPConfig()
+        local language_server_ids = lspconfig.util.available_servers()
+        for ____, server in ipairs(language_server_ids) do
+            lspconfig[server].setup({capabilities = capabilities})
+        end
+        local target = "ufo"
+        require(target).setup()
+    end
+}
 ____exports.default = plugin
 return ____exports
  end,

@@ -40,5 +40,8 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (CONFIGURATION.useBarBar) {
     result.push(require<{ default: LazyPlugin }>('barbar').default);
   }
+  if (CONFIGURATION.useUFO) {
+    result.push(require<{ default: LazyPlugin }>('ufo').default);
+  }
   return result;
 }

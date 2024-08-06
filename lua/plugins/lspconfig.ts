@@ -14,10 +14,16 @@ type LSPConfigInstanceBase<Extension> = {
   } & Extension) => void
 };
 
-type LSPConfig = {
+type LSPConfigServers = {
   tsserver: LSPConfigInstanceBase<{}>,
   lua_ls: LSPConfigInstanceBase<{}>
 };
+
+export type LSPConfig = {
+  util: {
+    available_servers: (this: void) => (keyof LSPConfigServers)[]
+  }
+} & LSPConfigServers;
 
 function on_attach(this: void, client: LSPClient, bufnr: number) {
   if (CONFIGURATION.lspconfig.useInlayHints) {
@@ -59,11 +65,14 @@ if (CONFIGURATION.lspconfig.useInlayHints) {
 }
 
 
-
-
-function configureLSP(this: void) {
+export function getLSPConfig(this: void) {
   let target = "lspconfig";
   const lspconfig = require<LSPConfig>(target);
+  return lspconfig;
+}
+
+function configureLSP(this: void) {
+  const lspconfig = getLSPConfig();
   let capabilities: unknown | undefined;
   if (CONFIGURATION.useCMP) {
     let target = "cmp_nvim_lsp";
