@@ -1,8 +1,11 @@
 type KeymapSetOptions = {
-  desc?: string
+  desc?: string,
+  noremap?: boolean,
+  expr?: boolean,
+  silent?: boolean
 };
 type KeyMapping = {
-  mode: 'i' | 'a' | 'n' | 't'
+  mode: 'i' | 'a' | 'n' | 't' | 'v'
 } & (
     {
       inputStroke: string,

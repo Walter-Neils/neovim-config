@@ -1,4 +1,3 @@
-
 local ____modules = {}
 local ____moduleCache = {}
 local ____originalRequire = require
@@ -44,8 +43,10 @@ ____exports.CONFIGURATION = {
     useTreeDevIcons = true,
     useLualine = true,
     useBarBar = true,
+    useComments = true,
     lspconfig = {useInlayHints = true, inlayHints = {displayMode = "only-in-normal-mode"}},
-    useUFO = true
+    useUFO = true,
+    behaviour = {wrappedLinesAsSeparateLines = true}
 }
 return ____exports
  end,
@@ -94,6 +95,9 @@ function ____exports.getPlugins()
     end
     if CONFIGURATION.useUFO then
         result[#result + 1] = require("lua.plugins.ufo").default
+    end
+    if CONFIGURATION.useComments then
+        result[#result + 1] = require("lua.plugins.comment").default
     end
     return result
 end
@@ -243,6 +247,10 @@ applyKeyMapping({
 if CONFIGURATION.useBarBar then
     applyKeyMapping({mode = "n", inputStroke = "<Tab>", outputStroke = "<cmd>:bnext<CR>", options = {desc = "Switch next buffer"}})
 end
+if CONFIGURATION.useComments then
+    applyKeyMapping({mode = "n", inputStroke = "<leader>/", outputStroke = "gcc", options = {desc = "toggle comment"}})
+    applyKeyMapping({mode = "v", inputStroke = "<leader>/", outputStroke = "gcc", options = {desc = "toggle comment"}})
+end
 return ____exports
  end,
 ["lua.plugins.autopairs"] = function(...) 
@@ -340,6 +348,12 @@ local plugin = {
         })
     end
 }
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.comment"] = function(...) 
+local ____exports = {}
+local plugin = {[1] = "numToStr/Comment.nvim", opts = {}}
 ____exports.default = plugin
 return ____exports
  end,

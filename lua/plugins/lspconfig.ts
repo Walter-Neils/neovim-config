@@ -78,14 +78,13 @@ function configureLSP(this: void) {
     let target = "cmp_nvim_lsp";
     capabilities = require<{ default_capabilities: (this: void) => unknown }>(target).default_capabilities();
   }
-  lspconfig.tsserver.setup({
-    capabilities,
-    on_attach
-  });
-  lspconfig.lua_ls.setup({
-    capabilities,
-    on_attach
-  });
+  const lsptargets = ['tsserver', 'lua_ls'] as const;
+  for (const target of lsptargets) {
+    lspconfig[target].setup({
+      capabilities,
+      on_attach
+    });
+  }
   vim.diagnostic.config({
     update_in_insert: true,
     virtual_text: !CONFIGURATION.useLSPLines

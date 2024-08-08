@@ -65,7 +65,7 @@ type VimAPI = {
     expand: (this: void, body: unknown) => unknown
   },
   keymap: {
-    set: (this: void, mode: 'i' | 'n' | 'a' | 't', stroke: string, ...args: any[]) => void
+    set: (this: void, mode: 'i' | 'n' | 'a' | 't' | 'v', stroke: string, ...args: any[]) => void
   },
   ui: {
     input: (this: void, config: { prompt: string }, callback: (this: void, input: string) => void) => void

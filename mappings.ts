@@ -286,3 +286,25 @@ if (CONFIGURATION.useBarBar) {
     }
   })
 }
+
+// Comments
+if (CONFIGURATION.useComments) {
+  applyKeyMapping({
+    mode: 'n',
+    inputStroke: '<leader>/',
+    action: function(this: void) {
+      vim.notify("invoked");
+    },
+    options: {
+      desc: 'toggle comment'
+    }
+  });
+  applyKeyMapping({
+    mode: 'v',
+    inputStroke: '<leader>/',
+    outputStroke: 'gcc',
+    options: {
+      desc: 'toggle comment'
+    }
+  });
+}

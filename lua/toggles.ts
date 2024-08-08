@@ -10,6 +10,7 @@ export const CONFIGURATION = {
   useTreeDevIcons: true,
   useLualine: true,
   useBarBar: true,
+  useComments: true,
   lspconfig: {
     // Activate builtin lsp_hints functionality on LSP server attach
     // Only works with nightly neovim ^0.10.0
@@ -18,5 +19,10 @@ export const CONFIGURATION = {
       displayMode: 'only-in-normal-mode'
     }
   },
-  useUFO: true
+  useUFO: true,
+  behaviour: {
+    // !! UNSUPPORTED -- NOT IMPLEMENTED !!
+    // Use 'gj' and 'gk' to navigate as expected
+    wrappedLinesAsSeparateLines: true,
+  }
 } as const;

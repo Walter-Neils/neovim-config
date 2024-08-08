@@ -43,5 +43,8 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (CONFIGURATION.useUFO) {
     result.push(require<{ default: LazyPlugin }>('ufo').default);
   }
+  if (CONFIGURATION.useComments) {
+    result.push(require<{ default: LazyPlugin }>('comment').default);
+  }
   return result;
 }
