@@ -1,3 +1,4 @@
+
 local ____modules = {}
 local ____moduleCache = {}
 local ____originalRequire = require
@@ -248,7 +249,14 @@ if CONFIGURATION.useBarBar then
     applyKeyMapping({mode = "n", inputStroke = "<Tab>", outputStroke = "<cmd>:bnext<CR>", options = {desc = "Switch next buffer"}})
 end
 if CONFIGURATION.useComments then
-    applyKeyMapping({mode = "n", inputStroke = "<leader>/", outputStroke = "gcc", options = {desc = "toggle comment"}})
+    applyKeyMapping({
+        mode = "n",
+        inputStroke = "<leader>/",
+        action = function()
+            vim.notify("invoked")
+        end,
+        options = {desc = "toggle comment"}
+    })
     applyKeyMapping({mode = "v", inputStroke = "<leader>/", outputStroke = "gcc", options = {desc = "toggle comment"}})
 end
 return ____exports
@@ -466,8 +474,10 @@ function configureLSP()
         local target = "cmp_nvim_lsp"
         capabilities = require(target).default_capabilities()
     end
-    lspconfig.tsserver.setup({capabilities = capabilities, on_attach = on_attach})
-    lspconfig.lua_ls.setup({capabilities = capabilities, on_attach = on_attach})
+    local lsptargets = {"tsserver", "lua_ls", "clangd"}
+    for ____, target in ipairs(lsptargets) do
+        lspconfig[target].setup({capabilities = capabilities, on_attach = on_attach})
+    end
     vim.diagnostic.config({update_in_insert = true, virtual_text = not CONFIGURATION.useLSPLines})
 end
 local plugin = {[1] = "neovim/nvim-lspconfig", config = configureLSP}

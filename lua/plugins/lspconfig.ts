@@ -17,6 +17,8 @@ type LSPConfigInstanceBase<Extension> = {
 type LSPConfigServers = {
   tsserver: LSPConfigInstanceBase<{}>,
   lua_ls: LSPConfigInstanceBase<{}>
+} & {
+  [key: string]: LSPConfigInstanceBase<{}>
 };
 
 export type LSPConfig = {
@@ -78,7 +80,7 @@ function configureLSP(this: void) {
     let target = "cmp_nvim_lsp";
     capabilities = require<{ default_capabilities: (this: void) => unknown }>(target).default_capabilities();
   }
-  const lsptargets = ['tsserver', 'lua_ls'] as const;
+  const lsptargets = ['tsserver', 'lua_ls', 'clangd'] as const;
   for (const target of lsptargets) {
     lspconfig[target].setup({
       capabilities,
