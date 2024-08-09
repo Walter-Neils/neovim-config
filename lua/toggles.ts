@@ -28,5 +28,13 @@ export const CONFIGURATION = {
     // !! UNSUPPORTED -- NOT IMPLEMENTED !!
     // Use 'gj' and 'gk' to navigate as expected
     wrappedLinesAsSeparateLines: true,
+  },
+  customCommands: {
+    fixRustAnalyzer: {
+      enabled: true
+    },
+    installDefaultLSPServers: {
+      enabled: true
+    }
   }
 } as const;

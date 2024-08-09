@@ -2851,33 +2851,36 @@ ____exports.CONFIGURATION = {
     mason = {defaultInstalled = {"typescript-language-server", "clangd", "lua-language-server"}},
     lspconfig = {useInlayHints = true, inlayHints = {displayMode = "only-in-normal-mode"}, configuredLSPServers = {"tsserver", "lua_ls", "clangd"}},
     useUFO = true,
-    behaviour = {wrappedLinesAsSeparateLines = true}
+    behaviour = {wrappedLinesAsSeparateLines = true},
+    customCommands = {fixRustAnalyzer = {enabled = true}, installDefaultLSPServers = {enabled = true}}
 }
 return ____exports
  end,
 ["commands"] = function(...) 
 local ____exports = {}
-local ____argparser = require("lua.helpers.user_command.argparser")
-local parseArgs = ____argparser.parseArgs
 local ____toggles = require("lua.toggles")
 local CONFIGURATION = ____toggles.CONFIGURATION
-vim.api.nvim_create_user_command(
-    "InstallDefaultLSPServers",
-    function()
-        for ____, server in ipairs(CONFIGURATION.mason.defaultInstalled) do
-            vim.cmd("MasonInstall " .. server)
-        end
-    end,
-    {nargs = 0}
-)
-if false then
+if CONFIGURATION.customCommands.installDefaultLSPServers.enabled then
     vim.api.nvim_create_user_command(
-        "Test",
-        function(args)
-            local parsed = parseArgs(args.fargs)
-            vim.notify(parsed.name)
+        "InstallDefaultLSPServers",
+        function()
+            for ____, server in ipairs(CONFIGURATION.mason.defaultInstalled) do
+                vim.cmd("MasonInstall " .. server)
+            end
         end,
-        {nargs = "*"}
+        {nargs = 0}
+    )
+end
+if CONFIGURATION.customCommands.fixRustAnalyzer.enabled then
+    vim.api.nvim_create_user_command(
+        "FixRustAnalyzer",
+        function()
+            for ____, component in ipairs({"rust-analyzer", "rustfmt"}) do
+                vim.notify("Installing component " .. component)
+                vim.fn.system({"rustup", "component", "add", component})
+            end
+        end,
+        {nargs = 0}
     )
 end
 return ____exports

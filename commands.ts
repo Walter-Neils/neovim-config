@@ -2,19 +2,22 @@ import { applyKeyMapping } from "./lua/helpers/keymap";
 import { parseArgs } from "./lua/helpers/user_command/argparser";
 import { CONFIGURATION } from "./lua/toggles";
 
-// Install LSP servers specified in configuration with Mason
-vim.api.nvim_create_user_command('InstallDefaultLSPServers', function(this: void) {
-  for (const server of CONFIGURATION.mason.defaultInstalled) {
-    vim.cmd(`MasonInstall ${server}`);
-  }
-}, { nargs: 0 });
+if (CONFIGURATION.customCommands.installDefaultLSPServers.enabled) {
+  // Install LSP servers specified in configuration with Mason
+  vim.api.nvim_create_user_command('InstallDefaultLSPServers', function(this: void) {
+    for (const server of CONFIGURATION.mason.defaultInstalled) {
+      vim.cmd(`MasonInstall ${server}`);
+    }
+  }, { nargs: 0 });
+}
 
-if (false) {
-  // Example command binding with arguments
-  vim.api.nvim_create_user_command('Test', function(this: void, args) {
-    const parsed = parseArgs<{ name: string }>(args.fargs);
-    vim.notify(parsed.name);
+if (CONFIGURATION.customCommands.fixRustAnalyzer.enabled) {
+  vim.api.nvim_create_user_command('FixRustAnalyzer', function(this: void) {
+    for (const component of ['rust-analyzer', 'rustfmt']) {
+      vim.notify(`Installing component ${component}`);
+      vim.fn.system(["rustup", "component", "add", component]);
+    }
   }, {
-    nargs: '*'
-  });
+    nargs: 0
+  })
 }
