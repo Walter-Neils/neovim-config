@@ -9,10 +9,12 @@ vim.api.nvim_create_user_command('WINInstallDefaultLSPServers', function(this: v
   }
 }, { nargs: 0 });
 
-vim.api.nvim_create_user_command('Test', function(this: void, args) {
-  const parsed = parseArgs<{ name: string }>(args.fargs);
-  vim.notify(parsed.name);
-}, {
-  nargs: '*'
-})
-
+if (false) {
+  // Example command binding with arguments
+  vim.api.nvim_create_user_command('Test', function(this: void, args) {
+    const parsed = parseArgs<{ name: string }>(args.fargs);
+    vim.notify(parsed.name);
+  }, {
+    nargs: '*'
+  });
+}

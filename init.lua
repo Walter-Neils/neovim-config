@@ -2870,14 +2870,16 @@ vim.api.nvim_create_user_command(
     end,
     {nargs = 0}
 )
-vim.api.nvim_create_user_command(
-    "Test",
-    function(args)
-        local parsed = parseArgs(args.fargs)
-        vim.notify(parsed.name)
-    end,
-    {nargs = "*"}
-)
+if false then
+    vim.api.nvim_create_user_command(
+        "Test",
+        function(args)
+            local parsed = parseArgs(args.fargs)
+            vim.notify(parsed.name)
+        end,
+        {nargs = "*"}
+    )
+end
 return ____exports
  end,
 ["lua.integrations.neovide"] = function(...) 
