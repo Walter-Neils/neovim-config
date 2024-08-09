@@ -35,6 +35,9 @@ export const CONFIGURATION = {
     },
     installDefaultLSPServers: {
       enabled: true
+    },
+    resetInstall: {
+      enabled: false
     }
   }
 } as const;

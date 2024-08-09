@@ -2852,7 +2852,7 @@ ____exports.CONFIGURATION = {
     lspconfig = {useInlayHints = true, inlayHints = {displayMode = "only-in-normal-mode"}, configuredLSPServers = {"tsserver", "lua_ls", "clangd"}},
     useUFO = true,
     behaviour = {wrappedLinesAsSeparateLines = true},
-    customCommands = {fixRustAnalyzer = {enabled = true}, installDefaultLSPServers = {enabled = true}}
+    customCommands = {fixRustAnalyzer = {enabled = true}, installDefaultLSPServers = {enabled = true}, resetInstall = {enabled = false}}
 }
 return ____exports
  end,
@@ -2881,6 +2881,22 @@ if CONFIGURATION.customCommands.fixRustAnalyzer.enabled then
             end
         end,
         {nargs = 0}
+    )
+end
+if CONFIGURATION.customCommands.resetInstall.enabled then
+    vim.api.nvim_create_user_command(
+        "ResetCurrentInstall",
+        function()
+            if vim.fn.input("To reset this install, type 'reset': ") == "reset" then
+                vim.fn.system({
+                    "rm",
+                    "-rf",
+                    vim.fn.stdpath("data")
+                })
+                vim.cmd("norm :qa!")
+            end
+        end,
+        {}
     )
 end
 return ____exports

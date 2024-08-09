@@ -21,3 +21,12 @@ if (CONFIGURATION.customCommands.fixRustAnalyzer.enabled) {
     nargs: 0
   })
 }
+
+if (CONFIGURATION.customCommands.resetInstall.enabled) {
+  vim.api.nvim_create_user_command('ResetCurrentInstall', function(this: void) {
+    if (vim.fn.input("To reset this install, type 'reset': ") === 'reset') {
+      vim.fn.system(["rm", "-rf", vim.fn.stdpath("data")])
+      vim.cmd("norm :qa!");
+    }
+  }, {});
+}

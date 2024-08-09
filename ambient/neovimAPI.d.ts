@@ -32,7 +32,8 @@ type VimAPI = {
     nvim_create_autocmd: (this: void, eventName: VimAutocmdEvent, config: {
       group?: string,
       callback: (this: void) => void
-    }) => void
+    }) => void,
+    nvim_win_get_cursor: (this: void, arg1: number) => number[]
   },
   lsp: {
     inlay_hint: {
@@ -84,6 +85,9 @@ type VimAPI = {
   fn: {
     system: (this: void, args: string[]) => void,
     stdpath: (this: void, target: string) => string,
+    input: (this: void, prompt: string) => string,
+    expand: (this: void, input: string) => string,
+    setreg: (this: void, register: string, value: string) => void
   },
   loop: {
     fs_stat: (this: void, path: string) => boolean
