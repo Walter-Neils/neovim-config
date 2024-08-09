@@ -3099,7 +3099,14 @@ if CONFIGURATION.useComments then
         end,
         options = {desc = "toggle comment"}
     })
-    applyKeyMapping({mode = "v", inputStroke = "<leader>/", outputStroke = "gcc", options = {desc = "toggle comment"}})
+    applyKeyMapping({
+        mode = "v",
+        inputStroke = "<leader>/",
+        action = function()
+            vim.cmd("norm gcc")
+        end,
+        options = {desc = "toggle comment"}
+    })
 end
 return ____exports
  end,

@@ -303,7 +303,9 @@ if (CONFIGURATION.useComments) {
   applyKeyMapping({
     mode: 'v',
     inputStroke: '<leader>/',
-    outputStroke: 'gcc',
+    action: function(this: void) {
+      vim.cmd("norm gcc");
+    },
     options: {
       desc: 'toggle comment'
     }
