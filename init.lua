@@ -2769,6 +2769,7 @@ ____exports.CONFIGURATION = {
     useBarBar = true,
     useComments = true,
     useMarks = true,
+    useTrouble = true,
     mason = {defaultInstalled = {"typescript-language-server", "clangd", "lua-language-server"}},
     lspconfig = {useInlayHints = true, inlayHints = {displayMode = "only-in-normal-mode"}, configuredLSPServers = {"tsserver", "lua_ls", "clangd"}},
     useUFO = true,
@@ -2883,6 +2884,9 @@ function ____exports.getPlugins()
     end
     if CONFIGURATION.useMarks then
         result[#result + 1] = require("lua.plugins.marks").default
+    end
+    if CONFIGURATION.useTrouble then
+        result[#result + 1] = require("lua.plugins.trouble").default
     end
     return result
 end
@@ -3062,6 +3066,9 @@ if CONFIGURATION.useComments then
         end,
         options = {desc = "toggle comment"}
     })
+end
+if CONFIGURATION.useTrouble then
+    applyKeyMapping({mode = "n", inputStroke = "<leader>tdd", outputStroke = ":Trouble diagnostics toggle<CR>", options = {silent = true}})
 end
 return ____exports
  end,
@@ -3500,6 +3507,12 @@ return ____exports
 ["lua.plugins.treesitter"] = function(...) 
 local ____exports = {}
 local plugin = {[1] = "nvim-treesitter/nvim-treesitter"}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.trouble"] = function(...) 
+local ____exports = {}
+local plugin = {[1] = "folke/trouble.nvim", cmd = {"Trouble"}, opts = {}}
 ____exports.default = plugin
 return ____exports
  end,

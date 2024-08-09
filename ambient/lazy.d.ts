@@ -1,9 +1,15 @@
+type LazyKey = {
+  1: string,
+  2: string,
+  desc?: string
+};
 export type LazyPlugin = {
   1?: string,
   lazy?: boolean,
   branch?: string,
   import?: string,
   cmd?: string[],
+  keys?: LazyKey[],
   config?: ((this: void, arg1: unknown, opts: unknown) => void) | boolean,
   opts?: ((this: void) => any) | any,
   dependencies?: string[],

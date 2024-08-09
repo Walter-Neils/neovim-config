@@ -312,3 +312,14 @@ if (CONFIGURATION.useComments) {
     }
   });
 }
+
+if (CONFIGURATION.useTrouble) {
+  applyKeyMapping({
+    mode: 'n',
+    inputStroke: '<leader>tdd',
+    outputStroke: ':Trouble diagnostics toggle<CR>',
+    options: {
+      silent: true
+    }
+  });
+}
