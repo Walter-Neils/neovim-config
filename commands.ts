@@ -1,5 +1,3 @@
-import { applyKeyMapping } from "./lua/helpers/keymap";
-import { parseArgs } from "./lua/helpers/user_command/argparser";
 import { CONFIGURATION } from "./lua/toggles";
 
 if (CONFIGURATION.customCommands.installDefaultLSPServers.enabled) {

@@ -11,6 +11,7 @@ export const CONFIGURATION = {
   useLualine: true,
   useBarBar: true,
   useComments: true,
+  useMarks: true,
   mason: {
     defaultInstalled: ['typescript-language-server', 'clangd', 'lua-language-server'] as const
   },

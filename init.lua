@@ -2754,86 +2754,6 @@ return {
   __TS__UsingAsync = __TS__UsingAsync
 }
  end,
-["lua.helpers.keymap.index"] = function(...) 
-local ____exports = {}
-function ____exports.applyKeyMapping(map)
-    if map.action ~= nil then
-        vim.keymap.set(map.mode, map.inputStroke, map.action, map.options)
-    else
-        vim.keymap.set(map.mode, map.inputStroke, map.outputStroke, map.options)
-    end
-end
-return ____exports
- end,
-["lua.helpers.user_command.argparser"] = function(...) 
-local ____lualib = require("lualib_bundle")
-local __TS__StringStartsWith = ____lualib.__TS__StringStartsWith
-local __TS__StringReplaceAll = ____lualib.__TS__StringReplaceAll
-local Error = ____lualib.Error
-local RangeError = ____lualib.RangeError
-local ReferenceError = ____lualib.ReferenceError
-local SyntaxError = ____lualib.SyntaxError
-local TypeError = ____lualib.TypeError
-local URIError = ____lualib.URIError
-local __TS__New = ____lualib.__TS__New
-local __TS__StringAccess = ____lualib.__TS__StringAccess
-local __TS__StringEndsWith = ____lualib.__TS__StringEndsWith
-local ____exports = {}
-function ____exports.parseArgs(args)
-    local result = {}
-    local primedKey = nil
-    do
-        local i = 0
-        while i < #args do
-            local segment = args[i + 1]
-            if __TS__StringStartsWith(segment, "--") then
-                if primedKey ~= nil then
-                    result[primedKey] = true
-                end
-                primedKey = __TS__StringReplaceAll(segment, "--", "")
-            else
-                if primedKey == nil then
-                    error(
-                        __TS__New(Error, "Expected a key, got a value"),
-                        0
-                    )
-                elseif __TS__StringStartsWith(segment, "\"") then
-                    local delim = __TS__StringAccess(segment, 0)
-                    local ____end = i
-                    do
-                        local v = i
-                        while not __TS__StringEndsWith(args[v + 1], delim) and v < #args do
-                            ____end = v
-                            v = v + 1
-                        end
-                    end
-                    if not __TS__StringEndsWith(args[____end + 1], delim) then
-                        error(
-                            __TS__New(Error, "Unterminated string: " .. args[____end + 1]),
-                            0
-                        )
-                    end
-                    local valueResult = ""
-                    do
-                        local v = i
-                        while v <= ____end do
-                            valueResult = valueResult .. args[v + 1]
-                            v = v + 1
-                        end
-                    end
-                    result[primedKey] = valueResult
-                else
-                    result[primedKey] = segment
-                end
-                primedKey = nil
-            end
-            i = i + 1
-        end
-    end
-    return result
-end
-return ____exports
- end,
 ["lua.toggles"] = function(...) 
 local ____exports = {}
 ____exports.CONFIGURATION = {
@@ -2848,6 +2768,7 @@ ____exports.CONFIGURATION = {
     useLualine = true,
     useBarBar = true,
     useComments = true,
+    useMarks = true,
     mason = {defaultInstalled = {"typescript-language-server", "clangd", "lua-language-server"}},
     lspconfig = {useInlayHints = true, inlayHints = {displayMode = "only-in-normal-mode"}, configuredLSPServers = {"tsserver", "lua_ls", "clangd"}},
     useUFO = true,
@@ -2960,6 +2881,9 @@ function ____exports.getPlugins()
     if CONFIGURATION.useComments then
         result[#result + 1] = require("lua.plugins.comment").default
     end
+    if CONFIGURATION.useMarks then
+        result[#result + 1] = require("lua.plugins.marks").default
+    end
     return result
 end
 return ____exports
@@ -3033,6 +2957,17 @@ vim.opt.numberwidth = 2
 vim.opt.ruler = false
 require("mappings")
 require("commands")
+return ____exports
+ end,
+["lua.helpers.keymap.index"] = function(...) 
+local ____exports = {}
+function ____exports.applyKeyMapping(map)
+    if map.action ~= nil then
+        vim.keymap.set(map.mode, map.inputStroke, map.action, map.options)
+    else
+        vim.keymap.set(map.mode, map.inputStroke, map.outputStroke, map.options)
+    end
+end
 return ____exports
  end,
 ["lua.plugins.floatterm"] = function(...) 
@@ -3127,6 +3062,75 @@ if CONFIGURATION.useComments then
         end,
         options = {desc = "toggle comment"}
     })
+end
+return ____exports
+ end,
+["lua.helpers.user_command.argparser"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local __TS__StringStartsWith = ____lualib.__TS__StringStartsWith
+local __TS__StringReplaceAll = ____lualib.__TS__StringReplaceAll
+local Error = ____lualib.Error
+local RangeError = ____lualib.RangeError
+local ReferenceError = ____lualib.ReferenceError
+local SyntaxError = ____lualib.SyntaxError
+local TypeError = ____lualib.TypeError
+local URIError = ____lualib.URIError
+local __TS__New = ____lualib.__TS__New
+local __TS__StringAccess = ____lualib.__TS__StringAccess
+local __TS__StringEndsWith = ____lualib.__TS__StringEndsWith
+local ____exports = {}
+function ____exports.parseArgs(args)
+    local result = {}
+    local primedKey = nil
+    do
+        local i = 0
+        while i < #args do
+            local segment = args[i + 1]
+            if __TS__StringStartsWith(segment, "--") then
+                if primedKey ~= nil then
+                    result[primedKey] = true
+                end
+                primedKey = __TS__StringReplaceAll(segment, "--", "")
+            else
+                if primedKey == nil then
+                    error(
+                        __TS__New(Error, "Expected a key, got a value"),
+                        0
+                    )
+                elseif __TS__StringStartsWith(segment, "\"") then
+                    local delim = __TS__StringAccess(segment, 0)
+                    local ____end = i
+                    do
+                        local v = i
+                        while not __TS__StringEndsWith(args[v + 1], delim) and v < #args do
+                            ____end = v
+                            v = v + 1
+                        end
+                    end
+                    if not __TS__StringEndsWith(args[____end + 1], delim) then
+                        error(
+                            __TS__New(Error, "Unterminated string: " .. args[____end + 1]),
+                            0
+                        )
+                    end
+                    local valueResult = ""
+                    do
+                        local v = i
+                        while v <= ____end do
+                            valueResult = valueResult .. args[v + 1]
+                            v = v + 1
+                        end
+                    end
+                    result[primedKey] = valueResult
+                else
+                    result[primedKey] = segment
+                end
+                primedKey = nil
+            end
+            i = i + 1
+        end
+    end
+    return result
 end
 return ____exports
  end,
@@ -3373,6 +3377,18 @@ local plugin = {
         local target = "lualine"
         local module = require(target)
         module.setup({options = {theme = "material"}})
+    end
+}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.marks"] = function(...) 
+local ____exports = {}
+local plugin = {
+    [1] = "chentoast/marks.nvim",
+    config = function()
+        local target = "marks"
+        require(target).setup()
     end
 }
 ____exports.default = plugin

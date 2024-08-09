@@ -46,5 +46,8 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (CONFIGURATION.useComments) {
     result.push(require<{ default: LazyPlugin }>('comment').default);
   }
+  if(CONFIGURATION.useMarks) {
+    result.push(require<{ default: LazyPlugin }>('marks').default);
+  }
   return result;
 }
