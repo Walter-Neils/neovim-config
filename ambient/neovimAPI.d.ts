@@ -18,11 +18,15 @@ type VimLSPProtocolClientCapabilities = {
   }
 };
 
+type NeovimBuffer = unknown;
+type NeovimWindow = unknown;
+
 type VimAutocmdEvent = 'BufAdd' | 'BufDelete' | 'BufEnter' | 'BufFilePost' | 'BufFilePre' | 'BufHidden' | 'BufLeave' | 'BufModifiedSet' | 'BufNew' | 'BufNewFile' | 'BufRead' | 'BufReadCmd' | 'BufReadPre' | 'BufUnload' | 'BufWinEnter' | 'BufWinLeave' | 'BufWipeout' | 'BufWrite' | 'BufWriteCmd' | 'BufWritePost' | 'ChanInfo' | 'ChanOpen' | 'CmdUndefined' | 'CmdlineChanged' | 'CmdlineEnter' | 'CmdlineLeave' | 'CmdwinEnter' | 'CmdwinLeave' | 'ColorScheme' | 'ColorSchemePre' | 'CompleteChanged' | 'CompleteDonePre' | 'CompleteDone' | 'CursorHold' | 'CursorHoldI' | 'CursorMoved' | 'CursorMovedI' | 'DiffUpdated' | 'DirChanged' | 'DirChangedPre' | 'ExitPre' | 'FileAppendCmd' | 'FileAppendPost' | 'FileAppendPre' | 'FileChangedRO' | 'FileChangedShell' | 'FileChangedShellPost' | 'FileReadCmd' | 'FileReadPost' | 'FileReadPre' | 'FileType' | 'FileWriteCmd' | 'FileWritePost' | 'FileWritePre' | 'FilterReadPost' | 'FilterReadPre' | 'FilterWritePost' | 'FilterWritePre' | 'FocusGained' | 'FocusLost' | 'FuncUndefined' | 'UIEnter' | 'UILeave' | 'InsertChange' | 'InsertCharPre' | 'InsertEnter' | 'InsertLeavePre' | 'InsertLeave' | 'MenuPopup' | 'ModeChanged' | 'OptionSet' | 'QuickFixCmdPre' | 'QuickFixCmdPost' | 'QuitPre' | 'RemoteReply' | 'SearchWrapped' | 'RecordingEnter' | 'RecordingLeave' | 'SafeState' | 'SessionLoadPost' | 'SessionWritePost' | 'ShellCmdPost' | 'Signal' | 'ShellFilterPost' | 'SourcePre' | 'SourcePost' | 'SourceCmd' | 'SpellFileMissing' | 'StdinReadPost' | 'StdinReadPre' | 'SwapExists' | 'Syntax' | 'TabEnter' | 'TabLeave' | 'TabNew' | 'TabNewEntered' | 'TabClosed' | 'TermOpen' | 'TermEnter' | 'TermLeave' | 'TermClose' | 'TermRequest' | 'TermResponse' | 'TextChanged' | 'TextChangedI' | 'TextChangedP' | 'TextChangedT' | 'TextYankPost' | 'User' | 'UserGettingBored' | 'VimEnter' | 'VimLeave' | 'VimLeavePre' | 'VimResized' | 'VimResume' | 'VimSuspend' | 'WinClosed' | 'WinEnter' | 'WinLeave' | 'WinNew' | 'WinScrolled' | 'WinResized';
 
 type VimAPI = {
   cmd: (this: void, params: string) => void,
   notify: (this: void, value: any) => void,
+  schedule: (this: void, callback: (this: void) => void) => void,
   api: {
     nvim_set_hl: (this: void, arg1: number, arg2: string, params: VimHLColorParams) => void,
     nvim_create_user_command: (this: void, commandName: string, luaFunc: (this: void, args: { fargs: string[] }) => void, options: {
@@ -33,7 +37,16 @@ type VimAPI = {
       group?: string,
       callback: (this: void) => void
     }) => void,
-    nvim_win_get_cursor: (this: void, arg1: number) => number[]
+    nvim_win_get_cursor: (this: void, arg1: number) => number[],
+    nvim_get_current_buf: (this: void) => NeovimBuffer,
+    nvim_get_current_window: (this: void) => NeovimWindow,
+    nvim_create_buf: (this: void, arg1: boolean, arg2: boolean) => NeovimBuffer,
+    nvim_buf_set_option: (this: void, buffer: NeovimBuffer, ev: Lowercase<VimAutocmdEvent>, action: string) => void,
+    nvim_set_option_value: (this: void, name: string, value: unknown, opts: {
+      scope?: 'global' | 'local',
+      win?: number,
+      buf?: number
+    }) => void
   },
   lsp: {
     inlay_hint: {
@@ -67,7 +80,7 @@ type VimAPI = {
     expand: (this: void, body: unknown) => unknown
   },
   keymap: {
-    set: (this: void, mode: 'i' | 'n' | 'a' | 't' | 'v', stroke: string, ...args: any[]) => void
+    set: (this: void, mode: 'i' | 'n' | 'a' | 't' | 'v' | 'x', stroke: string, ...args: any[]) => void
   },
   ui: {
     input: (this: void, config: { prompt: string }, callback: (this: void, input: string) => void) => void
@@ -87,6 +100,7 @@ type VimAPI = {
     stdpath: (this: void, target: string) => string,
     input: (this: void, prompt: string) => string,
     expand: (this: void, input: string) => string,
+    getreg: (this: void, register: string) => string,
     setreg: (this: void, register: string, value: string) => void
   },
   loop: {
