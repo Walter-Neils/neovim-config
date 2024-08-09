@@ -3,7 +3,7 @@ import { parseArgs } from "./lua/helpers/user_command/argparser";
 import { CONFIGURATION } from "./lua/toggles";
 
 // Install LSP servers specified in configuration with Mason
-vim.api.nvim_create_user_command('WINInstallDefaultLSPServers', function(this: void) {
+vim.api.nvim_create_user_command('InstallDefaultLSPServers', function(this: void) {
   for (const server of CONFIGURATION.mason.defaultInstalled) {
     vim.cmd(`MasonInstall ${server}`);
   }

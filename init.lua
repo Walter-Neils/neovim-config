@@ -2862,7 +2862,7 @@ local parseArgs = ____argparser.parseArgs
 local ____toggles = require("lua.toggles")
 local CONFIGURATION = ____toggles.CONFIGURATION
 vim.api.nvim_create_user_command(
-    "WINInstallDefaultLSPServers",
+    "InstallDefaultLSPServers",
     function()
         for ____, server in ipairs(CONFIGURATION.mason.defaultInstalled) do
             vim.cmd("MasonInstall " .. server)
@@ -3016,6 +3016,17 @@ require("mappings")
 require("commands")
 return ____exports
  end,
+["lua.plugins.floatterm"] = function(...) 
+local ____exports = {}
+function ____exports.extendNeovimAPIWithFloattermConfig()
+    return vim
+end
+local plugin = {[1] = "voldikss/vim-floaterm", cmd = {"FloatermNew", "FloatermToggle", "FloatermShow", "FloatermHide"}}
+local nvim = ____exports.extendNeovimAPIWithFloattermConfig()
+nvim.g.floaterm_title = ""
+____exports.default = plugin
+return ____exports
+ end,
 ["mappings"] = function(...) 
 local ____exports = {}
 local ____keymap = require("lua.helpers.keymap.index")
@@ -3084,7 +3095,7 @@ if CONFIGURATION.useComments then
         mode = "n",
         inputStroke = "<leader>/",
         action = function()
-            vim.notify("invoked")
+            vim.cmd("norm gcc")
         end,
         options = {desc = "toggle comment"}
     })
@@ -3193,12 +3204,6 @@ return ____exports
 ["lua.plugins.comment"] = function(...) 
 local ____exports = {}
 local plugin = {[1] = "numToStr/Comment.nvim", opts = {}}
-____exports.default = plugin
-return ____exports
- end,
-["lua.plugins.floatterm"] = function(...) 
-local ____exports = {}
-local plugin = {[1] = "voldikss/vim-floaterm", cmd = {"FloatermNew", "FloatermToggle", "FloatermShow", "FloatermHide"}}
 ____exports.default = plugin
 return ____exports
  end,

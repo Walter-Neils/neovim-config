@@ -1,4 +1,5 @@
 import { applyKeyMapping } from "./lua/helpers/keymap";
+import { extendNeovimAPIWithFloattermConfig } from "./lua/plugins/floatterm";
 import { CONFIGURATION } from "./lua/toggles";
 
 vim.g.mapleader = " "; // Use space key as leader
@@ -293,7 +294,7 @@ if (CONFIGURATION.useComments) {
     mode: 'n',
     inputStroke: '<leader>/',
     action: function(this: void) {
-      vim.notify("invoked");
+      vim.cmd("norm gcc");
     },
     options: {
       desc: 'toggle comment'
