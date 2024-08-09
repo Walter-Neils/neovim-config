@@ -25,8 +25,9 @@ type VimAPI = {
   notify: (this: void, value: any) => void,
   api: {
     nvim_set_hl: (this: void, arg1: number, arg2: string, params: VimHLColorParams) => void,
-    nvim_create_user_command: (this: void, commandName: string, luaFunc: (this: void, args?: unknown) => void, options?: {
-      nargs?: number
+    nvim_create_user_command: (this: void, commandName: string, luaFunc: (this: void, args: { fargs: string[] }) => void, options: {
+      nargs?: number | '+' | '*',
+      bang?: boolean
     }) => void,
     nvim_create_autocmd: (this: void, eventName: VimAutocmdEvent, config: {
       group?: string,

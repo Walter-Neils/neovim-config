@@ -80,8 +80,7 @@ function configureLSP(this: void) {
     let target = "cmp_nvim_lsp";
     capabilities = require<{ default_capabilities: (this: void) => unknown }>(target).default_capabilities();
   }
-  const lsptargets = ['tsserver', 'lua_ls', 'clangd'] as const;
-  for (const target of lsptargets) {
+  for (const target of CONFIGURATION.lspconfig.configuredLSPServers) {
     lspconfig[target].setup({
       capabilities,
       on_attach

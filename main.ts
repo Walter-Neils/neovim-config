@@ -44,3 +44,4 @@ vim.opt.numberwidth = 2;
 vim.opt.ruler = false;
 
 require<unknown>("mappings");
+require<unknown>("commands");

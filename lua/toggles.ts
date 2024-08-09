@@ -11,13 +11,17 @@ export const CONFIGURATION = {
   useLualine: true,
   useBarBar: true,
   useComments: true,
+  mason: {
+    defaultInstalled: ['typescript-language-server', 'clangd', 'lua-language-server'] as const
+  },
   lspconfig: {
     // Activate builtin lsp_hints functionality on LSP server attach
     // Only works with nightly neovim ^0.10.0
     useInlayHints: true,
     inlayHints: {
       displayMode: 'only-in-normal-mode'
-    }
+    },
+    configuredLSPServers: ['tsserver', 'lua_ls', 'clangd'] as const
   },
   useUFO: true,
   behaviour: {
