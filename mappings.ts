@@ -269,9 +269,10 @@ applyKeyMapping({
   inputStroke: ',',
   action: function(this: void) {
     vim.lsp.buf.signature_help();
+    vim.lsp.buf.hover();
   },
   options: {
-    desc: 'Toggle inlay hints'
+    desc: 'Show LSP signature & type info'
   }
 })
 

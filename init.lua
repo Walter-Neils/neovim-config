@@ -3084,8 +3084,9 @@ applyKeyMapping({
     inputStroke = ",",
     action = function()
         vim.lsp.buf.signature_help()
+        vim.lsp.buf.hover()
     end,
-    options = {desc = "Toggle inlay hints"}
+    options = {desc = "Show LSP signature & type info"}
 })
 if CONFIGURATION.useBarBar then
     applyKeyMapping({mode = "n", inputStroke = "<Tab>", outputStroke = "<cmd>:bnext<CR>", options = {desc = "Switch next buffer"}})
