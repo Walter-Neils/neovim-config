@@ -323,3 +323,16 @@ if (CONFIGURATION.useTrouble) {
     }
   });
 }
+
+if(CONFIGURATION.lspconfig.rename.enabled) {
+  applyKeyMapping({
+    mode: 'n',
+    inputStroke: CONFIGURATION.lspconfig.rename.bind,
+    action: function(this: void) {
+      vim.lsp.buf.rename();
+    },
+    options: {
+      desc: 'rename'
+    }
+  });
+}

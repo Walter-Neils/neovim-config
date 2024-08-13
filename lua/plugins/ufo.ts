@@ -24,7 +24,9 @@ const plugin: LazyPlugin = {
       });
     }
     let target = "ufo";
-    require<{ setup: (this: void) => void }>(target).setup();
+    require<{ setup: (this: void, arg?: unknown) => void }>(target).setup({
+      // TODO: Setup fold_virt_text_handler
+    });
   }
 };
 export { plugin as default };

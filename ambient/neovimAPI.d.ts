@@ -61,6 +61,7 @@ type VimAPI = {
       hover: (this: void) => void,
       implementation: (this: void) => void,
       type_definition: (this: void) => void,
+      rename: (this: void) => void
     },
     protocol: {
       make_client_capabilities: (this: void) => VimLSPProtocolClientCapabilities
@@ -90,7 +91,10 @@ type VimAPI = {
     foldcolumn: string,
     foldlevel: number,
     foldlevelstart: number,
-    foldenable: boolean
+    foldenable: boolean,
+    whichwrap: {
+      append: (target: string) => string
+    }
   },
   g: {
     mapleader: string,

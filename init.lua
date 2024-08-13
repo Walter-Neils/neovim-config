@@ -2771,7 +2771,7 @@ ____exports.CONFIGURATION = {
     useMarks = true,
     useTrouble = true,
     mason = {defaultInstalled = {"typescript-language-server", "clangd", "lua-language-server"}},
-    lspconfig = {useInlayHints = true, inlayHints = {displayMode = "only-in-normal-mode"}, configuredLSPServers = {"tsserver", "lua_ls", "clangd"}},
+    lspconfig = {useInlayHints = true, inlayHints = {displayMode = "only-in-normal-mode"}, configuredLSPServers = {"tsserver", "lua_ls", "clangd"}, rename = {enabled = true, bind = "<F2>"}},
     useUFO = true,
     behaviour = {wrappedLinesAsSeparateLines = true},
     customCommands = {fixRustAnalyzer = {enabled = true}, installDefaultLSPServers = {enabled = true}, resetInstall = {enabled = false}}
@@ -2925,7 +2925,6 @@ local THEME_APPLIERS = ____theme.THEME_APPLIERS
 local function setupNeovide()
     local vim = getNeovideExtendedVimContext()
     if vim.g.neovide then
-        vim.notify("Applying neovide")
         vim.g.neovide_scale_factor = 0.75
         vim.g.neovide_detach_on_quit = "always_detach"
     end
@@ -3069,6 +3068,16 @@ if CONFIGURATION.useComments then
 end
 if CONFIGURATION.useTrouble then
     applyKeyMapping({mode = "n", inputStroke = "<leader>tdd", outputStroke = ":Trouble diagnostics toggle<CR>", options = {silent = true}})
+end
+if CONFIGURATION.lspconfig.rename.enabled then
+    applyKeyMapping({
+        mode = "n",
+        inputStroke = CONFIGURATION.lspconfig.rename.bind,
+        action = function()
+            vim.lsp.buf.rename()
+        end,
+        options = {desc = "rename"}
+    })
 end
 return ____exports
  end,

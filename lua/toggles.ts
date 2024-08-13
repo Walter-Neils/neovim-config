@@ -23,7 +23,11 @@ export const CONFIGURATION = {
     inlayHints: {
       displayMode: 'only-in-normal-mode'
     },
-    configuredLSPServers: ['tsserver', 'lua_ls', 'clangd'] as const
+    configuredLSPServers: ['tsserver', 'lua_ls', 'clangd'] as const,
+    rename: {
+      enabled: true,
+      bind: "<F2>"
+    }
   },
   useUFO: true,
   behaviour: {
@@ -40,6 +44,6 @@ export const CONFIGURATION = {
     },
     resetInstall: {
       enabled: false
-    }
+    },
   }
 } as const;

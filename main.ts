@@ -7,7 +7,6 @@ import { THEME_APPLIERS } from "./lua/theme";
 function setupNeovide() {
   const vim = getNeovideExtendedVimContext();
   if (vim.g.neovide) {
-    vim.notify("Applying neovide");
     vim.g.neovide_scale_factor = 0.75;
     // Doesn't appear to be doing anything, but should leave remote nvim server instances intact when closing
     vim.g.neovide_detach_on_quit = 'always_detach';
@@ -42,6 +41,8 @@ vim.opt.softtabstop = 2;
 vim.opt.number = true;
 vim.opt.numberwidth = 2;
 vim.opt.ruler = false;
+
+// vim.o.whichwrap.append("<>[]hl");
 
 require<unknown>("mappings");
 require<unknown>("commands");
