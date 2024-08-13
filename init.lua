@@ -2770,6 +2770,7 @@ ____exports.CONFIGURATION = {
     useComments = true,
     useMarks = true,
     useTrouble = true,
+    useOutline = true,
     mason = {defaultInstalled = {"typescript-language-server", "clangd", "lua-language-server"}},
     lspconfig = {useInlayHints = true, inlayHints = {displayMode = "only-in-normal-mode"}, configuredLSPServers = {"tsserver", "lua_ls", "clangd"}, rename = {enabled = true, bind = "<F2>"}},
     useUFO = true,
@@ -2887,6 +2888,9 @@ function ____exports.getPlugins()
     end
     if CONFIGURATION.useTrouble then
         result[#result + 1] = require("lua.plugins.trouble").default
+    end
+    if CONFIGURATION.useOutline then
+        result[#result + 1] = require("lua.plugins.outline").default
     end
     return result
 end
@@ -3487,6 +3491,18 @@ local plugin = {
 ____exports.default = plugin
 return ____exports
  end,
+["lua.plugins.outline"] = function(...) 
+local ____exports = {}
+local plugin = {
+    [1] = "hedyhli/outline.nvim",
+    lazy = true,
+    cmd = {"Outline", "OutlineOpen"},
+    keys = {{[1] = "<leader>o", [2] = "<cmd>Outline<CR>", desc = "Toggle outline"}},
+    opts = {symbol_folding = {}, preview_window = {auto_preview = true, live = true}, outline_items = {show_symbol_lineno = true}}
+}
+____exports.default = plugin
+return ____exports
+ end,
 ["lua.plugins.rustaceanvim"] = function(...) 
 local ____exports = {}
 local plugin = {
@@ -3546,7 +3562,7 @@ local plugin = {
             lspconfig[server].setup({capabilities = capabilities})
         end
         local target = "ufo"
-        require(target).setup()
+        require(target).setup({})
     end
 }
 ____exports.default = plugin

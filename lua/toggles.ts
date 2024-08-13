@@ -13,6 +13,7 @@ export const CONFIGURATION = {
   useComments: true,
   useMarks: true,
   useTrouble: true,
+  useOutline: true,
   mason: {
     defaultInstalled: ['typescript-language-server', 'clangd', 'lua-language-server'] as const
   },

@@ -46,11 +46,14 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (CONFIGURATION.useComments) {
     result.push(require<{ default: LazyPlugin }>('comment').default);
   }
-  if(CONFIGURATION.useMarks) {
+  if (CONFIGURATION.useMarks) {
     result.push(require<{ default: LazyPlugin }>('marks').default);
   }
-  if(CONFIGURATION.useTrouble) {
+  if (CONFIGURATION.useTrouble) {
     result.push(require<{ default: LazyPlugin }>('trouble').default);
+  }
+  if (CONFIGURATION.useOutline) {
+    result.push(require<{ default: LazyPlugin }>('outline').default);
   }
   return result;
 }
