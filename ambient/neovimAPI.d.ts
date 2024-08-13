@@ -26,6 +26,7 @@ type VimAutocmdEvent = 'BufAdd' | 'BufDelete' | 'BufEnter' | 'BufFilePost' | 'Bu
 type VimAPI = {
   cmd: (this: void, params: string) => void,
   notify: (this: void, value: any) => void,
+  print: (this: void, value: any) => void,
   schedule: (this: void, callback: (this: void) => void) => void,
   api: {
     nvim_set_hl: (this: void, arg1: number, arg2: string, params: VimHLColorParams) => void,
@@ -87,6 +88,7 @@ type VimAPI = {
     input: (this: void, config: { prompt: string }, callback: (this: void, input: string) => void) => void
   },
   o: {
+    shell: string,
     shiftwidth: number,
     foldcolumn: string,
     foldlevel: number,
@@ -97,6 +99,7 @@ type VimAPI = {
     }
   },
   g: {
+    terminal_emulator: string,
     mapleader: string,
   },
   fn: {

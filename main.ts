@@ -2,6 +2,7 @@ import { LazyModuleInterface } from "./ambient/lazy";
 import { getNeovideExtendedVimContext } from "./lua/integrations/neovide";
 import { getPlugins } from "./lua/plugins/init";
 import { THEME_APPLIERS } from "./lua/theme";
+import { CONFIGURATION } from "./lua/toggles";
 
 
 function setupNeovide() {
@@ -46,3 +47,14 @@ vim.opt.ruler = false;
 
 require<unknown>("mappings");
 require<unknown>("commands");
+
+if (CONFIGURATION.behaviour.shell.target === 'tmux') {
+  const term = os.getenv("TERM") ?? '__term_value_not_supplied';
+  if (!term.includes('tmux')) {
+    vim.print(`Setup: using terminal emulator 'tmux'`);
+    vim.g.terminal_emulator = 'tmux';
+    vim.o.shell = 'tmux';
+  } else {
+    vim.print(`Setup: terminal tmux would nest if applied. skipping...`);
+  }
+}

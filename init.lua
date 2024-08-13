@@ -2775,7 +2775,7 @@ ____exports.CONFIGURATION = {
     mason = {defaultInstalled = {"typescript-language-server", "clangd", "lua-language-server"}},
     lspconfig = {useInlayHints = true, inlayHints = {displayMode = "only-in-normal-mode"}, configuredLSPServers = {"tsserver", "lua_ls", "clangd"}, rename = {enabled = true, bind = "<F2>"}},
     useUFO = true,
-    behaviour = {wrappedLinesAsSeparateLines = true},
+    behaviour = {wrappedLinesAsSeparateLines = true, shell = {target = "tmux"}},
     customCommands = {fixRustAnalyzer = {enabled = true}, installDefaultLSPServers = {enabled = true}, resetInstall = {enabled = false}}
 }
 return ____exports
@@ -2923,6 +2923,8 @@ ____exports.THEME_APPLIERS = {VSCode = VSCode, TokyoNight = TokyoNight}
 return ____exports
  end,
 ["main"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local __TS__StringIncludes = ____lualib.__TS__StringIncludes
 local ____exports = {}
 local ____neovide = require("lua.integrations.neovide")
 local getNeovideExtendedVimContext = ____neovide.getNeovideExtendedVimContext
@@ -2930,6 +2932,8 @@ local ____init = require("lua.plugins.init")
 local getPlugins = ____init.getPlugins
 local ____theme = require("lua.theme")
 local THEME_APPLIERS = ____theme.THEME_APPLIERS
+local ____toggles = require("lua.toggles")
+local CONFIGURATION = ____toggles.CONFIGURATION
 local function setupNeovide()
     local vim = getNeovideExtendedVimContext()
     if vim.g.neovide then
@@ -2968,6 +2972,16 @@ vim.opt.numberwidth = 2
 vim.opt.ruler = false
 require("mappings")
 require("commands")
+if CONFIGURATION.behaviour.shell.target == "tmux" then
+    local term = os.getenv("TERM") or "__term_value_not_supplied"
+    if not __TS__StringIncludes(term, "tmux") then
+        vim.print("Setup: using terminal emulator 'tmux'")
+        vim.g.terminal_emulator = "tmux"
+        vim.o.shell = "tmux"
+    else
+        vim.print("Setup: terminal tmux would nest if applied. skipping...")
+    end
+end
 return ____exports
  end,
 ["lua.helpers.keymap.index"] = function(...) 

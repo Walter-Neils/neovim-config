@@ -36,6 +36,9 @@ export const CONFIGURATION = {
     // !! UNSUPPORTED -- NOT IMPLEMENTED !!
     // Use 'gj' and 'gk' to navigate as expected
     wrappedLinesAsSeparateLines: true,
+    shell: {
+      target: 'tmux'
+    }
   },
   customCommands: {
     fixRustAnalyzer: {
