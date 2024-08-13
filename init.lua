@@ -2771,6 +2771,7 @@ ____exports.CONFIGURATION = {
     useMarks = true,
     useTrouble = true,
     useOutline = true,
+    useGlance = true,
     mason = {defaultInstalled = {"typescript-language-server", "clangd", "lua-language-server"}},
     lspconfig = {useInlayHints = true, inlayHints = {displayMode = "only-in-normal-mode"}, configuredLSPServers = {"tsserver", "lua_ls", "clangd"}, rename = {enabled = true, bind = "<F2>"}},
     useUFO = true,
@@ -2891,6 +2892,9 @@ function ____exports.getPlugins()
     end
     if CONFIGURATION.useOutline then
         result[#result + 1] = require("lua.plugins.outline").default
+    end
+    if CONFIGURATION.useGlance then
+        result[#result + 1] = require("lua.plugins.glance").default
     end
     return result
 end
@@ -3083,6 +3087,12 @@ if CONFIGURATION.lspconfig.rename.enabled then
         options = {desc = "rename"}
     })
 end
+if CONFIGURATION.useGlance then
+    applyKeyMapping({mode = "n", inputStroke = "<leader>glr", outputStroke = ":Glance references<CR>", options = {desc = "Open references"}})
+    applyKeyMapping({mode = "n", inputStroke = "<leader>gld", outputStroke = ":Glance definitions<CR>", options = {desc = "Open definitions"}})
+    applyKeyMapping({mode = "n", inputStroke = "<leader>gltd", outputStroke = ":Glance type_definitions<CR>", options = {desc = "Open type definitions"}})
+    applyKeyMapping({mode = "n", inputStroke = "<leader>gli", outputStroke = ":Glance implementations<CR>", options = {desc = "Open implementations"}})
+end
 return ____exports
  end,
 ["lua.helpers.user_command.argparser"] = function(...) 
@@ -3255,6 +3265,18 @@ return ____exports
 ["lua.plugins.comment"] = function(...) 
 local ____exports = {}
 local plugin = {[1] = "numToStr/Comment.nvim", opts = {}}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.glance"] = function(...) 
+local ____exports = {}
+local plugin = {
+    [1] = "dnlhc/glance.nvim",
+    config = function()
+        local target = "glance"
+        require(target).setup({})
+    end
+}
 ____exports.default = plugin
 return ____exports
  end,

@@ -324,7 +324,7 @@ if (CONFIGURATION.useTrouble) {
   });
 }
 
-if(CONFIGURATION.lspconfig.rename.enabled) {
+if (CONFIGURATION.lspconfig.rename.enabled) {
   applyKeyMapping({
     mode: 'n',
     inputStroke: CONFIGURATION.lspconfig.rename.bind,
@@ -333,6 +333,41 @@ if(CONFIGURATION.lspconfig.rename.enabled) {
     },
     options: {
       desc: 'rename'
+    }
+  });
+}
+
+if (CONFIGURATION.useGlance) {
+  applyKeyMapping({
+    mode: 'n',
+    inputStroke: '<leader>glr',
+    outputStroke: ':Glance references<CR>',
+    options: {
+      desc: 'Open references'
+    }
+  });
+  applyKeyMapping({
+    mode: 'n',
+    inputStroke: '<leader>gld',
+    outputStroke: ':Glance definitions<CR>',
+    options: {
+      desc: 'Open definitions'
+    }
+  });
+  applyKeyMapping({
+    mode: 'n',
+    inputStroke: '<leader>gltd',
+    outputStroke: ':Glance type_definitions<CR>',
+    options: {
+      desc: 'Open type definitions'
+    }
+  });
+  applyKeyMapping({
+    mode: 'n',
+    inputStroke: '<leader>gli',
+    outputStroke: ':Glance implementations<CR>',
+    options: {
+      desc: 'Open implementations'
     }
   });
 }

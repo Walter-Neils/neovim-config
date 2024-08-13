@@ -55,5 +55,8 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (CONFIGURATION.useOutline) {
     result.push(require<{ default: LazyPlugin }>('outline').default);
   }
+  if (CONFIGURATION.useGlance) {
+    result.push(require<{ default: LazyPlugin }>('glance').default);
+  }
   return result;
 }
