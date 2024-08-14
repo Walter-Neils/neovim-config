@@ -15,9 +15,7 @@ if (CONFIGURATION.customCommands.fixRustAnalyzer.enabled) {
       vim.notify(`Installing component ${component}`);
       vim.fn.system(["rustup", "component", "add", component]);
     }
-  }, {
-    nargs: 0
-  })
+  }, { nargs: 0 })
 }
 
 if (CONFIGURATION.customCommands.resetInstall.enabled) {

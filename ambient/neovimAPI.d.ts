@@ -6,7 +6,8 @@ type VimHLColorParams = {
   bg?: string,
   fg?: string,
   strikethrough?: boolean,
-  link?: string
+  link?: string,
+  ctermbg?: number
 };
 
 type VimLSPProtocolClientCapabilities = {
@@ -88,6 +89,7 @@ type VimAPI = {
     input: (this: void, config: { prompt: string }, callback: (this: void, input: string) => void) => void
   },
   o: {
+    fillchars: string,
     shell: string,
     shiftwidth: number,
     foldcolumn: string,
@@ -102,7 +104,20 @@ type VimAPI = {
     terminal_emulator: string,
     mapleader: string,
   },
+  highlight: {
+    create: (this: void, id: string, args: Partial<{
+      ctermbg: number,
+      guifg: string,
+      guibg: string
+    }>, unknownArg: boolean) => void
+  },
   fn: {
+    sign_define: (this: void, id: string, options: {
+      text: string,
+      texthl: 'red' | string,
+      linehl: string,
+      numhl: string,
+    }) => void
     system: (this: void, args: string[]) => void,
     stdpath: (this: void, target: string) => string,
     input: (this: void, prompt: string) => string,

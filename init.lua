@@ -2772,6 +2772,8 @@ ____exports.CONFIGURATION = {
     useTrouble = true,
     useOutline = true,
     useGlance = true,
+    useNvimDapUI = true,
+    dap = {nodeJS = true},
     mason = {defaultInstalled = {"typescript-language-server", "clangd", "lua-language-server"}},
     lspconfig = {useInlayHints = true, inlayHints = {displayMode = "only-in-normal-mode"}, configuredLSPServers = {"tsserver", "lua_ls", "clangd"}, rename = {enabled = true, bind = "<F2>"}},
     useUFO = true,
@@ -2896,6 +2898,9 @@ function ____exports.getPlugins()
     if CONFIGURATION.useGlance then
         result[#result + 1] = require("lua.plugins.glance").default
     end
+    if CONFIGURATION.useNvimDapUI then
+        result[#result + 1] = require("lua.plugins.nvim-dap-ui").default
+    end
     return result
 end
 return ____exports
@@ -2918,6 +2923,15 @@ local function VSCode()
 end
 local function TokyoNight()
     vim.cmd("colorscheme tokyonight")
+    vim.api.nvim_set_hl(0, "DapBreakpoint", {ctermbg = 0, fg = "#993939", bg = "#31353f"})
+    vim.api.nvim_set_hl(0, "DapLogPoint", {ctermbg = 0, fg = "#61afef", bg = "#31353f"})
+    vim.api.nvim_set_hl(0, "DapStopped", {ctermbg = 0, fg = "#98c379", bg = "#31353f"})
+    vim.fn.sign_define("DapBreakpoint", {text = "", texthl = "DapBreakpoint", linehl = "DapBreakpoint", numhl = "DapBreakpoint"})
+    vim.fn.sign_define("DapBreakpointCondition", {text = "ﳁ", texthl = "DapBreakpoint", linehl = "DapBreakpoint", numhl = "DapBreakpoint"})
+    vim.fn.sign_define("DapBreakpointRejected", {text = "", texthl = "DapBreakpoint", linehl = "DapBreakpoint", numhl = "DapBreakpoint"})
+    vim.fn.sign_define("DapLogPoint", {text = "", texthl = "DapLogPoint", linehl = "DapLogPoint", numhl = "DapLogPoint"})
+    vim.fn.sign_define("DapStopped", {text = "", texthl = "DapStopped", linehl = "DapStopped", numhl = "DapStopped"})
+    vim.o.fillchars = "eob: ,fold: ,foldopen:,foldsep: ,foldclose:"
 end
 ____exports.THEME_APPLIERS = {VSCode = VSCode, TokyoNight = TokyoNight}
 return ____exports
@@ -3006,10 +3020,70 @@ nvim.g.floaterm_title = ""
 ____exports.default = plugin
 return ____exports
  end,
+["lua.plugins.nvim-dap-ui"] = function(...) 
+local ____exports = {}
+local ____toggles = require("lua.toggles")
+local CONFIGURATION = ____toggles.CONFIGURATION
+function ____exports.getDap()
+    local target = "dap"
+    local dapui = require(target)
+    return dapui
+end
+function ____exports.getDapUI()
+    local target = "dapui"
+    local dapui = require(target)
+    return dapui
+end
+local function bindDapUIEvents()
+    local dap = ____exports.getDap()
+    local dapui = ____exports.getDapUI()
+    dap.listeners.before.attach.dapui_config = function()
+        dapui.open()
+    end
+    dap.listeners.before.launch.dapui_config = function()
+        dapui.open()
+    end
+    dap.listeners.before.event_terminated.dapui_config = function()
+        dapui.close()
+    end
+    dap.listeners.before.event_exited.dapui_config = function()
+        dapui.close()
+    end
+end
+local function configureActiveLanguages()
+    local dap = ____exports.getDap()
+    if CONFIGURATION.dap.nodeJS then
+        dap.adapters["pwa-node"] = {type = "server", host = "::1", port = 8123, executable = {command = "js-debug-adapter"}}
+        for ____, language in ipairs({"javascript", "typescript"}) do
+            dap.configurations[language] = {{
+                type = "pwa-node",
+                request = "launch",
+                name = "Launch file",
+                program = "${file}",
+                cwd = "${workspaceFolder}",
+                runtimeExecutable = "node"
+            }}
+        end
+    end
+end
+local plugin = {
+    [1] = "rcarriga/nvim-dap-ui",
+    dependencies = {"mfussenegger/nvim-dap", "nvim-neotest/nvim-nio"},
+    config = function()
+        ____exports.getDapUI().setup({})
+        bindDapUIEvents()
+        configureActiveLanguages()
+    end
+}
+____exports.default = plugin
+return ____exports
+ end,
 ["mappings"] = function(...) 
 local ____exports = {}
 local ____keymap = require("lua.helpers.keymap.index")
 local applyKeyMapping = ____keymap.applyKeyMapping
+local ____nvim_2Ddap_2Dui = require("lua.plugins.nvim-dap-ui")
+local getDapUI = ____nvim_2Ddap_2Dui.getDapUI
 local ____toggles = require("lua.toggles")
 local CONFIGURATION = ____toggles.CONFIGURATION
 vim.g.mapleader = " "
@@ -3106,6 +3180,18 @@ if CONFIGURATION.useGlance then
     applyKeyMapping({mode = "n", inputStroke = "<leader>gld", outputStroke = ":Glance definitions<CR>", options = {desc = "Open definitions"}})
     applyKeyMapping({mode = "n", inputStroke = "<leader>gltd", outputStroke = ":Glance type_definitions<CR>", options = {desc = "Open type definitions"}})
     applyKeyMapping({mode = "n", inputStroke = "<leader>gli", outputStroke = ":Glance implementations<CR>", options = {desc = "Open implementations"}})
+end
+if CONFIGURATION.useNvimDapUI then
+    applyKeyMapping({mode = "n", inputStroke = "<leader>db", outputStroke = ":DapToggleBreakpoint<CR>", options = {desc = "Toggle breakpoint"}})
+    applyKeyMapping({mode = "n", inputStroke = "<leader>dr", outputStroke = ":DapContinue<CR>", options = {desc = "Start or continue the debugger"}})
+    applyKeyMapping({
+        mode = "n",
+        inputStroke = "<leader>dt",
+        action = function()
+            getDapUI().toggle()
+        end,
+        options = {desc = "Toggle debugger UI"}
+    })
 end
 return ____exports
  end,

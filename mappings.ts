@@ -1,5 +1,6 @@
 import { applyKeyMapping } from "./lua/helpers/keymap";
 import { extendNeovimAPIWithFloattermConfig } from "./lua/plugins/floatterm";
+import { getDapUI } from "./lua/plugins/nvim-dap-ui";
 import { CONFIGURATION } from "./lua/toggles";
 
 vim.g.mapleader = " "; // Use space key as leader
@@ -368,6 +369,35 @@ if (CONFIGURATION.useGlance) {
     outputStroke: ':Glance implementations<CR>',
     options: {
       desc: 'Open implementations'
+    }
+  });
+}
+
+if (CONFIGURATION.useNvimDapUI) {
+  applyKeyMapping({
+    mode: 'n',
+    inputStroke: '<leader>db',
+    outputStroke: ':DapToggleBreakpoint<CR>',
+    options: {
+      desc: 'Toggle breakpoint'
+    }
+  });
+  applyKeyMapping({
+    mode: 'n',
+    inputStroke: '<leader>dr',
+    outputStroke: ':DapContinue<CR>',
+    options: {
+      desc: 'Start or continue the debugger'
+    }
+  });
+  applyKeyMapping({
+    mode: 'n',
+    inputStroke: '<leader>dt',
+    action: function(this: void) {
+      getDapUI().toggle();
+    },
+    options: {
+      desc: 'Toggle debugger UI'
     }
   });
 }

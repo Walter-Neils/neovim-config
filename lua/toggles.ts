@@ -15,6 +15,10 @@ export const CONFIGURATION = {
   useTrouble: true,
   useOutline: true,
   useGlance: true,
+  useNvimDapUI: true,
+  dap: {
+    nodeJS: true,
+  },
   mason: {
     defaultInstalled: ['typescript-language-server', 'clangd', 'lua-language-server'] as const
   },
