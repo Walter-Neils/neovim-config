@@ -2774,8 +2774,8 @@ ____exports.CONFIGURATION = {
     useGlance = true,
     useNvimDapUI = true,
     dap = {nodeJS = true},
-    mason = {defaultInstalled = {"typescript-language-server", "clangd", "lua-language-server"}},
-    lspconfig = {useInlayHints = true, inlayHints = {displayMode = "only-in-normal-mode"}, configuredLSPServers = {"tsserver", "lua_ls", "clangd"}, rename = {enabled = true, bind = "<F2>"}},
+    mason = {defaultInstalled = {"typescript-language-server", "clangd", "lua-language-server", "yaml-language-server"}},
+    lspconfig = {useInlayHints = true, inlayHints = {displayMode = "only-in-normal-mode"}, configuredLSPServers = {"tsserver", "lua_ls", "clangd", "yamlls"}, rename = {enabled = true, bind = "<F2>"}},
     useUFO = true,
     behaviour = {wrappedLinesAsSeparateLines = true, shell = {target = "tmux"}},
     customCommands = {fixRustAnalyzer = {enabled = true}, installDefaultLSPServers = {enabled = true}, resetInstall = {enabled = false}}

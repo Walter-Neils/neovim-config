@@ -20,7 +20,7 @@ export const CONFIGURATION = {
     nodeJS: true,
   },
   mason: {
-    defaultInstalled: ['typescript-language-server', 'clangd', 'lua-language-server'] as const
+    defaultInstalled: ['typescript-language-server', 'clangd', 'lua-language-server', 'yaml-language-server'] as const
   },
   lspconfig: {
     // Activate builtin lsp_hints functionality on LSP server attach
@@ -29,7 +29,7 @@ export const CONFIGURATION = {
     inlayHints: {
       displayMode: 'only-in-normal-mode'
     },
-    configuredLSPServers: ['tsserver', 'lua_ls', 'clangd'] as const,
+    configuredLSPServers: ['tsserver', 'lua_ls', 'clangd', 'yamlls'] as const,
     rename: {
       enabled: true,
       bind: "<F2>"
