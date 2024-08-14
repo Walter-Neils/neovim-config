@@ -2932,6 +2932,7 @@ local function TokyoNight()
     vim.fn.sign_define("DapLogPoint", {text = "", texthl = "DapLogPoint", linehl = "DapLogPoint", numhl = "DapLogPoint"})
     vim.fn.sign_define("DapStopped", {text = "", texthl = "DapStopped", linehl = "DapStopped", numhl = "DapStopped"})
     vim.o.fillchars = "eob: ,fold: ,foldopen:,foldsep: ,foldclose:"
+    vim.o.foldcolumn = "1"
 end
 ____exports.THEME_APPLIERS = {VSCode = VSCode, TokyoNight = TokyoNight}
 return ____exports

@@ -4,7 +4,6 @@ import { getPlugins } from "./lua/plugins/init";
 import { THEME_APPLIERS } from "./lua/theme";
 import { CONFIGURATION } from "./lua/toggles";
 
-
 function setupNeovide() {
   const vim = getNeovideExtendedVimContext();
   if (vim.g.neovide) {
