@@ -1,3 +1,3 @@
-*.AppImage
+# *.AppImage
 AppDir/usr/
 AppDir/config/
