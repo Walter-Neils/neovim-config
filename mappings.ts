@@ -68,8 +68,24 @@ if (!CONFIGURATION.useBarBar) {
       desc: `next buffer`
     }
   });
+  applyKeyMapping({
+    mode: 'n',
+    inputStroke: '<Tab>',
+    outputStroke: "<cmd>:bnext<CR>",
+    options: {
+      desc: 'Switch next buffer'
+    }
+  });
 }
 else {
+  applyKeyMapping({
+    mode: 'n',
+    inputStroke: '<Tab>',
+    outputStroke: '<cmd>BufferNext<CR>',
+    options: {
+      desc: 'Switch buffer'
+    }
+  });
   applyKeyMapping({
     mode: 'n',
     inputStroke: `<A-h>`,
@@ -120,14 +136,26 @@ applyKeyMapping({
 });
 
 // Close buffer 
-applyKeyMapping({
-  mode: 'n',
-  inputStroke: '<leader>x',
-  outputStroke: '<cmd>:bd<CR>:bnext<CR>',
-  options: {
-    desc: 'Close current buffer'
-  }
-});
+if (CONFIGURATION.useBarBar) {
+  applyKeyMapping({
+    mode: 'n',
+    inputStroke: '<leader>x',
+    outputStroke: '<cmd>BufferClose<CR>',
+    options: {
+      desc: 'Close current buffer'
+    }
+  });
+}
+else {
+  applyKeyMapping({
+    mode: 'n',
+    inputStroke: '<leader>x',
+    outputStroke: '<cmd>:bd<CR>:bnext<CR>',
+    options: {
+      desc: 'Close current buffer'
+    }
+  });
+}
 
 // nvim-tree
 applyKeyMapping({
@@ -275,19 +303,6 @@ applyKeyMapping({
     desc: 'Show LSP signature & type info'
   }
 })
-
-// BarBar
-if (CONFIGURATION.useBarBar) {
-  // None yet
-  applyKeyMapping({
-    mode: 'n',
-    inputStroke: '<Tab>',
-    outputStroke: "<cmd>:bnext<CR>",
-    options: {
-      desc: 'Switch next buffer'
-    }
-  })
-}
 
 // Comments
 if (CONFIGURATION.useComments) {

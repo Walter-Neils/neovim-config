@@ -3162,14 +3162,20 @@ end
 if not CONFIGURATION.useBarBar then
     applyKeyMapping({mode = "n", inputStroke = "<A-h>", outputStroke = "<cmd>:bprev <CR>", options = {desc = "previous buffer"}})
     applyKeyMapping({mode = "n", inputStroke = "<A-l>", outputStroke = "<cmd>:bnext <CR>", options = {desc = "next buffer"}})
+    applyKeyMapping({mode = "n", inputStroke = "<Tab>", outputStroke = "<cmd>:bnext<CR>", options = {desc = "Switch next buffer"}})
 else
+    applyKeyMapping({mode = "n", inputStroke = "<Tab>", outputStroke = "<cmd>BufferNext<CR>", options = {desc = "Switch buffer"}})
     applyKeyMapping({mode = "n", inputStroke = "<A-h>", outputStroke = "<cmd>:BufferPrevious <CR>", options = {desc = "previous buffer"}})
     applyKeyMapping({mode = "n", inputStroke = "<A-l>", outputStroke = "<cmd>:BufferNext <CR>", options = {desc = "next buffer"}})
 end
 applyKeyMapping({mode = "n", inputStroke = "<leader>s", outputStroke = "<cmd>:vsplit<CR>", options = {desc = "vertical split"}})
 applyKeyMapping({mode = "n", inputStroke = "<leader>h", outputStroke = "<cmd>:split<CR>", options = {desc = "horizontal split"}})
 applyKeyMapping({mode = "n", inputStroke = "<Esc>", outputStroke = "<cmd>noh<CR>", options = {desc = "general clear highlights"}})
-applyKeyMapping({mode = "n", inputStroke = "<leader>x", outputStroke = "<cmd>:bd<CR>:bnext<CR>", options = {desc = "Close current buffer"}})
+if CONFIGURATION.useBarBar then
+    applyKeyMapping({mode = "n", inputStroke = "<leader>x", outputStroke = "<cmd>BufferClose<CR>", options = {desc = "Close current buffer"}})
+else
+    applyKeyMapping({mode = "n", inputStroke = "<leader>x", outputStroke = "<cmd>:bd<CR>:bnext<CR>", options = {desc = "Close current buffer"}})
+end
 applyKeyMapping({mode = "n", inputStroke = "<C-n>", outputStroke = "<cmd>NvimTreeToggle<CR>", options = {desc = "toggle file tree"}})
 for ____, mode in ipairs({"n", "i", "t"}) do
     applyKeyMapping({mode = mode, inputStroke = "<A-i>", outputStroke = "<cmd>FloatermToggle __builtin_floating<CR>", options = {desc = "toggle floating terminal"}})
@@ -3204,9 +3210,6 @@ applyKeyMapping({
     end,
     options = {desc = "Show LSP signature & type info"}
 })
-if CONFIGURATION.useBarBar then
-    applyKeyMapping({mode = "n", inputStroke = "<Tab>", outputStroke = "<cmd>:bnext<CR>", options = {desc = "Switch next buffer"}})
-end
 if CONFIGURATION.useComments then
     applyKeyMapping({
         mode = "n",
