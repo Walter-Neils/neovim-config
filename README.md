@@ -10,10 +10,5 @@ wget https://raw.githubusercontent.com/Walter-Neils/neovim-config/main/init.lua 
 # Try it out
 ## Arch Linux
 ```bash
-EPHEMERAL_NEOVIM_ENVIRONMENT="nvim-winconf"
-mkdir ~/.config/$EPHEMERAL_NEOVIM_ENVIRONMENT/
-wget https://raw.githubusercontent.com/Walter-Neils/neovim-config/main/init.lua -O ~/.config/$EPHEMERAL_NEOVIM_ENVIRONMENT/init.lua
-NVIM_APPNAME=$EPHEMERAL_NEOVIM_ENVIRONMENT nvim # NVIM_APPNAME instructs neovim to use a different name for config / data folders
-rm -rf ~/.config/$EPHEMERAL_NEOVIM_ENVIRONMENT
-rm -rf ~/.local/share/$EPHEMERAL_NEOVIM_ENVIRONMENT
+cd /tmp/;wget https://github.com/Walter-Neils/neovim-config/raw/main/appimage/winvim-x86_64.AppImage && winvim-x86-64.AppImage
 ```
