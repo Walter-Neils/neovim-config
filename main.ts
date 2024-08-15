@@ -1,8 +1,11 @@
 import { LazyModuleInterface } from "./ambient/lazy";
 import { getNeovideExtendedVimContext } from "./lua/integrations/neovide";
+import { enablePortableAppImageLogic } from "./lua/integrations/portable-appimage";
 import { getPlugins } from "./lua/plugins/init";
 import { THEME_APPLIERS } from "./lua/theme";
 import { CONFIGURATION } from "./lua/toggles";
+
+enablePortableAppImageLogic();
 
 function setupNeovide() {
   const vim = getNeovideExtendedVimContext();

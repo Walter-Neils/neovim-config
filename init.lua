@@ -2840,6 +2840,25 @@ function ____exports.getNeovideExtendedVimContext()
 end
 return ____exports
  end,
+["lua.integrations.portable-appimage"] = function(...) 
+local ____exports = {}
+local function getAppImageConfigData()
+    return {appDir = os.getenv("APPDIR")}
+end
+local function injectSTDPathOverride()
+    vim.fn.stdpath = function(target)
+        return "/tmp/winvim/" .. target
+    end
+end
+function ____exports.enablePortableAppImageLogic()
+    local appImageEnvironment = getAppImageConfigData()
+    if appImageEnvironment.appDir ~= nil then
+        vim.notify("AppImage environment detected. Integrating...")
+        injectSTDPathOverride()
+    end
+end
+return ____exports
+ end,
 ["lua.plugins.init"] = function(...) 
 local ____exports = {}
 local ____toggles = require("lua.toggles")
@@ -2955,12 +2974,15 @@ local __TS__StringIncludes = ____lualib.__TS__StringIncludes
 local ____exports = {}
 local ____neovide = require("lua.integrations.neovide")
 local getNeovideExtendedVimContext = ____neovide.getNeovideExtendedVimContext
+local ____portable_2Dappimage = require("lua.integrations.portable-appimage")
+local enablePortableAppImageLogic = ____portable_2Dappimage.enablePortableAppImageLogic
 local ____init = require("lua.plugins.init")
 local getPlugins = ____init.getPlugins
 local ____theme = require("lua.theme")
 local THEME_APPLIERS = ____theme.THEME_APPLIERS
 local ____toggles = require("lua.toggles")
 local CONFIGURATION = ____toggles.CONFIGURATION
+enablePortableAppImageLogic()
 local function setupNeovide()
     local vim = getNeovideExtendedVimContext()
     if vim.g.neovide then

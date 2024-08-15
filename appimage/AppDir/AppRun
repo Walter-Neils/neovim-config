@@ -1,0 +1,17 @@
+#!/bin/bash
+# cp /usr/bin/nvim/init.lua $XDG_CONFIG_HOME/init.lua
+# echo $APPDIR
+# INSTANCE_KEY=$(echo $APPDIR | sha1sum | awk '{print $1}')
+# echo $INSTANCE_KEY
+# mkdir /tmp/$INSTANCE_KEY
+# mkdir /tmp/$INSTANCE_KEY/usr
+# mkdir /tmp/$INSTANCE_KEY/usr/config
+# mkdir /tmp/$INSTANCE_KEY/usr/config/nvim
+# cp $APPDIR/usr/config/nvim/init.lua /tmp/$INSTANCE_KEY/usr/config/nvim/init.lua
+# export XDG_CONFIG_HOME="/tmp/$INSTANCE_KEY/usr/config"
+# export XDG_STATE_HOME="/tmp/$INSTANCE_KEY"
+# export XDG_CONFIG_CACHE="/tmp/$INSTANCE_KEY"
+# export XDG_DATA_HOME="/tmp/$INSTANCE_KEY"
+# mkdir $XDG_STATE_HOME
+# exec /usr/bin/nvim "$@"
+exec $APPDIR/usr/bin/bin/nvim -u $APPDIR/usr/config/nvim/init.lua "$@"
