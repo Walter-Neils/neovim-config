@@ -11,9 +11,10 @@ type DapUIModule = {
 type DapAdapterStructure = {
   type: 'server',
   host: '::1' | string,
-  port: number,
+  port: number | '${port}',
   executable: {
-    command: string
+    command: string,
+    args?: string[]
   }
 } | {
   type: 'executable',
@@ -26,9 +27,12 @@ type DapConfig = {
   type: string,
   request: 'launch',
   name: string,
-  program: '${file}' | string,
+  program: '${file}' | string | ((this: void) => string),
   cwd: '${workspaceFolder}' | string,
-  runtimeExecutable: 'node' | string
+  runtimeExecutable?: 'node' | string,
+  stopOnEntry?: boolean,
+  args?: string[],
+  runInTerminal?: boolean
 };
 
 type DapModule = {
@@ -78,6 +82,14 @@ function bindDapUIEvents(this: void) {
   dap.listeners.before.event_exited.dapui_config = function(this: void) { dapui.close(); }
 }
 
+let cppExePath: string | undefined;
+function getCPPTargetExecutable(this: void) {
+  if(cppExePath === undefined) {
+    cppExePath = vim.fn.input('Path to executable: ', vim.fn.getcwd() + "/", 'file');
+  }
+  return cppExePath;
+}
+
 function configureActiveLanguages(this: void) {
   const dap = getDap();
   if (CONFIGURATION.dap.nodeJS) {
@@ -89,6 +101,31 @@ function configureActiveLanguages(this: void) {
         command: 'js-debug-adapter'
       }
     };
+
+    const LLDB_PORT = 1828;
+    dap.adapters['lldb'] = {
+      type: 'server',
+      port: LLDB_PORT,
+      host: '127.0.0.1',
+      executable: {
+        command: 'codelldb',
+        args: ['--port', LLDB_PORT.toString()]
+      }
+    }
+
+    for (const language of ['cpp', 'c'] as const) {
+      dap.configurations[language] = [{
+        name: 'Launch',
+        type: 'lldb',
+        request: 'launch',
+        program: getCPPTargetExecutable,
+        cwd: '${workspaceFolder}',
+        stopOnEntry: false,
+        args: [],
+        runInTerminal: true
+      }]
+    }
+
     for (const language of ['javascript', 'typescript'] as const) {
       dap.configurations[language] = [{
         type: 'pwa-node',

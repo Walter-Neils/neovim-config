@@ -3051,10 +3051,46 @@ local function bindDapUIEvents()
         dapui.close()
     end
 end
+local cppExePath
+local function getCPPTargetExecutable()
+    if cppExePath == nil then
+        cppExePath = vim.fn.input(
+            "Path to executable: ",
+            vim.fn.getcwd() .. "/",
+            "file"
+        )
+    end
+    return cppExePath
+end
 local function configureActiveLanguages()
     local dap = ____exports.getDap()
     if CONFIGURATION.dap.nodeJS then
         dap.adapters["pwa-node"] = {type = "server", host = "::1", port = 8123, executable = {command = "js-debug-adapter"}}
+        local LLDB_PORT = 1828
+        dap.adapters.lldb = {
+            type = "server",
+            port = LLDB_PORT,
+            host = "127.0.0.1",
+            executable = {
+                command = "codelldb",
+                args = {
+                    "--port",
+                    tostring(LLDB_PORT)
+                }
+            }
+        }
+        for ____, language in ipairs({"cpp", "c"}) do
+            dap.configurations[language] = {{
+                name = "Launch",
+                type = "lldb",
+                request = "launch",
+                program = getCPPTargetExecutable,
+                cwd = "${workspaceFolder}",
+                stopOnEntry = false,
+                args = {},
+                runInTerminal = true
+            }}
+        end
         for ____, language in ipairs({"javascript", "typescript"}) do
             dap.configurations[language] = {{
                 type = "pwa-node",
@@ -3193,6 +3229,9 @@ if CONFIGURATION.useNvimDapUI then
         end,
         options = {desc = "Toggle debugger UI"}
     })
+    applyKeyMapping({mode = "n", inputStroke = "<leader>dsi", outputStroke = ":DapStepInto<CR>", options = {desc = "Step into"}})
+    applyKeyMapping({mode = "n", inputStroke = "<leader>dso", outputStroke = ":DapStepOver<CR>", options = {desc = "Step over"}})
+    applyKeyMapping({mode = "n", inputStroke = "<leader>dsO", outputStroke = ":DapStepOut<CR>", options = {desc = "Step out"}})
 end
 return ____exports
  end,

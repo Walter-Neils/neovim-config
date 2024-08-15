@@ -400,4 +400,28 @@ if (CONFIGURATION.useNvimDapUI) {
       desc: 'Toggle debugger UI'
     }
   });
+  applyKeyMapping({
+    mode: 'n',
+    inputStroke: '<leader>dsi',
+    outputStroke: ':DapStepInto<CR>',
+    options: {
+      desc: 'Step into'
+    }
+  });
+  applyKeyMapping({
+    mode: 'n',
+    inputStroke: '<leader>dso',
+    outputStroke: ':DapStepOver<CR>',
+    options: {
+      desc: 'Step over'
+    }
+  });
+  applyKeyMapping({
+    mode: 'n',
+    inputStroke: '<leader>dsO',
+    outputStroke: ':DapStepOut<CR>',
+    options: {
+      desc: 'Step out'
+    }
+  });
 }

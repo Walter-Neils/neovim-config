@@ -112,6 +112,7 @@ type VimAPI = {
     }>, unknownArg: boolean) => void
   },
   fn: {
+    getcwd: (this: void) => string,
     sign_define: (this: void, id: string, options: {
       text: string,
       texthl: 'red' | string,
@@ -120,7 +121,7 @@ type VimAPI = {
     }) => void
     system: (this: void, args: string[]) => void,
     stdpath: (this: void, target: string) => string,
-    input: (this: void, prompt: string) => string,
+    input: (this: void, prompt: string, initialValue?: string, formatHint?: 'file' | 'directory') => string,
     expand: (this: void, input: string) => string,
     getreg: (this: void, register: string) => string,
     setreg: (this: void, register: string, value: string) => void
