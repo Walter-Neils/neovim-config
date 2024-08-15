@@ -61,5 +61,8 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (CONFIGURATION.useNvimDapUI) {
     result.push(require<{ default: LazyPlugin }>('nvim-dap-ui').default);
   }
+  if (CONFIGURATION.useDiffView) {
+    result.push(require<{ default: LazyPlugin }>('diffview').default);
+  }
   return result;
 }

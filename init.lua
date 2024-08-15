@@ -2773,7 +2773,8 @@ ____exports.CONFIGURATION = {
     useOutline = true,
     useGlance = true,
     useNvimDapUI = true,
-    dap = {nodeJS = true},
+    useDiffView = true,
+    dap = {nodeJS = true, cPlusPlus = true, rust = true},
     mason = {defaultInstalled = {"typescript-language-server", "clangd", "lua-language-server", "yaml-language-server"}},
     lspconfig = {useInlayHints = true, inlayHints = {displayMode = "only-in-normal-mode"}, configuredLSPServers = {"tsserver", "lua_ls", "clangd", "yamlls"}, rename = {enabled = true, bind = "<F2>"}},
     useUFO = true,
@@ -2901,6 +2902,9 @@ function ____exports.getPlugins()
     if CONFIGURATION.useNvimDapUI then
         result[#result + 1] = require("lua.plugins.nvim-dap-ui").default
     end
+    if CONFIGURATION.useDiffView then
+        result[#result + 1] = require("lua.plugins.diffview").default
+    end
     return result
 end
 return ____exports
@@ -3020,18 +3024,15 @@ function ____exports.applyKeyMapping(map)
 end
 return ____exports
  end,
-["lua.plugins.floatterm"] = function(...) 
-local ____exports = {}
-function ____exports.extendNeovimAPIWithFloattermConfig()
-    return vim
-end
-local plugin = {[1] = "voldikss/vim-floaterm", cmd = {"FloatermNew", "FloatermToggle", "FloatermShow", "FloatermHide"}}
-local nvim = ____exports.extendNeovimAPIWithFloattermConfig()
-nvim.g.floaterm_title = ""
-____exports.default = plugin
-return ____exports
- end,
 ["lua.plugins.nvim-dap-ui"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local Error = ____lualib.Error
+local RangeError = ____lualib.RangeError
+local ReferenceError = ____lualib.ReferenceError
+local SyntaxError = ____lualib.SyntaxError
+local TypeError = ____lualib.TypeError
+local URIError = ____lualib.URIError
+local __TS__New = ____lualib.__TS__New
 local ____exports = {}
 local ____toggles = require("lua.toggles")
 local CONFIGURATION = ____toggles.CONFIGURATION
@@ -3069,13 +3070,25 @@ local function getCPPTargetExecutable()
             vim.fn.getcwd() .. "/",
             "file"
         )
+        if not vim.loop.fs_stat(cppExePath) then
+            cppExePath = nil
+            error(
+                __TS__New(Error, "File not found"),
+                0
+            )
+        end
     end
     return cppExePath
 end
+vim.api.nvim_create_autocmd(
+    "DirChanged",
+    {callback = function()
+        cppExePath = nil
+    end}
+)
 local function configureActiveLanguages()
     local dap = ____exports.getDap()
-    if CONFIGURATION.dap.nodeJS then
-        dap.adapters["pwa-node"] = {type = "server", host = "::1", port = 8123, executable = {command = "js-debug-adapter"}}
+    if CONFIGURATION.dap.cPlusPlus then
         local LLDB_PORT = 1828
         dap.adapters.lldb = {
             type = "server",
@@ -3101,6 +3114,9 @@ local function configureActiveLanguages()
                 runInTerminal = true
             }}
         end
+    end
+    if CONFIGURATION.dap.nodeJS then
+        dap.adapters["pwa-node"] = {type = "server", host = "::1", port = 8123, executable = {command = "js-debug-adapter"}}
         for ____, language in ipairs({"javascript", "typescript"}) do
             dap.configurations[language] = {{
                 type = "pwa-node",
@@ -3415,6 +3431,23 @@ return ____exports
 ["lua.plugins.comment"] = function(...) 
 local ____exports = {}
 local plugin = {[1] = "numToStr/Comment.nvim", opts = {}}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.diffview"] = function(...) 
+local ____exports = {}
+local plugin = {[1] = "sindrets/diffview.nvim", cmd = {"DiffviewOpen"}}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.floatterm"] = function(...) 
+local ____exports = {}
+function ____exports.extendNeovimAPIWithFloattermConfig()
+    return vim
+end
+local plugin = {[1] = "voldikss/vim-floaterm", cmd = {"FloatermNew", "FloatermToggle", "FloatermShow", "FloatermHide"}}
+local nvim = ____exports.extendNeovimAPIWithFloattermConfig()
+nvim.g.floaterm_title = ""
 ____exports.default = plugin
 return ____exports
  end,

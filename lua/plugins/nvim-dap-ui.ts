@@ -82,26 +82,29 @@ function bindDapUIEvents(this: void) {
   dap.listeners.before.event_exited.dapui_config = function(this: void) { dapui.close(); }
 }
 
+
+
 let cppExePath: string | undefined;
 function getCPPTargetExecutable(this: void) {
-  if(cppExePath === undefined) {
+  if (cppExePath === undefined) {
     cppExePath = vim.fn.input('Path to executable: ', vim.fn.getcwd() + "/", 'file');
+    if (!vim.loop.fs_stat(cppExePath)) {
+      cppExePath = undefined;
+      throw new Error(`File not found`);
+    }
   }
   return cppExePath;
 }
 
+vim.api.nvim_create_autocmd('DirChanged', {
+  callback: function(this: void) {
+    cppExePath = undefined;
+  }
+});
+
 function configureActiveLanguages(this: void) {
   const dap = getDap();
-  if (CONFIGURATION.dap.nodeJS) {
-    dap.adapters['pwa-node'] = {
-      type: 'server',
-      host: '::1',
-      port: 8123,
-      executable: {
-        command: 'js-debug-adapter'
-      }
-    };
-
+  if (CONFIGURATION.dap.cPlusPlus) {
     const LLDB_PORT = 1828;
     dap.adapters['lldb'] = {
       type: 'server',
@@ -125,6 +128,16 @@ function configureActiveLanguages(this: void) {
         runInTerminal: true
       }]
     }
+  }
+  if (CONFIGURATION.dap.nodeJS) {
+    dap.adapters['pwa-node'] = {
+      type: 'server',
+      host: '::1',
+      port: 8123,
+      executable: {
+        command: 'js-debug-adapter'
+      }
+    };
 
     for (const language of ['javascript', 'typescript'] as const) {
       dap.configurations[language] = [{

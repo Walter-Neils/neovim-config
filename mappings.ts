@@ -1,5 +1,4 @@
 import { applyKeyMapping } from "./lua/helpers/keymap";
-import { extendNeovimAPIWithFloattermConfig } from "./lua/plugins/floatterm";
 import { getDapUI } from "./lua/plugins/nvim-dap-ui";
 import { CONFIGURATION } from "./lua/toggles";
 

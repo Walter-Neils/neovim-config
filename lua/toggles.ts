@@ -16,8 +16,11 @@ export const CONFIGURATION = {
   useOutline: true,
   useGlance: true,
   useNvimDapUI: true,
+  useDiffView: true,
   dap: {
     nodeJS: true,
+    cPlusPlus: true,
+    rust: true
   },
   mason: {
     defaultInstalled: ['typescript-language-server', 'clangd', 'lua-language-server', 'yaml-language-server'] as const
