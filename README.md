@@ -10,5 +10,5 @@ wget https://raw.githubusercontent.com/Walter-Neils/neovim-config/main/init.lua 
 # Try it out
 ## Arch Linux
 ```bash
-cd /tmp/;wget https://github.com/Walter-Neils/neovim-config/raw/main/appimage/winvim-x86_64.AppImage && winvim-x86-64.AppImage
+cd /tmp/;wget https://github.com/Walter-Neils/neovim-config/raw/main/appimage/winvim-x86_64.AppImage && chmod +x ./winvim-x86-64.AppImage && ./winvim-x86-64.AppImage
 ```
