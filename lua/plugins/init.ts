@@ -67,5 +67,8 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (CONFIGURATION.useLazyGit) {
     result.push(require<{ default: LazyPlugin }>('lazygit').default);
   }
+  if (CONFIGURATION.useNoice) {
+    result.push(require<{ default: LazyPlugin }>('noice').default);
+  }
   return result;
 }

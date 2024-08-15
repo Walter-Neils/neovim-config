@@ -2775,6 +2775,7 @@ ____exports.CONFIGURATION = {
     useNvimDapUI = true,
     useDiffView = true,
     useLazyGit = true,
+    useNoice = true,
     dap = {nodeJS = true, cPlusPlus = true, rust = true},
     mason = {defaultInstalled = {"typescript-language-server", "clangd", "lua-language-server", "yaml-language-server"}},
     lspconfig = {useInlayHints = true, inlayHints = {displayMode = "only-in-normal-mode"}, configuredLSPServers = {"tsserver", "lua_ls", "clangd", "yamlls"}, rename = {enabled = true, bind = "<F2>"}},
@@ -2908,6 +2909,9 @@ function ____exports.getPlugins()
     end
     if CONFIGURATION.useLazyGit then
         result[#result + 1] = require("lua.plugins.lazygit").default
+    end
+    if CONFIGURATION.useNoice then
+        result[#result + 1] = require("lua.plugins.noice").default
     end
     return result
 end
@@ -3645,6 +3649,25 @@ local plugin = {
     config = function()
         local target = "mason"
         require(target).setup()
+    end
+}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.noice"] = function(...) 
+local ____exports = {}
+local function getNoice()
+    local target = "noice"
+    local noice = require(target)
+    return noice
+end
+local plugin = {
+    [1] = "folke/noice.nvim",
+    event = "VeryLazy",
+    dependencies = {"MunifTanjim/nui.nvim", "rcarriga/nvim-notify"},
+    config = function()
+        local noice = getNoice()
+        noice.setup({})
     end
 }
 ____exports.default = plugin

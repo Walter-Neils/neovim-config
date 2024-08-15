@@ -18,6 +18,7 @@ export const CONFIGURATION = {
   useNvimDapUI: true,
   useDiffView: true,
   useLazyGit: true,
+  useNoice: true,
   dap: {
     nodeJS: true,
     cPlusPlus: true,
