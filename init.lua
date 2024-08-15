@@ -2777,7 +2777,7 @@ ____exports.CONFIGURATION = {
     mason = {defaultInstalled = {"typescript-language-server", "clangd", "lua-language-server", "yaml-language-server"}},
     lspconfig = {useInlayHints = true, inlayHints = {displayMode = "only-in-normal-mode"}, configuredLSPServers = {"tsserver", "lua_ls", "clangd", "yamlls"}, rename = {enabled = true, bind = "<F2>"}},
     useUFO = true,
-    behaviour = {wrappedLinesAsSeparateLines = true, shell = {target = "tmux"}},
+    behaviour = {wrappedLinesAsSeparateLines = true, shell = {target = "tmux", tmux = {isolation = {scope = "per-instance"}}}},
     customCommands = {fixRustAnalyzer = {enabled = true}, installDefaultLSPServers = {enabled = true}, resetInstall = {enabled = false}}
 }
 return ____exports
@@ -2992,7 +2992,17 @@ if CONFIGURATION.behaviour.shell.target == "tmux" then
     if not __TS__StringIncludes(term, "tmux") then
         vim.print("Setup: using terminal emulator 'tmux'")
         vim.g.terminal_emulator = "tmux"
-        vim.o.shell = "tmux"
+        local isolationScope = CONFIGURATION.behaviour.shell.tmux.isolation.scope
+        if isolationScope == "global" then
+            vim.o.shell = "tmux"
+        elseif isolationScope == "neovim-shared" then
+            vim.o.shell = "tmux -L neovim"
+        elseif isolationScope == "per-instance" then
+            vim.o.shell = "tmux -L neovim-" .. tostring(vim.fn.getpid())
+        else
+            vim.notify(("Invalid option '" .. tostring(isolationScope)) .. "' for tmux isolation scope.")
+            vim.o.shell = "tmux"
+        end
     else
         vim.print("Setup: terminal tmux would nest if applied. skipping...")
     end

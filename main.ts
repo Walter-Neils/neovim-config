@@ -52,7 +52,20 @@ if (CONFIGURATION.behaviour.shell.target === 'tmux') {
   if (!term.includes('tmux')) {
     vim.print(`Setup: using terminal emulator 'tmux'`);
     vim.g.terminal_emulator = 'tmux';
-    vim.o.shell = 'tmux';
+    const isolationScope = CONFIGURATION.behaviour.shell.tmux.isolation.scope as 'global' | 'neovim-shared' | 'per-instance';
+    if (isolationScope === 'global') {
+      vim.o.shell = 'tmux';
+    }
+    else if (isolationScope === 'neovim-shared') {
+      vim.o.shell = 'tmux -L neovim';
+    }
+    else if (isolationScope === 'per-instance') {
+      vim.o.shell = `tmux -L neovim-${vim.fn.getpid()}`
+    }
+    else {
+      vim.notify(`Invalid option '${isolationScope}' for tmux isolation scope.`);
+      vim.o.shell = 'tmux';
+    }
   } else {
     vim.print(`Setup: terminal tmux would nest if applied. skipping...`);
   }

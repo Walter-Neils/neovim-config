@@ -41,7 +41,13 @@ export const CONFIGURATION = {
     // Use 'gj' and 'gk' to navigate as expected
     wrappedLinesAsSeparateLines: true,
     shell: {
-      target: 'tmux'
+      target: 'tmux',
+      tmux: {
+        isolation: {
+          // 'global', 'neovim-shared', 'per-instance'
+          scope: 'per-instance'
+        }
+      }
     }
   },
   customCommands: {

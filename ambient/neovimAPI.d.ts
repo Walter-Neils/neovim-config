@@ -124,7 +124,8 @@ type VimAPI = {
     input: (this: void, prompt: string, initialValue?: string, formatHint?: 'file' | 'directory') => string,
     expand: (this: void, input: string) => string,
     getreg: (this: void, register: string) => string,
-    setreg: (this: void, register: string, value: string) => void
+    setreg: (this: void, register: string, value: string) => void,
+    getpid: (this: void) => number
   },
   loop: {
     fs_stat: (this: void, path: string) => boolean
