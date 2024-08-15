@@ -64,5 +64,8 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (CONFIGURATION.useDiffView) {
     result.push(require<{ default: LazyPlugin }>('diffview').default);
   }
+  if (CONFIGURATION.useLazyGit) {
+    result.push(require<{ default: LazyPlugin }>('lazygit').default);
+  }
   return result;
 }

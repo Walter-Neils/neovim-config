@@ -2774,6 +2774,7 @@ ____exports.CONFIGURATION = {
     useGlance = true,
     useNvimDapUI = true,
     useDiffView = true,
+    useLazyGit = true,
     dap = {nodeJS = true, cPlusPlus = true, rust = true},
     mason = {defaultInstalled = {"typescript-language-server", "clangd", "lua-language-server", "yaml-language-server"}},
     lspconfig = {useInlayHints = true, inlayHints = {displayMode = "only-in-normal-mode"}, configuredLSPServers = {"tsserver", "lua_ls", "clangd", "yamlls"}, rename = {enabled = true, bind = "<F2>"}},
@@ -2904,6 +2905,9 @@ function ____exports.getPlugins()
     end
     if CONFIGURATION.useDiffView then
         result[#result + 1] = require("lua.plugins.diffview").default
+    end
+    if CONFIGURATION.useLazyGit then
+        result[#result + 1] = require("lua.plugins.lazygit").default
     end
     return result
 end
@@ -3477,6 +3481,18 @@ local plugin = {
         ibl.setup()
     end
 }
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.lazygit"] = function(...) 
+local ____exports = {}
+local plugin = {[1] = "kdheepak/lazygit.nvim", cmd = {
+    "LazyGit",
+    "LazyGitConfig",
+    "LazyGitCurrentFile",
+    "LazyGitFilter",
+    "LazyGitFilterCurrentFile"
+}, dependencies = {"nvim-lua/plenary.nvim"}, keys = {{[1] = "<leader>lg", [2] = "<cmd>LazyGit<CR>"}}}
 ____exports.default = plugin
 return ____exports
  end,
