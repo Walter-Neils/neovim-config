@@ -2776,7 +2776,8 @@ ____exports.CONFIGURATION = {
     useDiffView = true,
     useLazyGit = true,
     useNoice = true,
-    useCopilot = true,
+    useCopilot = false,
+    useActionsPreview = true,
     ollama = {enabled = false, targetModel = "codellama:code"},
     dap = {nodeJS = true, cPlusPlus = true, rust = true},
     mason = {defaultInstalled = {"typescript-language-server", "clangd", "lua-language-server", "yaml-language-server"}},
@@ -3039,6 +3040,9 @@ function ____exports.getPlugins()
     if CONFIGURATION.useNoice then
         result[#result + 1] = require("lua.plugins.copilot").default
     end
+    if CONFIGURATION.useActionsPreview then
+        result[#result + 1] = require("lua.plugins.actions-preview").default
+    end
     return result
 end
 return ____exports
@@ -3170,6 +3174,17 @@ function ____exports.applyKeyMapping(map)
 end
 return ____exports
  end,
+["lua.plugins.actions-preview"] = function(...) 
+local ____exports = {}
+function ____exports.getActionsPreview()
+    local target = "actions-preview"
+    local module = require(target)
+    return module
+end
+local plugin = {[1] = "aznhe21/actions-preview.nvim", event = "VeryLazy"}
+____exports.default = plugin
+return ____exports
+ end,
 ["lua.plugins.nvim-dap-ui"] = function(...) 
 local ____lualib = require("lualib_bundle")
 local Error = ____lualib.Error
@@ -3291,6 +3306,8 @@ return ____exports
 local ____exports = {}
 local ____keymap = require("lua.helpers.keymap.index")
 local applyKeyMapping = ____keymap.applyKeyMapping
+local ____actions_2Dpreview = require("lua.plugins.actions-preview")
+local getActionsPreview = ____actions_2Dpreview.getActionsPreview
 local ____nvim_2Ddap_2Dui = require("lua.plugins.nvim-dap-ui")
 local getDapUI = ____nvim_2Ddap_2Dui.getDapUI
 local ____toggles = require("lua.toggles")
@@ -3410,6 +3427,16 @@ if CONFIGURATION.useNvimDapUI then
 end
 if CONFIGURATION.useCopilot then
     vim.keymap.set("i", "<C-J>", "copilot#Accept(\"<CR>\")", {expr = true, replace_keycodes = false})
+end
+if CONFIGURATION.useActionsPreview then
+    applyKeyMapping({
+        mode = "n",
+        inputStroke = ".",
+        action = function()
+            getActionsPreview().code_actions()
+        end,
+        options = {desc = "Show code actions"}
+    })
 end
 return ____exports
  end,
@@ -3893,13 +3920,17 @@ return ____exports
  end,
 ["lua.plugins.rustaceanvim"] = function(...) 
 local ____exports = {}
+function ____exports.getRustaceonVimExtendedVIMApi()
+    return vim
+end
 local plugin = {
     [1] = "mrcjkb/rustaceanvim",
     version = "^5",
     ft = {"rust"},
     dependencies = {"nvim-lua/plenary.nvim", "mfussenegger/nvim-dap"},
     config = function()
-        vim.g.rustaceanvim = {tools = {hover_actions = {auto_focus = true}}, server = {}}
+        local vim = ____exports.getRustaceonVimExtendedVIMApi()
+        vim.g.rustaceanvim = {tools = {hover_actions = {auto_focus = false, replace_builtin_hover = false}}}
     end
 }
 ____exports.default = plugin

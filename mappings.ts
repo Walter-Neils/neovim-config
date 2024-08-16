@@ -1,4 +1,5 @@
 import { applyKeyMapping } from "./lua/helpers/keymap";
+import { getActionsPreview } from "./lua/plugins/actions-preview";
 import { getDapUI } from "./lua/plugins/nvim-dap-ui";
 import { CONFIGURATION } from "./lua/toggles";
 
@@ -446,4 +447,17 @@ if (CONFIGURATION.useCopilot) {
     expr: true,
     replace_keycodes: false,
   });
+}
+
+if (CONFIGURATION.useActionsPreview) {
+  applyKeyMapping({
+    mode: 'n',
+    inputStroke: '.',
+    action: function(this: void) {
+      getActionsPreview().code_actions();
+    },
+    options: {
+      desc: "Show code actions"
+    }
+  })
 }
