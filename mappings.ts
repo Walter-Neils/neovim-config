@@ -439,3 +439,11 @@ if (CONFIGURATION.useNvimDapUI) {
     }
   });
 }
+
+if (CONFIGURATION.useCopilot) {
+  // TODO: Replace with custom remapper
+  vim.keymap.set('i', '<C-J>', 'copilot#Accept("\<CR>")', {
+    expr: true,
+    replace_keycodes: false,
+  });
+}

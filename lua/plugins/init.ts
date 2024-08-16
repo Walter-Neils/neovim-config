@@ -70,5 +70,8 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (CONFIGURATION.useNoice) {
     result.push(require<{ default: LazyPlugin }>('noice').default);
   }
+  if (CONFIGURATION.useNoice) {
+    result.push(require<{ default: LazyPlugin }>('copilot').default);
+  }
   return result;
 }

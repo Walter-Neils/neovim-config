@@ -30,7 +30,7 @@ function TokyoNight(this: void) {
   vim.fn.sign_define('DapStopped', { text: '', texthl: 'DapStopped', linehl: 'DapStopped', numhl: 'DapStopped' });
 
   vim.o.fillchars = "eob: ,fold: ,foldopen:,foldsep: ,foldclose:";
-  vim.o.foldcolumn = '1';
+  vim.o.foldcolumn = '2';
 }
 
 

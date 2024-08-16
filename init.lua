@@ -2776,6 +2776,8 @@ ____exports.CONFIGURATION = {
     useDiffView = true,
     useLazyGit = true,
     useNoice = true,
+    useCopilot = true,
+    ollama = {enabled = false, targetModel = "codellama:code"},
     dap = {nodeJS = true, cPlusPlus = true, rust = true},
     mason = {defaultInstalled = {"typescript-language-server", "clangd", "lua-language-server", "yaml-language-server"}},
     lspconfig = {useInlayHints = true, inlayHints = {displayMode = "only-in-normal-mode"}, configuredLSPServers = {"tsserver", "lua_ls", "clangd", "yamlls"}, rename = {enabled = true, bind = "<F2>"}},
@@ -2883,6 +2885,66 @@ function ____exports.getNeovideExtendedVimContext()
 end
 return ____exports
  end,
+["lua.plugins.copilot"] = function(...) 
+local ____exports = {}
+function ____exports.getCopilotExtendedVimAPI()
+    return vim
+end
+local plugin = {
+    [1] = "github/copilot.vim",
+    event = "VeryLazy",
+    config = function()
+        local vim = ____exports.getCopilotExtendedVimAPI()
+        vim.g.copilot_no_tab_map = true
+    end
+}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.integrations.ollama"] = function(...) 
+local ____exports = {}
+local ____copilot = require("lua.plugins.copilot")
+local getCopilotExtendedVimAPI = ____copilot.getCopilotExtendedVimAPI
+local ____toggles = require("lua.toggles")
+local CONFIGURATION = ____toggles.CONFIGURATION
+function ____exports.setupOllamaCopilot()
+    local vim = getCopilotExtendedVimAPI()
+    if not CONFIGURATION.ollama.enabled or not CONFIGURATION.useCopilot then
+        return
+    end
+    vim.g.copilot_proxy = "http://localhost:11435"
+    vim.g.copilot_proxy_strict_ssl = false
+    if vim.fn.executable("go") then
+        vim.notify("Cannot configure copilot ollama proxy: the `go` binary is not installed", vim.log.levels.ERROR)
+        return
+    end
+    vim.fn.system({"go", "install", "github.com/bernardo-bruning/ollama-copilot@latest"})
+    if vim.v.shell_error ~= 0 then
+        vim.notify("An error occurred while installing `ollama-copilot@latest`.", vim.log.levels.ERROR)
+        return
+    end
+    local username = os.getenv("USER")
+    if username == nil then
+        vim.notify("$USER var is unset", vim.log.levels.ERROR)
+        return
+    end
+    local ollamaPath = ("/home/" .. tostring(username)) .. "/go/bin/ollama-copilot"
+    if not vim.fn.executable(ollamaPath) then
+        vim.notify("Unable to locate ollama-copilot binary")
+        return
+    end
+    local handle
+    handle = vim.loop.spawn(
+        ollamaPath,
+        {detached = true},
+        function(code, signal)
+            vim.notify(((("ollama exited: signal(" .. tostring(signal)) .. ") code(") .. tostring(code)) .. ")")
+            handle:close()
+        end
+    )
+end
+return ____exports
+ end,
 ["lua.integrations.portable-appimage"] = function(...) 
 local ____exports = {}
 local function getAppImageConfigData()
@@ -2974,6 +3036,9 @@ function ____exports.getPlugins()
     if CONFIGURATION.useNoice then
         result[#result + 1] = require("lua.plugins.noice").default
     end
+    if CONFIGURATION.useNoice then
+        result[#result + 1] = require("lua.plugins.copilot").default
+    end
     return result
 end
 return ____exports
@@ -3005,7 +3070,7 @@ local function TokyoNight()
     vim.fn.sign_define("DapLogPoint", {text = "", texthl = "DapLogPoint", linehl = "DapLogPoint", numhl = "DapLogPoint"})
     vim.fn.sign_define("DapStopped", {text = "", texthl = "DapStopped", linehl = "DapStopped", numhl = "DapStopped"})
     vim.o.fillchars = "eob: ,fold: ,foldopen:,foldsep: ,foldclose:"
-    vim.o.foldcolumn = "1"
+    vim.o.foldcolumn = "2"
 end
 ____exports.THEME_APPLIERS = {VSCode = VSCode, TokyoNight = TokyoNight}
 return ____exports
@@ -3019,6 +3084,8 @@ local Hyprland = ____hyprland.Hyprland
 local isDesktopHyprland = ____hyprland.isDesktopHyprland
 local ____neovide = require("lua.integrations.neovide")
 local getNeovideExtendedVimContext = ____neovide.getNeovideExtendedVimContext
+local ____ollama = require("lua.integrations.ollama")
+local setupOllamaCopilot = ____ollama.setupOllamaCopilot
 local ____portable_2Dappimage = require("lua.integrations.portable-appimage")
 local enablePortableAppImageLogic = ____portable_2Dappimage.enablePortableAppImageLogic
 local ____init = require("lua.plugins.init")
@@ -3055,6 +3122,7 @@ local function setupLazy()
     vim.opt.rtp:prepend(lazyPath)
 end
 setupNeovide()
+setupOllamaCopilot()
 setupLazy()
 local lazy = require("lazy")
 lazy.setup(getPlugins())
@@ -3339,6 +3407,9 @@ if CONFIGURATION.useNvimDapUI then
     applyKeyMapping({mode = "n", inputStroke = "<leader>dsi", outputStroke = ":DapStepInto<CR>", options = {desc = "Step into"}})
     applyKeyMapping({mode = "n", inputStroke = "<leader>dso", outputStroke = ":DapStepOver<CR>", options = {desc = "Step over"}})
     applyKeyMapping({mode = "n", inputStroke = "<leader>dsO", outputStroke = ":DapStepOut<CR>", options = {desc = "Step out"}})
+end
+if CONFIGURATION.useCopilot then
+    vim.keymap.set("i", "<C-J>", "copilot#Accept(\"<CR>\")", {expr = true, replace_keycodes = false})
 end
 return ____exports
  end,

@@ -19,6 +19,11 @@ export const CONFIGURATION = {
   useDiffView: true,
   useLazyGit: true,
   useNoice: true,
+  useCopilot: true,
+  ollama: {
+    enabled: false,
+    targetModel: 'codellama:code'
+  },
   dap: {
     nodeJS: true,
     cPlusPlus: true,

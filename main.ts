@@ -1,6 +1,7 @@
 import { LazyModuleInterface } from "./ambient/lazy";
 import { Hyprland, isDesktopHyprland } from "./lua/integrations/hyprland";
 import { getNeovideExtendedVimContext } from "./lua/integrations/neovide";
+import { setupOllamaCopilot } from "./lua/integrations/ollama";
 import { enablePortableAppImageLogic } from "./lua/integrations/portable-appimage";
 import { getPlugins } from "./lua/plugins/init";
 import { THEME_APPLIERS } from "./lua/theme";
@@ -33,6 +34,7 @@ function setupLazy(this: void) {
 }
 
 setupNeovide();
+setupOllamaCopilot();
 setupLazy();
 const lazy = require<LazyModuleInterface>("lazy");
 lazy.setup(

@@ -19,6 +19,11 @@ type VimLSPProtocolClientCapabilities = {
   }
 };
 
+type VimLoopSpawnHandle = {
+  close: (this: VimLoopSpawnHandle) => void,
+  kill: (this: VimLoopSpawnHandle, signum?: number) => void,
+};
+
 type NeovimBuffer = unknown;
 type NeovimWindow = unknown;
 
@@ -26,10 +31,20 @@ type VimAutocmdEvent = 'BufAdd' | 'BufDelete' | 'BufEnter' | 'BufFilePost' | 'Bu
 
 type VimAPI = {
   cmd: (this: void, params: string) => void,
-  notify: (this: void, value: any) => void,
+  notify: (this: void, value: string | [string, string], level?: VimAPI["log"]["levels"][keyof VimAPI["log"]["levels"]]) => void,
   print: (this: void, value: any) => void,
   schedule: (this: void, callback: (this: void) => void) => void,
   defer_fn: (this: void, callback: (this: void) => void, ms: number) => void,
+  v: {
+    shell_error: number
+  },
+  log: {
+    levels: {
+      INFO: Symbol,
+      WARN: Symbol,
+      ERROR: Symbol
+    }
+  },
   api: {
     nvim_set_hl: (this: void, arg1: number, arg2: string, params: VimHLColorParams) => void,
     nvim_create_user_command: (this: void, commandName: string, luaFunc: (this: void, args: { fargs: string[] }) => void, options: {
@@ -113,6 +128,7 @@ type VimAPI = {
     }>, unknownArg: boolean) => void
   },
   fn: {
+    executable: (this: void, exe: string) => boolean,
     getcwd: (this: void) => string,
     sign_define: (this: void, id: string, options: {
       text: string,
@@ -129,7 +145,19 @@ type VimAPI = {
     getpid: (this: void) => number
   },
   loop: {
-    fs_stat: (this: void, path: string) => boolean
+    fs_stat: (this: void, path: string) => boolean,
+    spawn: (this: void, exe: string, opts: {
+      stdio?: [stdin: number, stdout: number, stderr: number],
+      env?: Record<string, string>,
+      cwd?: string,
+      uid?: number,
+      gid?: number,
+      verbatim?: boolean,
+      args?: string[],
+      // If true, the child process will be detached from the parent process.
+      // This makes it possible for the child process to continue running after the parent exits.
+      detached?: boolean,
+    }, processExitCallback: (this: void, code: number, signal: number) => void) => VimLoopSpawnHandle
   },
   opt: {
     // Run-time path
