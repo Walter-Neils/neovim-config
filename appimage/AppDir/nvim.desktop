@@ -1,9 +1,0 @@
-[Desktop Entry]
-Name=winvim
-Comment=My horrible neovim configuration
-Exec=nvim
-Icon=nvim
-Terminal=true
-Type=Application
-Categories=Development;
-
