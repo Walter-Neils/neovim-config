@@ -35,6 +35,14 @@ function setupLazy(this: void) {
 
 setupNeovide();
 setupOllamaCopilot();
+
+if (!CONFIGURATION.useCopilot) {
+  // Once installed by Lazy, Copilot can't be prevented from loading without uninstalling it, so we've gotta do a little hack
+  // It'll still get loaded, but it won't be active for any filetypes, which I consider to be good enough.
+  (vim.g as unknown as { copilot_filetypes: Record<string, boolean> }).copilot_filetypes = { '*': false };
+}
+
+
 setupLazy();
 const lazy = require<LazyModuleInterface>("lazy");
 lazy.setup(

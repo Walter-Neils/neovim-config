@@ -461,3 +461,14 @@ if (CONFIGURATION.useActionsPreview) {
     }
   })
 }
+
+if (CONFIGURATION.useLazyGit) {
+  applyKeyMapping({
+    mode: 'n',
+    inputStroke: '<leader>lg',
+    outputStroke: '<cmd>LazyGit<CR>',
+    options: {
+      desc: "Show code actions"
+    }
+  });
+}

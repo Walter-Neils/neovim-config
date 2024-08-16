@@ -3127,6 +3127,9 @@ local function setupLazy()
 end
 setupNeovide()
 setupOllamaCopilot()
+if not CONFIGURATION.useCopilot then
+    vim.g.copilot_filetypes = {["*"] = false}
+end
 setupLazy()
 local lazy = require("lazy")
 lazy.setup(getPlugins())
@@ -3437,6 +3440,9 @@ if CONFIGURATION.useActionsPreview then
         end,
         options = {desc = "Show code actions"}
     })
+end
+if CONFIGURATION.useLazyGit then
+    applyKeyMapping({mode = "n", inputStroke = "<leader>lg", outputStroke = "<cmd>LazyGit<CR>", options = {desc = "Show code actions"}})
 end
 return ____exports
  end,
