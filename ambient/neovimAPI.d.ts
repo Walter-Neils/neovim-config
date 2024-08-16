@@ -29,6 +29,7 @@ type VimAPI = {
   notify: (this: void, value: any) => void,
   print: (this: void, value: any) => void,
   schedule: (this: void, callback: (this: void) => void) => void,
+  defer_fn: (this: void, callback: (this: void) => void, ms: number) => void,
   api: {
     nvim_set_hl: (this: void, arg1: number, arg2: string, params: VimHLColorParams) => void,
     nvim_create_user_command: (this: void, commandName: string, luaFunc: (this: void, args: { fargs: string[] }) => void, options: {

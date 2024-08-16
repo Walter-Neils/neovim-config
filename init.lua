@@ -2853,7 +2853,6 @@ end
 function ____exports.enablePortableAppImageLogic()
     local appImageEnvironment = getAppImageConfigData()
     if appImageEnvironment.appDir ~= nil then
-        vim.notify("AppImage environment detected. Integrating...")
         injectSTDPathOverride()
     end
 end
@@ -3038,7 +3037,6 @@ if CONFIGURATION.behaviour.shell.target == "tmux" then
             vim.o.shell = "tmux"
         end
     else
-        vim.print("Setup: terminal tmux would nest if applied. skipping...")
     end
 end
 return ____exports
@@ -3835,6 +3833,47 @@ local plugin = {
     end
 }
 ____exports.default = plugin
+return ____exports
+ end,
+["lua.shims.mainLoopCallbacks"] = function(...) 
+local ____exports = {}
+function ____exports.setTimeout(callback, ms)
+    local cancelFlag = false
+    local function cancel()
+        cancelFlag = true
+    end
+    local function wrapper()
+        if not cancelFlag then
+            callback()
+        end
+    end
+    vim.defer_fn(wrapper, ms)
+    return cancel
+end
+function ____exports.setImmediate(callback)
+    return vim.schedule(callback)
+end
+function ____exports.setInterval(callback, interval)
+    local cancelFlag = false
+    local wrapper
+    wrapper = function()
+        if not cancelFlag then
+            callback()
+            ____exports.setTimeout(wrapper, interval)
+        end
+    end
+    local function cancel()
+        cancelFlag = true
+    end
+    ____exports.setTimeout(wrapper, interval)
+    return cancel
+end
+function ____exports.clearTimeout(handle)
+    handle()
+end
+function ____exports.clearInterval(handle)
+    handle()
+end
 return ____exports
  end,
 }

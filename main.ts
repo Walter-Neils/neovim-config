@@ -70,6 +70,6 @@ if (CONFIGURATION.behaviour.shell.target === 'tmux') {
       vim.o.shell = 'tmux';
     }
   } else {
-    vim.print(`Setup: terminal tmux would nest if applied. skipping...`);
+    // Running `tmux` as the terminal provider would cause nesting, which is NOT desirable. 
   }
 }
