@@ -2830,6 +2830,49 @@ if CONFIGURATION.customCommands.resetInstall.enabled then
 end
 return ____exports
  end,
+["lua.integrations.hyprland"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local __TS__StringTrim = ____lualib.__TS__StringTrim
+local __TS__StringSplit = ____lualib.__TS__StringSplit
+local __TS__ArrayMap = ____lualib.__TS__ArrayMap
+local __TS__StringIncludes = ____lualib.__TS__StringIncludes
+local __TS__ArrayFilter = ____lualib.__TS__ArrayFilter
+local __TS__Number = ____lualib.__TS__Number
+local ____exports = {}
+function ____exports.isDesktopHyprland()
+    return os.getenv("HYPRLAND_INSTANCE_SIGNATURE") ~= nil
+end
+local function getRefreshRates()
+    local out = __TS__ArrayMap(
+        __TS__StringSplit(
+            vim.fn.system({"hyprctl", "monitors"}),
+            "\n"
+        ),
+        function(____, x) return __TS__StringTrim(x) end
+    )
+    local targets = __TS__ArrayFilter(
+        __TS__ArrayMap(
+            __TS__ArrayFilter(
+                out,
+                function(____, x) return not __TS__StringIncludes(x, ":") end
+            ),
+            function(____, x) return __TS__StringTrim(x) end
+        ),
+        function(____, x) return #x > 0 end
+    )
+    local function extractRefreshRate(line)
+        local resAndRefresh = unpack(__TS__StringSplit(line, " at "))
+        local resolution, refreshRate = unpack(__TS__StringSplit(resAndRefresh, "@"))
+        return __TS__Number(refreshRate)
+    end
+    return __TS__ArrayMap(
+        targets,
+        function(____, x) return extractRefreshRate(x) end
+    )
+end
+____exports.Hyprland = {getRefreshRates = getRefreshRates}
+return ____exports
+ end,
 ["lua.integrations.neovide"] = function(...) 
 local ____exports = {}
 function ____exports.isNeovideSession()
@@ -2971,6 +3014,9 @@ return ____exports
 local ____lualib = require("lualib_bundle")
 local __TS__StringIncludes = ____lualib.__TS__StringIncludes
 local ____exports = {}
+local ____hyprland = require("lua.integrations.hyprland")
+local Hyprland = ____hyprland.Hyprland
+local isDesktopHyprland = ____hyprland.isDesktopHyprland
 local ____neovide = require("lua.integrations.neovide")
 local getNeovideExtendedVimContext = ____neovide.getNeovideExtendedVimContext
 local ____portable_2Dappimage = require("lua.integrations.portable-appimage")
@@ -2987,6 +3033,10 @@ local function setupNeovide()
     if vim.g.neovide then
         vim.g.neovide_scale_factor = 0.75
         vim.g.neovide_detach_on_quit = "always_detach"
+        if isDesktopHyprland() then
+            local targetRefresh = math.max(unpack(Hyprland.getRefreshRates()))
+            vim.g.neovide_refresh_rate = targetRefresh
+        end
     end
 end
 local function setupLazy()

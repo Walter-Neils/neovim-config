@@ -1,4 +1,5 @@
 import { LazyModuleInterface } from "./ambient/lazy";
+import { Hyprland, isDesktopHyprland } from "./lua/integrations/hyprland";
 import { getNeovideExtendedVimContext } from "./lua/integrations/neovide";
 import { enablePortableAppImageLogic } from "./lua/integrations/portable-appimage";
 import { getPlugins } from "./lua/plugins/init";
@@ -13,6 +14,12 @@ function setupNeovide() {
     vim.g.neovide_scale_factor = 0.75;
     // Doesn't appear to be doing anything, but should leave remote nvim server instances intact when closing
     vim.g.neovide_detach_on_quit = 'always_detach';
+
+    if (isDesktopHyprland()) {
+      // Update Neovide's refresh rate to match the fastest monitor
+      const targetRefresh = Math.max(...Hyprland.getRefreshRates());
+      vim.g.neovide_refresh_rate = targetRefresh;
+    }
   }
 }
 

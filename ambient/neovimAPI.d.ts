@@ -120,7 +120,7 @@ type VimAPI = {
       linehl: string,
       numhl: string,
     }) => void
-    system: (this: void, args: string[]) => void,
+    system: (this: void, args: string[]) => string,
     stdpath: (this: void, target: string) => string,
     input: (this: void, prompt: string, initialValue?: string, formatHint?: 'file' | 'directory') => string,
     expand: (this: void, input: string) => string,
