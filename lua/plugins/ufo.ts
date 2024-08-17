@@ -1,4 +1,5 @@
 import { LazyPlugin } from "../../ambient/lazy";
+import { useExternalModule } from "../helpers/module/useModule";
 import { getLSPConfig } from "./lspconfig";
 
 const plugin: LazyPlugin = {
@@ -23,8 +24,7 @@ const plugin: LazyPlugin = {
         capabilities
       });
     }
-    let target = "ufo";
-    require<{ setup: (this: void, arg?: unknown) => void }>(target).setup({
+    useExternalModule<{ setup: (this: void, arg?: unknown) => void }>("ufo").setup({
       // TODO: Setup fold_virt_text_handler
     });
   }

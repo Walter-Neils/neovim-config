@@ -3,78 +3,81 @@ import { CONFIGURATION } from "../toggles";
 
 export function getPlugins(this: void): LazyPlugin[] {
   const result: LazyPlugin[] = [];
-  result.push(require<{ default: LazyPlugin }>('nvim-tree').default);
-  result.push(require<{ default: LazyPlugin }>('floatterm').default);
+  result.push(require('nvim-tree').default);
+  result.push(require('floatterm').default);
   if (CONFIGURATION.useTelescope) {
-    result.push(require<{ default: LazyPlugin }>('telescope').default);
+    result.push(require('telescope').default);
   }
-  result.push(require<{ default: LazyPlugin }>('treesitter').default);
-  result.push(require<{ default: LazyPlugin }>('lspconfig').default);
-  result.push(require<{ default: LazyPlugin }>('mason').default);
-  result.push(require<{ default: LazyPlugin }>('autopairs').default);
+  result.push(require('treesitter').default);
+  result.push(require('lspconfig').default);
+  result.push(require('mason').default);
+  result.push(require('autopairs').default);
   if (CONFIGURATION.useCMP) {
-    result.push(require<{ default: LazyPlugin }>('cmp').default);
+    result.push(require('cmp').default);
   }
   if (CONFIGURATION.useLSPLines) {
-    result.push(require<{ default: LazyPlugin }>('lsp_lines').default);
+    result.push(require('lsp_lines').default);
   }
   if (CONFIGURATION.useLSPUI) {
-    result.push(require<{ default: LazyPlugin }>('lspUI').default);
+    result.push(require('lspUI').default);
   }
   if (CONFIGURATION.useRustaceanvim) {
-    result.push(require<{ default: LazyPlugin }>('rustaceanvim').default);
+    result.push(require('rustaceanvim').default);
   }
-  result.push(require<{ default: LazyPlugin }>('tokyonight').default);
+  result.push(require('tokyonight').default);
   if (CONFIGURATION.useLSPSignature) {
-    result.push(require<{ default: LazyPlugin }>('lsp_signature').default);
+    result.push(require('lsp_signature').default);
   }
   if (CONFIGURATION.useIndentBlankline) {
-    result.push(require<{ default: LazyPlugin }>('indent-blankline').default);
+    result.push(require('indent-blankline').default);
   }
   if (CONFIGURATION.useTreeDevIcons) {
-    result.push(require<{ default: LazyPlugin }>('nvim-tree-devicons').default);
+    result.push(require('nvim-tree-devicons').default);
   }
   if (CONFIGURATION.useLualine) {
-    result.push(require<{ default: LazyPlugin }>('lualine').default);
+    result.push(require('lualine').default);
   }
   if (CONFIGURATION.useBarBar) {
-    result.push(require<{ default: LazyPlugin }>('barbar').default);
+    result.push(require('barbar').default);
   }
   if (CONFIGURATION.useUFO) {
-    result.push(require<{ default: LazyPlugin }>('ufo').default);
+    result.push(require('ufo').default);
   }
   if (CONFIGURATION.useComments) {
-    result.push(require<{ default: LazyPlugin }>('comment').default);
+    result.push(require('comment').default);
   }
   if (CONFIGURATION.useMarks) {
-    result.push(require<{ default: LazyPlugin }>('marks').default);
+    result.push(require('marks').default);
   }
   if (CONFIGURATION.useTrouble) {
-    result.push(require<{ default: LazyPlugin }>('trouble').default);
+    result.push(require('trouble').default);
   }
   if (CONFIGURATION.useOutline) {
-    result.push(require<{ default: LazyPlugin }>('outline').default);
+    result.push(require('outline').default);
   }
   if (CONFIGURATION.useGlance) {
-    result.push(require<{ default: LazyPlugin }>('glance').default);
+    result.push(require('glance').default);
   }
   if (CONFIGURATION.useNvimDapUI) {
-    result.push(require<{ default: LazyPlugin }>('nvim-dap-ui').default);
+    result.push(require('nvim-dap-ui').default);
   }
   if (CONFIGURATION.useDiffView) {
-    result.push(require<{ default: LazyPlugin }>('diffview').default);
+    result.push(require('diffview').default);
   }
   if (CONFIGURATION.useLazyGit) {
-    result.push(require<{ default: LazyPlugin }>('lazygit').default);
+    result.push(require('lazygit').default);
   }
   if (CONFIGURATION.useNoice) {
-    result.push(require<{ default: LazyPlugin }>('noice').default);
+    result.push(require('noice').default);
   }
   if (CONFIGURATION.useNoice) {
-    result.push(require<{ default: LazyPlugin }>('copilot').default);
+    result.push(require('copilot').default);
   }
   if (CONFIGURATION.useActionsPreview) {
-    result.push(require<{ default: LazyPlugin }>('actions-preview').default);
+    result.push(require('actions-preview').default);
+  }
+  if (CONFIGURATION.useFireNvim) {
+    result.push(require('firenvim').default);
   }
   return result;
 }

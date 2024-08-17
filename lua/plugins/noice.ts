@@ -1,11 +1,11 @@
 import { LazyPlugin } from "../../ambient/lazy";
+import { useExternalModule } from "../helpers/module/useModule";
 
 function getNoice(this: void) {
   type NoiceType = {
     setup: (this: void, arg: unknown) => void
   };
-  let target = "noice";
-  const noice = require<NoiceType>(target);
+  const noice = useExternalModule<NoiceType>("noice");
   return noice;
 }
 
@@ -17,8 +17,13 @@ const plugin: LazyPlugin = {
     "rcarriga/nvim-notify"
   ],
   config: function(this: void) {
-    const noice = getNoice();
-    noice.setup({})
+    if ((vim.g as unknown as { started_by_firenvim: boolean }).started_by_firenvim) {
+      // Don't run fancy GUI in firenvim
+    }
+    else {
+      const noice = getNoice();
+      noice.setup({})
+    }
   }
 };
 export { plugin as default };

@@ -1,4 +1,5 @@
 import { LazyModuleInterface } from "./ambient/lazy";
+import { useExternalModule } from "./lua/helpers/module/useModule";
 import { Hyprland, isDesktopHyprland } from "./lua/integrations/hyprland";
 import { getNeovideExtendedVimContext } from "./lua/integrations/neovide";
 import { setupOllamaCopilot } from "./lua/integrations/ollama";
@@ -44,7 +45,7 @@ if (!CONFIGURATION.useCopilot) {
 
 
 setupLazy();
-const lazy = require<LazyModuleInterface>("lazy");
+const lazy = useExternalModule<LazyModuleInterface>("lazy");
 lazy.setup(
   getPlugins()
 );
@@ -64,8 +65,8 @@ vim.opt.ruler = false;
 
 // vim.o.whichwrap.append("<>[]hl");
 
-require<unknown>("mappings");
-require<unknown>("commands");
+require("mappings");
+require("commands");
 
 if (CONFIGURATION.behaviour.shell.target === 'tmux') {
   const term = os.getenv("TERM") ?? '__term_value_not_supplied';

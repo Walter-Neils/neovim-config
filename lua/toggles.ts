@@ -21,6 +21,7 @@ export const CONFIGURATION = {
   useNoice: true,
   useCopilot: false,
   useActionsPreview: true,
+  useFireNvim: true,
   ollama: {
     enabled: false,
     targetModel: 'codellama:code'

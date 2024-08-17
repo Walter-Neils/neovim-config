@@ -6,6 +6,7 @@ type LazyKey = {
 export type LazyPlugin = {
   1?: string,
   lazy?: boolean,
+  build?: string
   branch?: string,
   import?: string,
   cmd?: string[],

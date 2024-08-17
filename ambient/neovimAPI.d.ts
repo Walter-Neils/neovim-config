@@ -181,6 +181,3 @@ type VimAPI = {
 }
 
 declare var vim: VimAPI;
-declare var tonumber: (this: void, input: any) => number;
-declare var require: <ModuleType>(this: void, target: string) => ModuleType;
-declare var string: { format: (this: void, pattern: string, ...args: string[]) => string };

@@ -1,4 +1,5 @@
 import { LazyPlugin } from "../../ambient/lazy";
+import { useExternalModule } from "../helpers/module/useModule";
 import { CONFIGURATION } from "../toggles";
 
 type DapUIModule = {
@@ -62,13 +63,13 @@ type DapModule = {
 
 export function getDap(this: void) {
   let target = 'dap';
-  const dapui = require<DapModule>(target);
+  const dapui = useExternalModule<DapModule>(target);
   return dapui;
 }
 
 export function getDapUI(this: void) {
   let target = 'dapui';
-  const dapui = require<DapUIModule>(target);
+  const dapui = useExternalModule<DapUIModule>(target);
   return dapui;
 }
 

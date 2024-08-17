@@ -1,4 +1,5 @@
 import { LazyPlugin } from "../../ambient/lazy";
+import { useExternalModule } from "../helpers/module/useModule";
 type CMPSource = { name: string };
 type CMPMappingActionType = (this: void, fallback: (this: void) => void) => void;
 type CMPMappingModeInsertion = {
@@ -53,8 +54,7 @@ const KIND_ICONS = {
 }
 
 export function getCMP() {
-  let target = "cmp";
-  const cmp = require<CMPModule>(target);
+  const cmp = useExternalModule<CMPModule>("cmp");
   return cmp;
 }
 

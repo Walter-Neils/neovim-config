@@ -26,4 +26,3 @@ if (CONFIGURATION.customCommands.resetInstall.enabled) {
     }
   }, {});
 }
-

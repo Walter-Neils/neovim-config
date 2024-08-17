@@ -2778,6 +2778,7 @@ ____exports.CONFIGURATION = {
     useNoice = true,
     useCopilot = false,
     useActionsPreview = true,
+    useFireNvim = true,
     ollama = {enabled = false, targetModel = "codellama:code"},
     dap = {nodeJS = true, cPlusPlus = true, rust = true},
     mason = {defaultInstalled = {"typescript-language-server", "clangd", "lua-language-server", "yaml-language-server"}},
@@ -2830,6 +2831,13 @@ if CONFIGURATION.customCommands.resetInstall.enabled then
         end,
         {}
     )
+end
+return ____exports
+ end,
+["lua.helpers.module.useModule"] = function(...) 
+local ____exports = {}
+function ____exports.useExternalModule(importTarget)
+    return require(importTarget)
 end
 return ____exports
  end,
@@ -2929,7 +2937,7 @@ function ____exports.setupOllamaCopilot()
         vim.notify("$USER var is unset", vim.log.levels.ERROR)
         return
     end
-    local ollamaPath = ("/home/" .. tostring(username)) .. "/go/bin/ollama-copilot"
+    local ollamaPath = ("/home/" .. username) .. "/go/bin/ollama-copilot"
     if not vim.fn.executable(ollamaPath) then
         vim.notify("Unable to locate ollama-copilot binary")
         return
@@ -3043,6 +3051,9 @@ function ____exports.getPlugins()
     if CONFIGURATION.useActionsPreview then
         result[#result + 1] = require("lua.plugins.actions-preview").default
     end
+    if CONFIGURATION.useFireNvim then
+        result[#result + 1] = require("lua.plugins.firenvim").default
+    end
     return result
 end
 return ____exports
@@ -3083,6 +3094,8 @@ return ____exports
 local ____lualib = require("lualib_bundle")
 local __TS__StringIncludes = ____lualib.__TS__StringIncludes
 local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
 local ____hyprland = require("lua.integrations.hyprland")
 local Hyprland = ____hyprland.Hyprland
 local isDesktopHyprland = ____hyprland.isDesktopHyprland
@@ -3131,7 +3144,7 @@ if not CONFIGURATION.useCopilot then
     vim.g.copilot_filetypes = {["*"] = false}
 end
 setupLazy()
-local lazy = require("lazy")
+local lazy = useExternalModule("lazy")
 lazy.setup(getPlugins())
 THEME_APPLIERS.TokyoNight()
 vim.opt.clipboard = "unnamedplus"
@@ -3179,9 +3192,11 @@ return ____exports
  end,
 ["lua.plugins.actions-preview"] = function(...) 
 local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
 function ____exports.getActionsPreview()
     local target = "actions-preview"
-    local module = require(target)
+    local module = useExternalModule(target)
     return module
 end
 local plugin = {[1] = "aznhe21/actions-preview.nvim", event = "VeryLazy"}
@@ -3198,16 +3213,18 @@ local TypeError = ____lualib.TypeError
 local URIError = ____lualib.URIError
 local __TS__New = ____lualib.__TS__New
 local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
 local ____toggles = require("lua.toggles")
 local CONFIGURATION = ____toggles.CONFIGURATION
 function ____exports.getDap()
     local target = "dap"
-    local dapui = require(target)
+    local dapui = useExternalModule(target)
     return dapui
 end
 function ____exports.getDapUI()
     local target = "dapui"
-    local dapui = require(target)
+    local dapui = useExternalModule(target)
     return dapui
 end
 local function bindDapUIEvents()
@@ -3536,6 +3553,8 @@ return ____exports
  end,
 ["lua.plugins.cmp"] = function(...) 
 local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
 local KIND_ICONS = {
     Text = "",
     Method = "󰆧",
@@ -3564,8 +3583,7 @@ local KIND_ICONS = {
     TypeParameter = "󰅲"
 }
 function ____exports.getCMP()
-    local target = "cmp"
-    local cmp = require(target)
+    local cmp = useExternalModule("cmp")
     return cmp
 end
 local plugin = {
@@ -3625,6 +3643,12 @@ local plugin = {[1] = "sindrets/diffview.nvim", cmd = {"DiffviewOpen"}}
 ____exports.default = plugin
 return ____exports
  end,
+["lua.plugins.firenvim"] = function(...) 
+local ____exports = {}
+local plugin = {[1] = "glacambre/firenvim", build = ":call firenvim#install(0)"}
+____exports.default = plugin
+return ____exports
+ end,
 ["lua.plugins.floatterm"] = function(...) 
 local ____exports = {}
 function ____exports.extendNeovimAPIWithFloattermConfig()
@@ -3638,11 +3662,12 @@ return ____exports
  end,
 ["lua.plugins.glance"] = function(...) 
 local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
 local plugin = {
     [1] = "dnlhc/glance.nvim",
     config = function()
-        local target = "glance"
-        require(target).setup({})
+        useExternalModule("glance").setup({})
     end
 }
 ____exports.default = plugin
@@ -3650,12 +3675,13 @@ return ____exports
  end,
 ["lua.plugins.indent-blankline"] = function(...) 
 local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
 local plugin = {
     [1] = "lukas-reineke/indent-blankline.nvim",
     version = "^3",
     config = function()
-        local target = "ibl"
-        local ibl = require(target)
+        local ibl = useExternalModule("ibl")
         ibl.setup()
     end
 }
@@ -3676,13 +3702,14 @@ return ____exports
  end,
 ["lua.plugins.lspUI"] = function(...) 
 local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
 local plugin = {
     [1] = "jinzhongjia/LspUI.nvim",
     branch = "main",
     event = "VeryLazy",
     config = function()
-        local target = "LspUI"
-        local lspUI = require(target)
+        local lspUI = useExternalModule("LspUI")
         lspUI.setup({inlay_hint = {enable = false}})
     end
 }
@@ -3691,12 +3718,13 @@ return ____exports
  end,
 ["lua.plugins.lsp_lines"] = function(...) 
 local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
 local plugin = {
     [1] = "ErichDonGubler/lsp_lines.nvim",
     event = "VimEnter",
     config = function()
-        local target = "lsp_lines"
-        require(target).setup()
+        useExternalModule("lsp_lines").setup()
     end
 }
 ____exports.default = plugin
@@ -3704,13 +3732,14 @@ return ____exports
  end,
 ["lua.plugins.lsp_signature"] = function(...) 
 local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
 local plugin = {
     [1] = "ray-x/lsp_signature.nvim",
     event = "VeryLazy",
     opts = {},
     config = function(_, opts)
-        local target = "lsp_signature"
-        local lsp_signature = require(target)
+        local lsp_signature = useExternalModule("lsp_signature")
         lsp_signature.setup(opts)
     end
 }
@@ -3720,6 +3749,8 @@ return ____exports
 ["lua.plugins.lspconfig"] = function(...) 
 local ____exports = {}
 local on_attach, configureLSP
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
 local ____toggles = require("lua.toggles")
 local CONFIGURATION = ____toggles.CONFIGURATION
 function on_attach(client, bufnr)
@@ -3752,16 +3783,14 @@ function on_attach(client, bufnr)
     end
 end
 function ____exports.getLSPConfig()
-    local target = "lspconfig"
-    local lspconfig = require(target)
+    local lspconfig = useExternalModule("lspconfig")
     return lspconfig
 end
 function configureLSP()
     local lspconfig = ____exports.getLSPConfig()
     local capabilities
     if CONFIGURATION.useCMP then
-        local target = "cmp_nvim_lsp"
-        capabilities = require(target).default_capabilities()
+        capabilities = useExternalModule("cmp_nvim_lsp").default_capabilities()
     end
     for ____, target in ipairs(CONFIGURATION.lspconfig.configuredLSPServers) do
         lspconfig[target].setup({capabilities = capabilities, on_attach = on_attach})
@@ -3792,12 +3821,13 @@ return ____exports
  end,
 ["lua.plugins.lualine"] = function(...) 
 local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
 local plugin = {
     [1] = "nvim-lualine/lualine.nvim",
     dependencies = {"nvim-tree/nvim-web-devicons"},
     config = function()
-        local target = "lualine"
-        local module = require(target)
+        local module = useExternalModule("lualine")
         module.setup({options = {theme = "material"}})
     end
 }
@@ -3806,11 +3836,13 @@ return ____exports
  end,
 ["lua.plugins.marks"] = function(...) 
 local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
 local plugin = {
     [1] = "chentoast/marks.nvim",
     config = function()
         local target = "marks"
-        require(target).setup()
+        useExternalModule(target).setup()
     end
 }
 ____exports.default = plugin
@@ -3818,11 +3850,12 @@ return ____exports
  end,
 ["lua.plugins.mason"] = function(...) 
 local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
 local plugin = {
     [1] = "williamboman/mason.nvim",
     config = function()
-        local target = "mason"
-        require(target).setup()
+        useExternalModule("mason").setup()
     end
 }
 ____exports.default = plugin
@@ -3830,9 +3863,10 @@ return ____exports
  end,
 ["lua.plugins.noice"] = function(...) 
 local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
 local function getNoice()
-    local target = "noice"
-    local noice = require(target)
+    local noice = useExternalModule("noice")
     return noice
 end
 local plugin = {
@@ -3840,8 +3874,11 @@ local plugin = {
     event = "VeryLazy",
     dependencies = {"MunifTanjim/nui.nvim", "rcarriga/nvim-notify"},
     config = function()
-        local noice = getNoice()
-        noice.setup({})
+        if vim.g.started_by_firenvim then
+        else
+            local noice = getNoice()
+            noice.setup({})
+        end
     end
 }
 ____exports.default = plugin
@@ -3849,11 +3886,12 @@ return ____exports
  end,
 ["lua.plugins.nvim-tree-devicons"] = function(...) 
 local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
 local plugin = {
     [1] = "nvim-tree/nvim-web-devicons",
     config = function()
-        local target = "nvim-web-devicons"
-        local module = require(target)
+        local module = useExternalModule("nvim-web-devicons")
         module.setup()
     end
 }
@@ -3968,6 +4006,8 @@ return ____exports
  end,
 ["lua.plugins.ufo"] = function(...) 
 local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
 local ____lspconfig = require("lua.plugins.lspconfig")
 local getLSPConfig = ____lspconfig.getLSPConfig
 local plugin = {
@@ -3986,8 +4026,7 @@ local plugin = {
         for ____, server in ipairs(language_server_ids) do
             lspconfig[server].setup({capabilities = capabilities})
         end
-        local target = "ufo"
-        require(target).setup({})
+        useExternalModule("ufo").setup({})
     end
 }
 ____exports.default = plugin

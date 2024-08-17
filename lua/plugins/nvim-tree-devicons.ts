@@ -1,10 +1,10 @@
 import { LazyPlugin } from "../../ambient/lazy";
+import { useExternalModule } from "../helpers/module/useModule";
 
 const plugin: LazyPlugin = {
   1: 'nvim-tree/nvim-web-devicons',
   config: function(this: void) {
-    let target = "nvim-web-devicons";
-    const module = require<{ setup: (this: void) => void }>(target);
+    const module = useExternalModule<{ setup: (this: void) => void }>("nvim-web-devicons");
     module.setup();
   }
 };

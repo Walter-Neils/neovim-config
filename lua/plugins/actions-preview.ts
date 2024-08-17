@@ -1,4 +1,5 @@
 import { LazyPlugin } from "../../ambient/lazy";
+import { useExternalModule } from "../helpers/module/useModule";
 
 type ActionsPreviewAPI = {
   code_actions: (this: void) => void
@@ -6,7 +7,7 @@ type ActionsPreviewAPI = {
 
 export function getActionsPreview() {
   let target = "actions-preview";
-  const module = require<ActionsPreviewAPI>(target);
+  const module = useExternalModule<ActionsPreviewAPI>(target);
   return module;
 }
 

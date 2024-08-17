@@ -1,4 +1,5 @@
 import { LazyPlugin } from "../../ambient/lazy";
+import { useExternalModule } from "../helpers/module/useModule";
 import { CONFIGURATION } from "../toggles";
 
 const plugin: LazyPlugin = {
@@ -68,8 +69,7 @@ if (CONFIGURATION.lspconfig.useInlayHints) {
 
 
 export function getLSPConfig(this: void) {
-  let target = "lspconfig";
-  const lspconfig = require<LSPConfig>(target);
+  const lspconfig = useExternalModule<LSPConfig>("lspconfig");
   return lspconfig;
 }
 
@@ -77,8 +77,7 @@ function configureLSP(this: void) {
   const lspconfig = getLSPConfig();
   let capabilities: unknown | undefined;
   if (CONFIGURATION.useCMP) {
-    let target = "cmp_nvim_lsp";
-    capabilities = require<{ default_capabilities: (this: void) => unknown }>(target).default_capabilities();
+    capabilities = useExternalModule<{ default_capabilities: (this: void) => unknown }>("cmp_nvim_lsp").default_capabilities();
   }
   for (const target of CONFIGURATION.lspconfig.configuredLSPServers) {
     lspconfig[target].setup({
