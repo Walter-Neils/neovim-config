@@ -179,6 +179,8 @@ type VimAPI = {
       eob: string
     },
     number: boolean,
+    relativenumber: boolean,
+    signcolumn: 'number' | string,
     numberwidth: number,
     ruler: boolean
   }
