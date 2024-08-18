@@ -35,6 +35,10 @@ type VimAPI = {
   print: (this: void, value: any) => void,
   schedule: (this: void, callback: (this: void) => void) => void,
   defer_fn: (this: void, callback: (this: void) => void, ms: number) => void,
+  json: {
+    encode: (this: void, value: unknown) => string,
+    decode: (this: void, value: string) => unknown
+  },
   v: {
     shell_error: number
   },

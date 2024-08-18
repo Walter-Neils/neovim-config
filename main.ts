@@ -1,5 +1,6 @@
 import { LazyModuleInterface } from "./ambient/lazy";
 import { useExternalModule } from "./lua/helpers/module/useModule";
+import { usePersistentValue } from "./lua/helpers/persistent-data";
 import { Hyprland, isDesktopHyprland } from "./lua/integrations/hyprland";
 import { getNeovideExtendedVimContext } from "./lua/integrations/neovide";
 import { setupOllamaCopilot } from "./lua/integrations/ollama";
@@ -9,6 +10,9 @@ import { THEME_APPLIERS } from "./lua/theme";
 import { CONFIGURATION } from "./lua/toggles";
 
 enablePortableAppImageLogic();
+
+const [getValue, setValue] = usePersistentValue('test', 'testing');
+setValue("test");
 
 function setupNeovide() {
   const vim = getNeovideExtendedVimContext();

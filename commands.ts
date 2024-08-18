@@ -1,3 +1,4 @@
+import { parseArgs } from "./lua/helpers/user_command/argparser";
 import { CONFIGURATION } from "./lua/toggles";
 
 if (CONFIGURATION.customCommands.installDefaultLSPServers.enabled) {
@@ -26,3 +27,10 @@ if (CONFIGURATION.customCommands.resetInstall.enabled) {
     }
   }, {});
 }
+
+vim.api.nvim_create_user_command('TestFunction', function(this: void, _args) {
+  const args = parseArgs<{
+    name: string
+  }>(_args.fargs);
+  vim.notify(`Hello, ${args.name}`);
+}, { nargs: '*' });

@@ -2754,6 +2754,70 @@ return {
   __TS__UsingAsync = __TS__UsingAsync
 }
  end,
+["lua.helpers.user_command.argparser"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local __TS__StringStartsWith = ____lualib.__TS__StringStartsWith
+local Error = ____lualib.Error
+local RangeError = ____lualib.RangeError
+local ReferenceError = ____lualib.ReferenceError
+local SyntaxError = ____lualib.SyntaxError
+local TypeError = ____lualib.TypeError
+local URIError = ____lualib.URIError
+local __TS__New = ____lualib.__TS__New
+local __TS__StringAccess = ____lualib.__TS__StringAccess
+local __TS__StringEndsWith = ____lualib.__TS__StringEndsWith
+local __TS__StringSlice = ____lualib.__TS__StringSlice
+local ____exports = {}
+function ____exports.parseArgs(args)
+    local result = {}
+    local primedKey = nil
+    do
+        local i = 0
+        while i < #args do
+            local segment = args[i + 1]
+            if __TS__StringStartsWith(segment, "--") then
+                if primedKey ~= nil then
+                    result[primedKey] = true
+                end
+                primedKey = string.sub(segment, 3)
+            else
+                if primedKey == nil then
+                    error(
+                        __TS__New(Error, "Expected a key, got a value"),
+                        0
+                    )
+                elseif __TS__StringStartsWith(segment, "\"") or __TS__StringStartsWith(segment, "'") then
+                    local delim = __TS__StringAccess(segment, 0)
+                    local valueResult = string.sub(segment, 2)
+                    local ____end = i
+                    while ____end < #args and not __TS__StringEndsWith(args[____end + 1], delim) do
+                        ____end = ____end + 1
+                        valueResult = valueResult .. " " .. args[____end + 1]
+                    end
+                    if ____end >= #args or not __TS__StringEndsWith(args[____end + 1], delim) then
+                        error(
+                            __TS__New(Error, "Unterminated string: " .. args[____end + 1]),
+                            0
+                        )
+                    end
+                    valueResult = __TS__StringSlice(valueResult, 0, #valueResult - 1)
+                    result[primedKey] = valueResult
+                    i = ____end
+                else
+                    result[primedKey] = segment
+                end
+                primedKey = nil
+            end
+            i = i + 1
+        end
+    end
+    if primedKey ~= nil then
+        result[primedKey] = true
+    end
+    return result
+end
+return ____exports
+ end,
 ["lua.toggles"] = function(...) 
 local ____exports = {}
 ____exports.CONFIGURATION = {
@@ -2791,6 +2855,8 @@ return ____exports
  end,
 ["commands"] = function(...) 
 local ____exports = {}
+local ____argparser = require("lua.helpers.user_command.argparser")
+local parseArgs = ____argparser.parseArgs
 local ____toggles = require("lua.toggles")
 local CONFIGURATION = ____toggles.CONFIGURATION
 if CONFIGURATION.customCommands.installDefaultLSPServers.enabled then
@@ -2832,12 +2898,107 @@ if CONFIGURATION.customCommands.resetInstall.enabled then
         {}
     )
 end
+vim.api.nvim_create_user_command(
+    "TestFunction",
+    function(_args)
+        local args = parseArgs(_args.fargs)
+        vim.notify("Hello, " .. args.name)
+    end,
+    {nargs = "*"}
+)
 return ____exports
  end,
 ["lua.helpers.module.useModule"] = function(...) 
 local ____exports = {}
 function ____exports.useExternalModule(importTarget)
     return require(importTarget)
+end
+return ____exports
+ end,
+["lua.shims.fs.index"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local Error = ____lualib.Error
+local RangeError = ____lualib.RangeError
+local ReferenceError = ____lualib.ReferenceError
+local SyntaxError = ____lualib.SyntaxError
+local TypeError = ____lualib.TypeError
+local URIError = ____lualib.URIError
+local __TS__New = ____lualib.__TS__New
+local ____exports = {}
+local function readFileSync(target)
+    local file = io.open(target, "r")
+    if file == nil then
+        error(
+            __TS__New(Error, "Failed to open file for read"),
+            0
+        )
+    end
+    local content = file:read("*a")
+    file:close()
+    if content == nil then
+        error(
+            __TS__New(Error, "Failed to read file"),
+            0
+        )
+    end
+    return content
+end
+local function writeFileSync(path, content)
+    local file = io.open(path, "w")
+    if file == nil then
+        error(
+            __TS__New(Error, "Failed to open file for writing"),
+            0
+        )
+    end
+    file:write(content)
+    file:close()
+end
+local function existsSync(target)
+    local file = io.open(target, "r")
+    if file ~= nil then
+        file:close()
+        return true
+    else
+        return false
+    end
+end
+____exports.fs = {readFileSync = readFileSync, existsSync = existsSync, writeFileSync = writeFileSync}
+return ____exports
+ end,
+["lua.helpers.persistent-data.index"] = function(...) 
+local ____exports = {}
+local ____fs = require("lua.shims.fs.index")
+local fs = ____fs.fs
+local persistValueInstances = {}
+local dataPath = vim.fn.stdpath("data") .. "/winvim"
+vim.fn.system({"mkdir", "-p", dataPath})
+function ____exports.usePersistentValue(key, defaultValue)
+    do
+        local target = persistValueInstances[key]
+        if target ~= nil then
+            return target
+        end
+    end
+    local filePath = (dataPath .. "/") .. key
+    local currentValue = defaultValue
+    if fs.existsSync(filePath) then
+        currentValue = vim.json.decode(fs.readFileSync(filePath))
+    end
+    local function get()
+        return currentValue
+    end
+    local function set(newValue)
+        currentValue = newValue
+        fs.writeFileSync(
+            filePath,
+            vim.json.encode(newValue)
+        )
+        return currentValue
+    end
+    local result = {get, set}
+    persistValueInstances[key] = result
+    return result
 end
 return ____exports
  end,
@@ -3096,6 +3257,8 @@ local __TS__StringIncludes = ____lualib.__TS__StringIncludes
 local ____exports = {}
 local ____useModule = require("lua.helpers.module.useModule")
 local useExternalModule = ____useModule.useExternalModule
+local ____persistent_2Ddata = require("lua.helpers.persistent-data.index")
+local usePersistentValue = ____persistent_2Ddata.usePersistentValue
 local ____hyprland = require("lua.integrations.hyprland")
 local Hyprland = ____hyprland.Hyprland
 local isDesktopHyprland = ____hyprland.isDesktopHyprland
@@ -3112,6 +3275,8 @@ local THEME_APPLIERS = ____theme.THEME_APPLIERS
 local ____toggles = require("lua.toggles")
 local CONFIGURATION = ____toggles.CONFIGURATION
 enablePortableAppImageLogic()
+local getValue, setValue = unpack(usePersistentValue("test", "testing"))
+setValue("test")
 local function setupNeovide()
     local vim = getNeovideExtendedVimContext()
     if vim.g.neovide then
@@ -3460,75 +3625,6 @@ if CONFIGURATION.useActionsPreview then
 end
 if CONFIGURATION.useLazyGit then
     applyKeyMapping({mode = "n", inputStroke = "<leader>lg", outputStroke = "<cmd>LazyGit<CR>", options = {desc = "Show code actions"}})
-end
-return ____exports
- end,
-["lua.helpers.user_command.argparser"] = function(...) 
-local ____lualib = require("lualib_bundle")
-local __TS__StringStartsWith = ____lualib.__TS__StringStartsWith
-local __TS__StringReplaceAll = ____lualib.__TS__StringReplaceAll
-local Error = ____lualib.Error
-local RangeError = ____lualib.RangeError
-local ReferenceError = ____lualib.ReferenceError
-local SyntaxError = ____lualib.SyntaxError
-local TypeError = ____lualib.TypeError
-local URIError = ____lualib.URIError
-local __TS__New = ____lualib.__TS__New
-local __TS__StringAccess = ____lualib.__TS__StringAccess
-local __TS__StringEndsWith = ____lualib.__TS__StringEndsWith
-local ____exports = {}
-function ____exports.parseArgs(args)
-    local result = {}
-    local primedKey = nil
-    do
-        local i = 0
-        while i < #args do
-            local segment = args[i + 1]
-            if __TS__StringStartsWith(segment, "--") then
-                if primedKey ~= nil then
-                    result[primedKey] = true
-                end
-                primedKey = __TS__StringReplaceAll(segment, "--", "")
-            else
-                if primedKey == nil then
-                    error(
-                        __TS__New(Error, "Expected a key, got a value"),
-                        0
-                    )
-                elseif __TS__StringStartsWith(segment, "\"") then
-                    local delim = __TS__StringAccess(segment, 0)
-                    local ____end = i
-                    do
-                        local v = i
-                        while not __TS__StringEndsWith(args[v + 1], delim) and v < #args do
-                            ____end = v
-                            v = v + 1
-                        end
-                    end
-                    if not __TS__StringEndsWith(args[____end + 1], delim) then
-                        error(
-                            __TS__New(Error, "Unterminated string: " .. args[____end + 1]),
-                            0
-                        )
-                    end
-                    local valueResult = ""
-                    do
-                        local v = i
-                        while v <= ____end do
-                            valueResult = valueResult .. args[v + 1]
-                            v = v + 1
-                        end
-                    end
-                    result[primedKey] = valueResult
-                else
-                    result[primedKey] = segment
-                end
-                primedKey = nil
-            end
-            i = i + 1
-        end
-    end
-    return result
 end
 return ____exports
  end,
