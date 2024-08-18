@@ -22,7 +22,7 @@ export function usePersistentValue<TValue>(key: string, defaultValue: TValue) {
   let currentValue: TValue = defaultValue;
 
   if (fs.existsSync(filePath)) {
-    currentValue = vim.json.decode(fs.readFileSync(filePath)) as TValue;
+    currentValue = JSON.parse(fs.readFileSync(filePath)) as TValue;
   }
 
   const get = () => {
@@ -31,7 +31,7 @@ export function usePersistentValue<TValue>(key: string, defaultValue: TValue) {
 
   const set = (newValue: TValue) => {
     currentValue = newValue;
-    fs.writeFileSync(filePath, vim.json.encode(newValue));
+    fs.writeFileSync(filePath, JSON.stringify(newValue));
     return currentValue;
   };
 

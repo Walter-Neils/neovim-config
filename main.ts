@@ -6,8 +6,11 @@ import { getNeovideExtendedVimContext } from "./lua/integrations/neovide";
 import { setupOllamaCopilot } from "./lua/integrations/ollama";
 import { enablePortableAppImageLogic } from "./lua/integrations/portable-appimage";
 import { getPlugins } from "./lua/plugins/init";
+import { insertJSONShims } from "./lua/shims/json";
 import { THEME_APPLIERS } from "./lua/theme";
 import { CONFIGURATION } from "./lua/toggles";
+
+insertJSONShims();
 
 enablePortableAppImageLogic();
 

@@ -2983,7 +2983,7 @@ function ____exports.usePersistentValue(key, defaultValue)
     local filePath = (dataPath .. "/") .. key
     local currentValue = defaultValue
     if fs.existsSync(filePath) then
-        currentValue = vim.json.decode(fs.readFileSync(filePath))
+        currentValue = JSON:parse(fs.readFileSync(filePath))
     end
     local function get()
         return currentValue
@@ -2992,7 +2992,7 @@ function ____exports.usePersistentValue(key, defaultValue)
         currentValue = newValue
         fs.writeFileSync(
             filePath,
-            vim.json.encode(newValue)
+            JSON:stringify(newValue)
         )
         return currentValue
     end
@@ -3219,6 +3219,27 @@ function ____exports.getPlugins()
 end
 return ____exports
  end,
+["lua.shims.json.index"] = function(...) 
+local ____exports = {}
+function ____exports.insertJSONShims()
+    if _G.JSON == nil then
+        _G.JSON = {}
+    end
+    _G.JSON.stringify = function(____, value, replacer)
+        if replacer ~= nil then
+            vim.notify("JSON.stringify replacer param does not have shim implementation", vim.log.levels.ERROR)
+        end
+        return vim.json.encode(value)
+    end
+    _G.JSON.parse = function(____, text, reviver)
+        if reviver ~= nil then
+            vim.notify("JSON.parse reviver param does not have shim implementation", vim.log.levels.ERROR)
+        end
+        vim.json.decode(text)
+    end
+end
+return ____exports
+ end,
 ["lua.theme"] = function(...) 
 local ____exports = {}
 local function VSCode()
@@ -3270,10 +3291,13 @@ local ____portable_2Dappimage = require("lua.integrations.portable-appimage")
 local enablePortableAppImageLogic = ____portable_2Dappimage.enablePortableAppImageLogic
 local ____init = require("lua.plugins.init")
 local getPlugins = ____init.getPlugins
+local ____json = require("lua.shims.json.index")
+local insertJSONShims = ____json.insertJSONShims
 local ____theme = require("lua.theme")
 local THEME_APPLIERS = ____theme.THEME_APPLIERS
 local ____toggles = require("lua.toggles")
 local CONFIGURATION = ____toggles.CONFIGURATION
+insertJSONShims()
 enablePortableAppImageLogic()
 local getValue, setValue = unpack(usePersistentValue("test", "testing"))
 setValue("test")
