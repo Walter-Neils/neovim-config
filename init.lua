@@ -3633,6 +3633,22 @@ if CONFIGURATION.useNvimDapUI then
     applyKeyMapping({mode = "n", inputStroke = "<leader>dsi", outputStroke = ":DapStepInto<CR>", options = {desc = "Step into"}})
     applyKeyMapping({mode = "n", inputStroke = "<leader>dso", outputStroke = ":DapStepOver<CR>", options = {desc = "Step over"}})
     applyKeyMapping({mode = "n", inputStroke = "<leader>dsO", outputStroke = ":DapStepOut<CR>", options = {desc = "Step out"}})
+    applyKeyMapping({
+        mode = "v",
+        inputStroke = "e",
+        action = function()
+            getDapUI().eval()
+        end,
+        options = {desc = "Evaluate selected statement"}
+    })
+    applyKeyMapping({
+        mode = "n",
+        inputStroke = "e",
+        action = function()
+            getDapUI().eval()
+        end,
+        options = {desc = "Evaluate selected statement"}
+    })
 end
 if CONFIGURATION.useCopilot then
     vim.keymap.set("i", "<C-J>", "copilot#Accept(\"<CR>\")", {expr = true, replace_keycodes = false})

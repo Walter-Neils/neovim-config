@@ -6,7 +6,8 @@ type DapUIModule = {
   setup: (this: void, arg: unknown) => void,
   open: (this: void) => void,
   close: (this: void) => void,
-  toggle: (this: void) => void
+  toggle: (this: void) => void,
+  eval: (this: void, expression?: unknown) => void
 };
 
 type DapAdapterStructure = {

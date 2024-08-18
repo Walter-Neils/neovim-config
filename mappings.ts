@@ -439,6 +439,27 @@ if (CONFIGURATION.useNvimDapUI) {
       desc: 'Step out'
     }
   });
+
+  applyKeyMapping({
+    mode: 'v',
+    inputStroke: 'e',
+    action: () => {
+      getDapUI().eval();
+    },
+    options: {
+      desc: "Evaluate selected statement"
+    }
+  });
+  applyKeyMapping({
+    mode: 'n',
+    inputStroke: 'e',
+    action: () => {
+      getDapUI().eval();
+    },
+    options: {
+      desc: "Evaluate selected statement"
+    }
+  });
 }
 
 if (CONFIGURATION.useCopilot) {
