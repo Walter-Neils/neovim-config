@@ -1,5 +1,5 @@
 export function insertJSONShims(this: void) {
-  if(globalThis.JSON === undefined) {
+  if (globalThis.JSON === undefined) {
     globalThis.JSON = {} as any;
   }
   // TODO: Replacer and reviver support
