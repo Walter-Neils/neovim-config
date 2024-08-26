@@ -32,6 +32,16 @@ type GlobalConfiguration = {
     [key: string]: {
       enabled: boolean
     } | undefined
+  },
+  shell: {
+    target: 'tmux',
+    isolationScope: 'global' | 'neovim-shared' | 'isolated',
+  },
+  integrations: {
+    [key: string]: {
+      enabled: boolean
+      config?: unknown
+    } | undefined
   }
 }
 
@@ -127,6 +137,15 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
   targetEnvironments: {
     typescript: {
       enabled: true
+    }
+  },
+  shell: {
+    target: 'tmux',
+    isolationScope: 'isolated'
+  },
+  integrations: {
+    ollama: {
+      enabled: true,
     }
   }
 };

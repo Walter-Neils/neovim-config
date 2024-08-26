@@ -91,21 +91,49 @@ export function getLSPConfig(this: void) {
   return lspconfig;
 }
 
+function getPluginConfig() {
+  const config = getGlobalConfiguration();
+  type Config = {
+
+  };
+  return config.packages["lspconfig"] as typeof config.packages["lspconfig"] & {
+    config: Config
+  };
+}
+
+function environmentKeyToConfig(env: string) {
+  const configs = [{
+    key: 'typescript',
+    lspKey: 'tsserver'
+  }];
+
+  return configs.find(x => x.key === env);
+}
+
 function configureLSP(this: void) {
   const lspconfig = getLSPConfig();
+  const config = getPluginConfig();
   let capabilities: unknown | undefined;
-  if (CONFIGURATION.useCMP) {
+  if (getGlobalConfiguration().packages["cmp"]?.enabled) {
     capabilities = useExternalModule<{ default_capabilities: (this: void) => unknown }>("cmp_nvim_lsp").default_capabilities();
   }
-  for (const target of CONFIGURATION.lspconfig.configuredLSPServers) {
-    lspconfig[target].setup({
-      capabilities,
-      on_attach
-    });
+  const targetEnvironments = getGlobalConfiguration().targetEnvironments;
+  for (const targetEnvKey in targetEnvironments) {
+    const target = targetEnvironments[targetEnvKey];
+    const config = environmentKeyToConfig(targetEnvKey);
+    if (config === undefined) {
+      vim.notify(`Failed to locate configuration for environment ${targetEnvKey}`, vim.log.levels.WARN);
+    }
+    else {
+      lspconfig[config.lspKey].setup({
+        capabilities,
+        on_attach
+      });
+    }
   }
   vim.diagnostic.config({
     update_in_insert: true,
-    virtual_text: !CONFIGURATION.useLSPLines
+    virtual_text: !(getGlobalConfiguration().packages["lspLines"]?.enabled ?? false)
   });
 }
 export { plugin as default };

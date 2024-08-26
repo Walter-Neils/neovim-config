@@ -1,6 +1,7 @@
 import { LazyModuleInterface } from "./ambient/lazy";
 import { activateWelcomePage } from "./components/welcome-page";
 import { setupCustomLogic } from "./lua/custom";
+import { getGlobalConfiguration } from "./lua/helpers/configuration";
 import { useExternalModule } from "./lua/helpers/module/useModule";
 import { usePersistentValue } from "./lua/helpers/persistent-data";
 import { Hyprland, isDesktopHyprland } from "./lua/integrations/hyprland";
@@ -13,7 +14,6 @@ import { insertConsoleShims } from "./lua/shims/console";
 import { insertJSONShims } from "./lua/shims/json";
 import { insertMainLoopCallbackShims, setImmediate, setInterval, setTimeout } from "./lua/shims/mainLoopCallbacks";
 import { THEME_APPLIERS } from "./lua/theme";
-import { CONFIGURATION } from "./lua/toggles";
 
 insertJSONShims();
 insertConsoleShims();
@@ -50,7 +50,7 @@ function setupLazy(this: void) {
 setupNeovide();
 setupOllamaCopilot();
 
-if (!CONFIGURATION.useCopilot) {
+if (!(getGlobalConfiguration().packages["copilot"]?.enabled ?? false)) {
   // Once installed by Lazy, Copilot can't be prevented from loading without uninstalling it, so we've gotta do a little hack
   // It'll still get loaded, but it won't be active for any filetypes, which I consider to be good enough.
   (vim.g as unknown as { copilot_filetypes: Record<string, boolean> }).copilot_filetypes = { '*': false };
@@ -82,28 +82,30 @@ activateWelcomePage();
 // vim.o.whichwrap.append("<>[]hl");
 
 require("mappings");
-require("commands");
 
-if (CONFIGURATION.behaviour.shell.target === 'tmux') {
-  const term = os.getenv("TERM") ?? '__term_value_not_supplied';
-  if (!term.includes('tmux')) {
-    vim.g.terminal_emulator = 'tmux';
-    const isolationScope = CONFIGURATION.behaviour.shell.tmux.isolation.scope as 'global' | 'neovim-shared' | 'per-instance';
-    if (isolationScope === 'global') {
-      vim.o.shell = 'tmux';
+{
+  const shellConfig = getGlobalConfiguration().shell;
+  if (shellConfig.target === 'tmux') {
+    const term = os.getenv("TERM") ?? '__term_value_not_supplied';
+    if (!term.includes('tmux')) {
+      vim.g.terminal_emulator = 'tmux';
+      const isolationScope = shellConfig.isolationScope;
+      if (isolationScope === 'global') {
+        vim.o.shell = 'tmux';
+      }
+      else if (isolationScope === 'neovim-shared') {
+        vim.o.shell = 'tmux -L neovim';
+      }
+      else if (isolationScope === 'isolated') {
+        vim.o.shell = `tmux -L neovim-${vim.fn.getpid()}`
+      }
+      else {
+        vim.notify(`Invalid option '${isolationScope}' for tmux isolation scope.`);
+        vim.o.shell = 'tmux';
+      }
+    } else {
+      // Running `tmux` as the terminal provider would cause nesting, which is NOT desirable. 
     }
-    else if (isolationScope === 'neovim-shared') {
-      vim.o.shell = 'tmux -L neovim';
-    }
-    else if (isolationScope === 'per-instance') {
-      vim.o.shell = `tmux -L neovim-${vim.fn.getpid()}`
-    }
-    else {
-      vim.notify(`Invalid option '${isolationScope}' for tmux isolation scope.`);
-      vim.o.shell = 'tmux';
-    }
-  } else {
-    // Running `tmux` as the terminal provider would cause nesting, which is NOT desirable. 
   }
 }
 

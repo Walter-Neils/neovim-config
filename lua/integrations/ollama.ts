@@ -1,11 +1,15 @@
+import { getGlobalConfiguration } from "../helpers/configuration";
 import { getCopilotExtendedVimAPI } from "../plugins/copilot";
-import { CONFIGURATION } from "../toggles";
 
 export function setupOllamaCopilot(this: void) {
   const vim = getCopilotExtendedVimAPI();
-  if (!CONFIGURATION.ollama.enabled || !CONFIGURATION.useCopilot) {
+  if (!getGlobalConfiguration().integrations["ollama"]?.enabled) {
     return;
   }
+  if (!getGlobalConfiguration().packages["copilot"]?.enabled) {
+    return;
+  }
+
   vim.g.copilot_proxy = "http://localhost:11435";
   vim.g.copilot_proxy_strict_ssl = false;
   if (vim.fn.executable("go")) {

@@ -1,7 +1,7 @@
+import { getGlobalConfiguration } from "./lua/helpers/configuration";
 import { applyKeyMapping } from "./lua/helpers/keymap";
 import { getActionsPreview } from "./lua/plugins/actions-preview";
 import { getDapUI } from "./lua/plugins/nvim-dap-ui";
-import { CONFIGURATION } from "./lua/toggles";
 
 vim.g.mapleader = " "; // Use space key as leader
 
@@ -53,8 +53,17 @@ for (const direction in MOVEMENT_DIRECTION_KEYS) {
   });
 }
 
-// Buffer switching
-if (!CONFIGURATION.useBarBar) {
+const config = getGlobalConfiguration();
+
+if (!(config.packages["barBar"]?.enabled)) {
+  applyKeyMapping({
+    mode: 'n',
+    inputStroke: '<leader>x',
+    outputStroke: '<cmd>:bd<CR>:bnext<CR>',
+    options: {
+      desc: 'Close current buffer'
+    }
+  });
   applyKeyMapping({
     mode: 'n',
     inputStroke: `<A-h>`,
@@ -82,6 +91,14 @@ if (!CONFIGURATION.useBarBar) {
   });
 }
 else {
+  applyKeyMapping({
+    mode: 'n',
+    inputStroke: '<leader>x',
+    outputStroke: '<cmd>BufferClose<CR>',
+    options: {
+      desc: 'Close current buffer'
+    }
+  });
   applyKeyMapping({
     mode: 'n',
     inputStroke: '<Tab>',
@@ -138,28 +155,6 @@ applyKeyMapping({
     desc: "general clear highlights"
   }
 });
-
-// Close buffer 
-if (CONFIGURATION.useBarBar) {
-  applyKeyMapping({
-    mode: 'n',
-    inputStroke: '<leader>x',
-    outputStroke: '<cmd>BufferClose<CR>',
-    options: {
-      desc: 'Close current buffer'
-    }
-  });
-}
-else {
-  applyKeyMapping({
-    mode: 'n',
-    inputStroke: '<leader>x',
-    outputStroke: '<cmd>:bd<CR>:bnext<CR>',
-    options: {
-      desc: 'Close current buffer'
-    }
-  });
-}
 
 // nvim-tree
 applyKeyMapping({
@@ -229,7 +224,7 @@ applyKeyMapping({
 });
 
 // Telescope
-if (CONFIGURATION.useTelescope) {
+if (config.packages["telescope"]?.enabled) {
   applyKeyMapping({
     mode: 'n',
     inputStroke: '<leader>ff',
@@ -309,7 +304,7 @@ applyKeyMapping({
 })
 
 // Comments
-if (CONFIGURATION.useComments) {
+if (config.packages["comments"]?.enabled) {
   applyKeyMapping({
     mode: 'n',
     inputStroke: '<leader>/',
@@ -332,7 +327,7 @@ if (CONFIGURATION.useComments) {
   });
 }
 
-if (CONFIGURATION.useTrouble) {
+if (config.packages["trouble"]?.enabled) {
   applyKeyMapping({
     mode: 'n',
     inputStroke: '<leader>tdd',
@@ -343,10 +338,10 @@ if (CONFIGURATION.useTrouble) {
   });
 }
 
-if (CONFIGURATION.lspconfig.rename.enabled) {
+if (true) {
   applyKeyMapping({
     mode: 'n',
-    inputStroke: CONFIGURATION.lspconfig.rename.bind,
+    inputStroke: "<F2>",
     action: function(this: void) {
       vim.lsp.buf.rename();
     },
@@ -356,7 +351,7 @@ if (CONFIGURATION.lspconfig.rename.enabled) {
   });
 }
 
-if (CONFIGURATION.useGlance) {
+if (config.packages["glance"]?.enabled) {
   applyKeyMapping({
     mode: 'n',
     inputStroke: '<leader>glr',
@@ -391,7 +386,7 @@ if (CONFIGURATION.useGlance) {
   });
 }
 
-if (CONFIGURATION.useNvimDapUI) {
+if (config.packages["nvimDapUI"]) {
   applyKeyMapping({
     mode: 'n',
     inputStroke: '<leader>db',
@@ -465,7 +460,7 @@ if (CONFIGURATION.useNvimDapUI) {
   });
 }
 
-if (CONFIGURATION.useCopilot) {
+if (config.packages["copilot"]?.enabled) {
   // TODO: Replace with custom remapper
   vim.keymap.set('i', '<C-J>', 'copilot#Accept("\<CR>")', {
     expr: true,
@@ -473,7 +468,7 @@ if (CONFIGURATION.useCopilot) {
   });
 }
 
-if (CONFIGURATION.useActionsPreview) {
+if (config.packages["actionsPreview"]?.enabled) {
   applyKeyMapping({
     mode: 'n',
     inputStroke: '.',
@@ -486,7 +481,7 @@ if (CONFIGURATION.useActionsPreview) {
   })
 }
 
-if (CONFIGURATION.useLazyGit) {
+if (config.packages["lazyGit"]?.enabled) {
   applyKeyMapping({
     mode: 'n',
     inputStroke: '<leader>lg',

@@ -2754,127 +2754,6 @@ return {
   __TS__UsingAsync = __TS__UsingAsync
 }
  end,
-["lua.helpers.user_command.argparser"] = function(...) 
-local ____lualib = require("lualib_bundle")
-local __TS__StringStartsWith = ____lualib.__TS__StringStartsWith
-local Error = ____lualib.Error
-local RangeError = ____lualib.RangeError
-local ReferenceError = ____lualib.ReferenceError
-local SyntaxError = ____lualib.SyntaxError
-local TypeError = ____lualib.TypeError
-local URIError = ____lualib.URIError
-local __TS__New = ____lualib.__TS__New
-local __TS__StringAccess = ____lualib.__TS__StringAccess
-local __TS__StringEndsWith = ____lualib.__TS__StringEndsWith
-local __TS__StringSlice = ____lualib.__TS__StringSlice
-local ____exports = {}
-function ____exports.parseArgs(args)
-    local result = {}
-    local primedKey = nil
-    do
-        local i = 0
-        while i < #args do
-            local segment = args[i + 1]
-            if __TS__StringStartsWith(segment, "--") then
-                if primedKey ~= nil then
-                    result[primedKey] = true
-                end
-                primedKey = string.sub(segment, 3)
-            else
-                if primedKey == nil then
-                    error(
-                        __TS__New(Error, "Expected a key, got a value"),
-                        0
-                    )
-                elseif __TS__StringStartsWith(segment, "\"") or __TS__StringStartsWith(segment, "'") then
-                    local delim = __TS__StringAccess(segment, 0)
-                    local valueResult = string.sub(segment, 2)
-                    local ____end = i
-                    while ____end < #args and not __TS__StringEndsWith(args[____end + 1], delim) do
-                        ____end = ____end + 1
-                        valueResult = valueResult .. " " .. args[____end + 1]
-                    end
-                    if ____end >= #args or not __TS__StringEndsWith(args[____end + 1], delim) then
-                        error(
-                            __TS__New(Error, "Unterminated string: " .. args[____end + 1]),
-                            0
-                        )
-                    end
-                    valueResult = __TS__StringSlice(valueResult, 0, #valueResult - 1)
-                    result[primedKey] = valueResult
-                    i = ____end
-                else
-                    result[primedKey] = segment
-                end
-                primedKey = nil
-            end
-            i = i + 1
-        end
-    end
-    if primedKey ~= nil then
-        result[primedKey] = true
-    end
-    return result
-end
-return ____exports
- end,
-["commands"] = function(...) 
-local ____lualib = require("lualib_bundle")
-local __TS__Iterator = ____lualib.__TS__Iterator
-local ____exports = {}
-local ____argparser = require("lua.helpers.user_command.argparser")
-local parseArgs = ____argparser.parseArgs
-local ____toggles = require("lua.toggles")
-local CONFIGURATION = ____toggles.CONFIGURATION
-if CONFIGURATION.customCommands.installDefaultLSPServers.enabled then
-    vim.api.nvim_create_user_command(
-        "InstallDefaultLSPServers",
-        function()
-            for ____, server in __TS__Iterator(CONFIGURATION.mason.defaultInstalled) do
-                vim.cmd("MasonInstall " .. tostring(server))
-            end
-        end,
-        {nargs = 0}
-    )
-end
-if CONFIGURATION.customCommands.fixRustAnalyzer.enabled then
-    vim.api.nvim_create_user_command(
-        "FixRustAnalyzer",
-        function()
-            for ____, component in ipairs({"rust-analyzer", "rustfmt"}) do
-                vim.notify("Installing component " .. component)
-                vim.fn.system({"rustup", "component", "add", component})
-            end
-        end,
-        {nargs = 0}
-    )
-end
-if CONFIGURATION.customCommands.resetInstall.enabled then
-    vim.api.nvim_create_user_command(
-        "ResetCurrentInstall",
-        function()
-            if vim.fn.input("To reset this install, type 'reset': ") == "reset" then
-                vim.fn.system({
-                    "rm",
-                    "-rf",
-                    vim.fn.stdpath("data")
-                })
-                vim.cmd("norm :qa!")
-            end
-        end,
-        {}
-    )
-end
-vim.api.nvim_create_user_command(
-    "TestFunction",
-    function(_args)
-        local args = parseArgs(_args.fargs)
-        vim.notify("Hello, " .. args.name)
-    end,
-    {nargs = "*"}
-)
-return ____exports
- end,
 ["lua.helpers.text.center"] = function(...) 
 local ____exports = {}
 function ____exports.centerText(input, width, spacer)
@@ -3166,6 +3045,66 @@ function ____exports.usePersistentValue(key, defaultValue)
 end
 return ____exports
  end,
+["lua.helpers.configuration.index"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local __TS__ObjectKeys = ____lualib.__TS__ObjectKeys
+local ____exports = {}
+local saveConfiguration, configuration, getGlobalConfig, setGlobalConfig
+local ____persistent_2Ddata = require("lua.helpers.persistent-data.index")
+local usePersistentValue = ____persistent_2Ddata.usePersistentValue
+function saveConfiguration()
+    setGlobalConfig(configuration)
+end
+function ____exports.saveGlobalConfiguration()
+    saveConfiguration()
+end
+configuration = nil
+getGlobalConfig, setGlobalConfig = unpack(usePersistentValue("configuration.json", {}))
+local function reloadConfiguration()
+    local config = getGlobalConfig()
+    if #__TS__ObjectKeys(config) < 1 then
+        configuration = ____exports.CONFIGURATION_DEFAULTS
+        ____exports.saveGlobalConfiguration()
+        configuration = getGlobalConfig()
+    else
+        configuration = config
+    end
+end
+____exports.CONFIGURATION_DEFAULTS = {packages = {
+    lspLines = {enabled = false},
+    cmp = {enabled = true},
+    telescope = {enabled = true},
+    lspUI = {enabled = false},
+    rustaceanvim = {enabled = true},
+    lspSignature = {enabled = true},
+    indentBlankline = {enabled = true},
+    treeDevIcons = {enabled = true},
+    luaLine = {enabled = true},
+    barBar = {enabled = true},
+    comments = {enabled = true},
+    marks = {enabled = true},
+    trouble = {enabled = true},
+    outline = {enabled = true},
+    glance = {enabled = true},
+    nvimDapUI = {enabled = true, config = {lldb = {port = 1828}}},
+    diffView = {enabled = true},
+    lazyGit = {enabled = true},
+    noice = {enabled = false},
+    nvimNotify = {enabled = true},
+    copilot = {enabled = false},
+    actionsPreview = {enabled = true},
+    fireNvim = {enabled = true},
+    ufo = {enabled = true},
+    lspconfig = {enabled = true, config = {inlayHints = {enabled = true, displayMode = "only-in-normal-mode"}}}
+}, targetEnvironments = {typescript = {enabled = true}}, shell = {target = "tmux", isolationScope = "isolated"}, integrations = {ollama = {enabled = true}}}
+function ____exports.getGlobalConfiguration()
+    if configuration == nil then
+        reloadConfiguration()
+    end
+    return configuration
+end
+return ____exports
+ end,
 ["lua.integrations.hyprland"] = function(...) 
 local ____lualib = require("lualib_bundle")
 local __TS__StringTrim = ____lualib.__TS__StringTrim
@@ -3237,13 +3176,18 @@ return ____exports
  end,
 ["lua.integrations.ollama"] = function(...) 
 local ____exports = {}
+local ____configuration = require("lua.helpers.configuration.index")
+local getGlobalConfiguration = ____configuration.getGlobalConfiguration
 local ____copilot = require("lua.plugins.copilot")
 local getCopilotExtendedVimAPI = ____copilot.getCopilotExtendedVimAPI
-local ____toggles = require("lua.toggles")
-local CONFIGURATION = ____toggles.CONFIGURATION
 function ____exports.setupOllamaCopilot()
     local vim = getCopilotExtendedVimAPI()
-    if not CONFIGURATION.ollama.enabled or not CONFIGURATION.useCopilot then
+    local ____opt_0 = getGlobalConfiguration().integrations.ollama
+    if not (____opt_0 and ____opt_0.enabled) then
+        return
+    end
+    local ____opt_2 = getGlobalConfiguration().packages.copilot
+    if not (____opt_2 and ____opt_2.enabled) then
         return
     end
     vim.g.copilot_proxy = "http://localhost:11435"
@@ -3297,66 +3241,6 @@ function ____exports.enablePortableAppImageLogic()
 end
 return ____exports
  end,
-["lua.helpers.configuration.index"] = function(...) 
-local ____lualib = require("lualib_bundle")
-local __TS__ObjectKeys = ____lualib.__TS__ObjectKeys
-local ____exports = {}
-local saveConfiguration, configuration, getGlobalConfig, setGlobalConfig
-local ____persistent_2Ddata = require("lua.helpers.persistent-data.index")
-local usePersistentValue = ____persistent_2Ddata.usePersistentValue
-function saveConfiguration()
-    setGlobalConfig(configuration)
-end
-function ____exports.saveGlobalConfiguration()
-    saveConfiguration()
-end
-configuration = nil
-getGlobalConfig, setGlobalConfig = unpack(usePersistentValue("configuration.json", {}))
-local function reloadConfiguration()
-    local config = getGlobalConfig()
-    if #__TS__ObjectKeys(config) < 1 then
-        configuration = ____exports.CONFIGURATION_DEFAULTS
-        ____exports.saveGlobalConfiguration()
-        configuration = getGlobalConfig()
-    else
-        configuration = config
-    end
-end
-____exports.CONFIGURATION_DEFAULTS = {packages = {
-    lspLines = {enabled = false},
-    cmp = {enabled = true},
-    telescope = {enabled = true},
-    lspUI = {enabled = false},
-    rustaceanvim = {enabled = true},
-    lspSignature = {enabled = true},
-    indentBlankline = {enabled = true},
-    treeDevIcons = {enabled = true},
-    luaLine = {enabled = true},
-    barBar = {enabled = true},
-    comments = {enabled = true},
-    marks = {enabled = true},
-    trouble = {enabled = true},
-    outline = {enabled = true},
-    glance = {enabled = true},
-    nvimDapUI = {enabled = true, config = {lldb = {port = 1828}}},
-    diffView = {enabled = true},
-    lazyGit = {enabled = true},
-    noice = {enabled = false},
-    nvimNotify = {enabled = true},
-    copilot = {enabled = false},
-    actionsPreview = {enabled = true},
-    fireNvim = {enabled = true},
-    ufo = {enabled = true},
-    lspconfig = {enabled = true, config = {inlayHints = {enabled = true, displayMode = "only-in-normal-mode"}}}
-}, targetEnvironments = {typescript = {enabled = true}}}
-function ____exports.getGlobalConfiguration()
-    if configuration == nil then
-        reloadConfiguration()
-    end
-    return configuration
-end
-return ____exports
- end,
 ["lua.plugins.init"] = function(...) 
 local ____exports = {}
 local ____configuration = require("lua.helpers.configuration.index")
@@ -3371,76 +3255,100 @@ function ____exports.getPlugins()
     result[#result + 1] = require("lua.plugins.mason").default
     result[#result + 1] = require("lua.plugins.autopairs").default
     result[#result + 1] = require("lua.plugins.tokyonight").default
-    if globalConfig.packages.telescope.enabled then
+    local ____opt_0 = globalConfig.packages.telescope
+    if ____opt_0 and ____opt_0.enabled then
         result[#result + 1] = require("lua.plugins.telescope").default
     end
-    if globalConfig.packages.cmp.enabled then
+    local ____opt_2 = globalConfig.packages.cmp
+    if ____opt_2 and ____opt_2.enabled then
         result[#result + 1] = require("lua.plugins.cmp").default
     end
-    if globalConfig.packages.lspLines.enabled then
+    local ____opt_4 = globalConfig.packages.lspLines
+    if ____opt_4 and ____opt_4.enabled then
         result[#result + 1] = require("lua.plugins.lsp_lines").default
     end
-    if globalConfig.packages.lspUI.enabled then
+    local ____opt_6 = globalConfig.packages.lspUI
+    if ____opt_6 and ____opt_6.enabled then
         result[#result + 1] = require("lua.plugins.lspUI").default
     end
-    if globalConfig.packages.rustaceanvim.enabled then
+    local ____opt_8 = globalConfig.packages.rustaceanvim
+    if ____opt_8 and ____opt_8.enabled then
         result[#result + 1] = require("lua.plugins.rustaceanvim").default
     end
-    if globalConfig.packages.lspSignature.enabled then
+    local ____opt_10 = globalConfig.packages.lspSignature
+    if ____opt_10 and ____opt_10.enabled then
         result[#result + 1] = require("lua.plugins.lsp_signature").default
     end
-    if globalConfig.packages.indentBlankline.enabled then
+    local ____opt_12 = globalConfig.packages.indentBlankline
+    if ____opt_12 and ____opt_12.enabled then
         result[#result + 1] = require("lua.plugins.indent-blankline").default
     end
-    if globalConfig.packages.treeDevIcons.enabled then
+    local ____opt_14 = globalConfig.packages.treeDevIcons
+    if ____opt_14 and ____opt_14.enabled then
         result[#result + 1] = require("lua.plugins.nvim-tree-devicons").default
     end
-    if globalConfig.packages.luaLine.enabled then
+    local ____opt_16 = globalConfig.packages.luaLine
+    if ____opt_16 and ____opt_16.enabled then
         result[#result + 1] = require("lua.plugins.lualine").default
     end
-    if globalConfig.packages.barBar.enabled then
+    local ____opt_18 = globalConfig.packages.barBar
+    if ____opt_18 and ____opt_18.enabled then
         result[#result + 1] = require("lua.plugins.barbar").default
     end
-    if globalConfig.packages.ufo.enabled then
+    local ____opt_20 = globalConfig.packages.ufo
+    if ____opt_20 and ____opt_20.enabled then
         result[#result + 1] = require("lua.plugins.ufo").default
     end
-    if globalConfig.packages.comments.enabled then
+    local ____opt_22 = globalConfig.packages.comments
+    if ____opt_22 and ____opt_22.enabled then
         result[#result + 1] = require("lua.plugins.comment").default
     end
-    if globalConfig.packages.marks.enabled then
+    local ____opt_24 = globalConfig.packages.marks
+    if ____opt_24 and ____opt_24.enabled then
         result[#result + 1] = require("lua.plugins.marks").default
     end
-    if globalConfig.packages.trouble.enabled then
+    local ____opt_26 = globalConfig.packages.trouble
+    if ____opt_26 and ____opt_26.enabled then
         result[#result + 1] = require("lua.plugins.trouble").default
     end
-    if globalConfig.packages.outline.enabled then
+    local ____opt_28 = globalConfig.packages.outline
+    if ____opt_28 and ____opt_28.enabled then
         result[#result + 1] = require("lua.plugins.outline").default
     end
-    if globalConfig.packages.glance.enabled then
+    local ____opt_30 = globalConfig.packages.glance
+    if ____opt_30 and ____opt_30.enabled then
         result[#result + 1] = require("lua.plugins.glance").default
     end
-    if globalConfig.packages.nvimDapUI.enabled then
+    local ____opt_32 = globalConfig.packages.nvimDapUI
+    if ____opt_32 and ____opt_32.enabled then
         result[#result + 1] = require("lua.plugins.nvim-dap-ui").default
     end
-    if globalConfig.packages.diffView.enabled then
+    local ____opt_34 = globalConfig.packages.diffView
+    if ____opt_34 and ____opt_34.enabled then
         result[#result + 1] = require("lua.plugins.diffview").default
     end
-    if globalConfig.packages.lazyGit.enabled then
+    local ____opt_36 = globalConfig.packages.lazyGit
+    if ____opt_36 and ____opt_36.enabled then
         result[#result + 1] = require("lua.plugins.lazygit").default
     end
-    if globalConfig.packages.noice.enabled then
+    local ____opt_38 = globalConfig.packages.noice
+    if ____opt_38 and ____opt_38.enabled then
         result[#result + 1] = require("lua.plugins.noice").default
     end
-    if globalConfig.packages.copilot.enabled then
+    local ____opt_40 = globalConfig.packages.copilot
+    if ____opt_40 and ____opt_40.enabled then
         result[#result + 1] = require("lua.plugins.copilot").default
     end
-    if globalConfig.packages.actionsPreview.enabled then
+    local ____opt_42 = globalConfig.packages.actionsPreview
+    if ____opt_42 and ____opt_42.enabled then
         result[#result + 1] = require("lua.plugins.actions-preview").default
     end
-    if globalConfig.packages.fireNvim.enabled then
+    local ____opt_44 = globalConfig.packages.fireNvim
+    if ____opt_44 and ____opt_44.enabled then
         result[#result + 1] = require("lua.plugins.firenvim").default
     end
-    if globalConfig.packages.nvimNotify.enabled then
+    local ____opt_46 = globalConfig.packages.nvimNotify
+    if ____opt_46 and ____opt_46.enabled then
         result[#result + 1] = require("lua.plugins.nvim-notify").default
     end
     result[#result + 1] = require("lua.plugins.nui").default
@@ -3527,6 +3435,8 @@ local ____welcome_2Dpage = require("components.welcome-page.index")
 local activateWelcomePage = ____welcome_2Dpage.activateWelcomePage
 local ____custom = require("lua.custom.index")
 local setupCustomLogic = ____custom.setupCustomLogic
+local ____configuration = require("lua.helpers.configuration.index")
+local getGlobalConfiguration = ____configuration.getGlobalConfiguration
 local ____useModule = require("lua.helpers.module.useModule")
 local useExternalModule = ____useModule.useExternalModule
 local ____hyprland = require("lua.integrations.hyprland")
@@ -3549,8 +3459,6 @@ local insertMainLoopCallbackShims = ____mainLoopCallbacks.insertMainLoopCallback
 local setImmediate = ____mainLoopCallbacks.setImmediate
 local ____theme = require("lua.theme")
 local THEME_APPLIERS = ____theme.THEME_APPLIERS
-local ____toggles = require("lua.toggles")
-local CONFIGURATION = ____toggles.CONFIGURATION
 insertJSONShims()
 insertConsoleShims()
 insertMainLoopCallbackShims()
@@ -3583,7 +3491,12 @@ local function setupLazy()
 end
 setupNeovide()
 setupOllamaCopilot()
-if not CONFIGURATION.useCopilot then
+local ____opt_0 = getGlobalConfiguration().packages.copilot
+local ____temp_2 = ____opt_0 and ____opt_0.enabled
+if ____temp_2 == nil then
+    ____temp_2 = false
+end
+if not ____temp_2 then
     vim.g.copilot_filetypes = {["*"] = false}
 end
 setupLazy()
@@ -3603,23 +3516,25 @@ vim.opt.numberwidth = 2
 vim.opt.ruler = false
 activateWelcomePage()
 require("mappings")
-require("commands")
-if CONFIGURATION.behaviour.shell.target == "tmux" then
-    local term = os.getenv("TERM") or "__term_value_not_supplied"
-    if not __TS__StringIncludes(term, "tmux") then
-        vim.g.terminal_emulator = "tmux"
-        local isolationScope = CONFIGURATION.behaviour.shell.tmux.isolation.scope
-        if isolationScope == "global" then
-            vim.o.shell = "tmux"
-        elseif isolationScope == "neovim-shared" then
-            vim.o.shell = "tmux -L neovim"
-        elseif isolationScope == "per-instance" then
-            vim.o.shell = "tmux -L neovim-" .. tostring(vim.fn.getpid())
+do
+    local shellConfig = getGlobalConfiguration().shell
+    if shellConfig.target == "tmux" then
+        local term = os.getenv("TERM") or "__term_value_not_supplied"
+        if not __TS__StringIncludes(term, "tmux") then
+            vim.g.terminal_emulator = "tmux"
+            local isolationScope = shellConfig.isolationScope
+            if isolationScope == "global" then
+                vim.o.shell = "tmux"
+            elseif isolationScope == "neovim-shared" then
+                vim.o.shell = "tmux -L neovim"
+            elseif isolationScope == "isolated" then
+                vim.o.shell = "tmux -L neovim-" .. tostring(vim.fn.getpid())
+            else
+                vim.notify(("Invalid option '" .. tostring(isolationScope)) .. "' for tmux isolation scope.")
+                vim.o.shell = "tmux"
+            end
         else
-            vim.notify(("Invalid option '" .. tostring(isolationScope)) .. "' for tmux isolation scope.")
-            vim.o.shell = "tmux"
         end
-    else
     end
 end
 setImmediate(setupCustomLogic)
@@ -3799,14 +3714,14 @@ return ____exports
  end,
 ["mappings"] = function(...) 
 local ____exports = {}
+local ____configuration = require("lua.helpers.configuration.index")
+local getGlobalConfiguration = ____configuration.getGlobalConfiguration
 local ____keymap = require("lua.helpers.keymap.index")
 local applyKeyMapping = ____keymap.applyKeyMapping
 local ____actions_2Dpreview = require("lua.plugins.actions-preview")
 local getActionsPreview = ____actions_2Dpreview.getActionsPreview
 local ____nvim_2Ddap_2Dui = require("lua.plugins.nvim-dap-ui")
 local getDapUI = ____nvim_2Ddap_2Dui.getDapUI
-local ____toggles = require("lua.toggles")
-local CONFIGURATION = ____toggles.CONFIGURATION
 vim.g.mapleader = " "
 vim.cmd("map w <Nop>")
 vim.cmd("map W <Nop>")
@@ -3819,11 +3734,15 @@ for direction in pairs(MOVEMENT_DIRECTION_KEYS) do
     local key = MOVEMENT_DIRECTION_KEYS[direction]
     applyKeyMapping({mode = "n", inputStroke = ("<C-" .. key.key) .. ">", outputStroke = "<C-w>" .. key.key, options = {desc = "switch window " .. direction}})
 end
-if not CONFIGURATION.useBarBar then
+local config = getGlobalConfiguration()
+local ____opt_0 = config.packages.barBar
+if not (____opt_0 and ____opt_0.enabled) then
+    applyKeyMapping({mode = "n", inputStroke = "<leader>x", outputStroke = "<cmd>:bd<CR>:bnext<CR>", options = {desc = "Close current buffer"}})
     applyKeyMapping({mode = "n", inputStroke = "<A-h>", outputStroke = "<cmd>:bprev <CR>", options = {desc = "previous buffer"}})
     applyKeyMapping({mode = "n", inputStroke = "<A-l>", outputStroke = "<cmd>:bnext <CR>", options = {desc = "next buffer"}})
     applyKeyMapping({mode = "n", inputStroke = "<Tab>", outputStroke = "<cmd>:bnext<CR>", options = {desc = "Switch next buffer"}})
 else
+    applyKeyMapping({mode = "n", inputStroke = "<leader>x", outputStroke = "<cmd>BufferClose<CR>", options = {desc = "Close current buffer"}})
     applyKeyMapping({mode = "n", inputStroke = "<Tab>", outputStroke = "<cmd>BufferNext<CR>", options = {desc = "Switch buffer"}})
     applyKeyMapping({mode = "n", inputStroke = "<A-h>", outputStroke = "<cmd>:BufferPrevious <CR>", options = {desc = "previous buffer"}})
     applyKeyMapping({mode = "n", inputStroke = "<A-l>", outputStroke = "<cmd>:BufferNext <CR>", options = {desc = "next buffer"}})
@@ -3831,11 +3750,6 @@ end
 applyKeyMapping({mode = "n", inputStroke = "<leader>s", outputStroke = "<cmd>:vsplit<CR>", options = {desc = "vertical split"}})
 applyKeyMapping({mode = "n", inputStroke = "<leader>h", outputStroke = "<cmd>:split<CR>", options = {desc = "horizontal split"}})
 applyKeyMapping({mode = "n", inputStroke = "<Esc>", outputStroke = "<cmd>noh<CR>", options = {desc = "general clear highlights"}})
-if CONFIGURATION.useBarBar then
-    applyKeyMapping({mode = "n", inputStroke = "<leader>x", outputStroke = "<cmd>BufferClose<CR>", options = {desc = "Close current buffer"}})
-else
-    applyKeyMapping({mode = "n", inputStroke = "<leader>x", outputStroke = "<cmd>:bd<CR>:bnext<CR>", options = {desc = "Close current buffer"}})
-end
 applyKeyMapping({mode = "n", inputStroke = "<C-n>", outputStroke = "<cmd>NvimTreeToggle<CR>", options = {desc = "toggle file tree"}})
 for ____, mode in ipairs({"n", "i", "t"}) do
     applyKeyMapping({mode = mode, inputStroke = "<A-i>", outputStroke = "<cmd>FloatermToggle __builtin_floating<CR>", options = {desc = "toggle floating terminal"}})
@@ -3845,7 +3759,8 @@ applyKeyMapping({mode = "t", inputStroke = "<A-l>", outputStroke = "<cmd>Floater
 applyKeyMapping({mode = "t", inputStroke = "<A-n>", outputStroke = "<cmd>FloatermNew<CR>", options = {desc = "terminal new terminal"}})
 applyKeyMapping({mode = "t", inputStroke = "<A-k>", outputStroke = "<cmd>FloatermKill<CR>", options = {desc = "terminal new terminal"}})
 applyKeyMapping({mode = "t", inputStroke = "<C-x>", outputStroke = "<C-\\><C-N>", options = {desc = "terminal escape terminal mode"}})
-if CONFIGURATION.useTelescope then
+local ____opt_2 = config.packages.telescope
+if ____opt_2 and ____opt_2.enabled then
     applyKeyMapping({mode = "n", inputStroke = "<leader>ff", outputStroke = "<cmd>Telescope find_files <CR>", options = {desc = "Find files"}})
     applyKeyMapping({mode = "n", inputStroke = "<leader>fw", outputStroke = "<cmd>Telescope live_grep <CR>", options = {desc = "Live grep"}})
     applyKeyMapping({mode = "n", inputStroke = "<leader>fb", outputStroke = "<cmd>Telescope buffers <CR>", options = {desc = "Find buffers"}})
@@ -3870,7 +3785,8 @@ applyKeyMapping({
     end,
     options = {desc = "Show LSP signature & type info"}
 })
-if CONFIGURATION.useComments then
+local ____opt_4 = config.packages.comments
+if ____opt_4 and ____opt_4.enabled then
     applyKeyMapping({
         mode = "n",
         inputStroke = "<leader>/",
@@ -3888,26 +3804,28 @@ if CONFIGURATION.useComments then
         options = {desc = "toggle comment"}
     })
 end
-if CONFIGURATION.useTrouble then
+local ____opt_6 = config.packages.trouble
+if ____opt_6 and ____opt_6.enabled then
     applyKeyMapping({mode = "n", inputStroke = "<leader>tdd", outputStroke = ":Trouble diagnostics toggle<CR>", options = {silent = true}})
 end
-if CONFIGURATION.lspconfig.rename.enabled then
+if true then
     applyKeyMapping({
         mode = "n",
-        inputStroke = CONFIGURATION.lspconfig.rename.bind,
+        inputStroke = "<F2>",
         action = function()
             vim.lsp.buf.rename()
         end,
         options = {desc = "rename"}
     })
 end
-if CONFIGURATION.useGlance then
+local ____opt_8 = config.packages.glance
+if ____opt_8 and ____opt_8.enabled then
     applyKeyMapping({mode = "n", inputStroke = "<leader>glr", outputStroke = ":Glance references<CR>", options = {desc = "Open references"}})
     applyKeyMapping({mode = "n", inputStroke = "<leader>gld", outputStroke = ":Glance definitions<CR>", options = {desc = "Open definitions"}})
     applyKeyMapping({mode = "n", inputStroke = "<leader>gltd", outputStroke = ":Glance type_definitions<CR>", options = {desc = "Open type definitions"}})
     applyKeyMapping({mode = "n", inputStroke = "<leader>gli", outputStroke = ":Glance implementations<CR>", options = {desc = "Open implementations"}})
 end
-if CONFIGURATION.useNvimDapUI then
+if config.packages.nvimDapUI then
     applyKeyMapping({mode = "n", inputStroke = "<leader>db", outputStroke = ":DapToggleBreakpoint<CR>", options = {desc = "Toggle breakpoint"}})
     applyKeyMapping({mode = "n", inputStroke = "<leader>dr", outputStroke = ":DapContinue<CR>", options = {desc = "Start or continue the debugger"}})
     applyKeyMapping({
@@ -3938,10 +3856,12 @@ if CONFIGURATION.useNvimDapUI then
         options = {desc = "Evaluate selected statement"}
     })
 end
-if CONFIGURATION.useCopilot then
+local ____opt_10 = config.packages.copilot
+if ____opt_10 and ____opt_10.enabled then
     vim.keymap.set("i", "<C-J>", "copilot#Accept(\"<CR>\")", {expr = true, replace_keycodes = false})
 end
-if CONFIGURATION.useActionsPreview then
+local ____opt_12 = config.packages.actionsPreview
+if ____opt_12 and ____opt_12.enabled then
     applyKeyMapping({
         mode = "n",
         inputStroke = ".",
@@ -3951,8 +3871,73 @@ if CONFIGURATION.useActionsPreview then
         options = {desc = "Show code actions"}
     })
 end
-if CONFIGURATION.useLazyGit then
+local ____opt_14 = config.packages.lazyGit
+if ____opt_14 and ____opt_14.enabled then
     applyKeyMapping({mode = "n", inputStroke = "<leader>lg", outputStroke = "<cmd>LazyGit<CR>", options = {desc = "Show code actions"}})
+end
+return ____exports
+ end,
+["lua.helpers.user_command.argparser"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local __TS__StringStartsWith = ____lualib.__TS__StringStartsWith
+local Error = ____lualib.Error
+local RangeError = ____lualib.RangeError
+local ReferenceError = ____lualib.ReferenceError
+local SyntaxError = ____lualib.SyntaxError
+local TypeError = ____lualib.TypeError
+local URIError = ____lualib.URIError
+local __TS__New = ____lualib.__TS__New
+local __TS__StringAccess = ____lualib.__TS__StringAccess
+local __TS__StringEndsWith = ____lualib.__TS__StringEndsWith
+local __TS__StringSlice = ____lualib.__TS__StringSlice
+local ____exports = {}
+function ____exports.parseArgs(args)
+    local result = {}
+    local primedKey = nil
+    do
+        local i = 0
+        while i < #args do
+            local segment = args[i + 1]
+            if __TS__StringStartsWith(segment, "--") then
+                if primedKey ~= nil then
+                    result[primedKey] = true
+                end
+                primedKey = string.sub(segment, 3)
+            else
+                if primedKey == nil then
+                    error(
+                        __TS__New(Error, "Expected a key, got a value"),
+                        0
+                    )
+                elseif __TS__StringStartsWith(segment, "\"") or __TS__StringStartsWith(segment, "'") then
+                    local delim = __TS__StringAccess(segment, 0)
+                    local valueResult = string.sub(segment, 2)
+                    local ____end = i
+                    while ____end < #args and not __TS__StringEndsWith(args[____end + 1], delim) do
+                        ____end = ____end + 1
+                        valueResult = valueResult .. " " .. args[____end + 1]
+                    end
+                    if ____end >= #args or not __TS__StringEndsWith(args[____end + 1], delim) then
+                        error(
+                            __TS__New(Error, "Unterminated string: " .. args[____end + 1]),
+                            0
+                        )
+                    end
+                    valueResult = __TS__StringSlice(valueResult, 0, #valueResult - 1)
+                    result[primedKey] = valueResult
+                    i = ____end
+                else
+                    result[primedKey] = segment
+                end
+                primedKey = nil
+            end
+            i = i + 1
+        end
+    end
+    if primedKey ~= nil then
+        result[primedKey] = true
+    end
+    return result
 end
 return ____exports
  end,
@@ -4172,9 +4157,9 @@ return ____exports
  end,
 ["lua.plugins.lspconfig"] = function(...) 
 local ____lualib = require("lualib_bundle")
-local __TS__Iterator = ____lualib.__TS__Iterator
+local __TS__ArrayFind = ____lualib.__TS__ArrayFind
 local ____exports = {}
-local getConfig, on_attach, configureLSP
+local getConfig, on_attach, getPluginConfig, environmentKeyToConfig, configureLSP
 local ____configuration = require("lua.helpers.configuration.index")
 local getGlobalConfiguration = ____configuration.getGlobalConfiguration
 local ____useModule = require("lua.helpers.module.useModule")
@@ -4219,16 +4204,42 @@ function ____exports.getLSPConfig()
     local lspconfig = useExternalModule("lspconfig")
     return lspconfig
 end
+function getPluginConfig()
+    local config = getGlobalConfiguration()
+    return config.packages.lspconfig
+end
+function environmentKeyToConfig(env)
+    local configs = {{key = "typescript", lspKey = "tsserver"}}
+    return __TS__ArrayFind(
+        configs,
+        function(____, x) return x.key == env end
+    )
+end
 function configureLSP()
     local lspconfig = ____exports.getLSPConfig()
+    local config = getPluginConfig()
     local capabilities
-    if CONFIGURATION.useCMP then
+    local ____opt_0 = getGlobalConfiguration().packages.cmp
+    if ____opt_0 and ____opt_0.enabled then
         capabilities = useExternalModule("cmp_nvim_lsp").default_capabilities()
     end
-    for ____, target in __TS__Iterator(CONFIGURATION.lspconfig.configuredLSPServers) do
-        lspconfig[target].setup({capabilities = capabilities, on_attach = on_attach})
+    local targetEnvironments = getGlobalConfiguration().targetEnvironments
+    for targetEnvKey in pairs(targetEnvironments) do
+        local target = targetEnvironments[targetEnvKey]
+        local config = environmentKeyToConfig(targetEnvKey)
+        if config == nil then
+            vim.notify("Failed to locate configuration for environment " .. targetEnvKey, vim.log.levels.WARN)
+        else
+            lspconfig[config.lspKey].setup({capabilities = capabilities, on_attach = on_attach})
+        end
     end
-    vim.diagnostic.config({update_in_insert = true, virtual_text = not CONFIGURATION.useLSPLines})
+    local ____vim_diagnostic_config_5 = vim.diagnostic.config
+    local ____opt_2 = getGlobalConfiguration().packages.lspLines
+    local ____temp_4 = ____opt_2 and ____opt_2.enabled
+    if ____temp_4 == nil then
+        ____temp_4 = false
+    end
+    ____vim_diagnostic_config_5({update_in_insert = true, virtual_text = not ____temp_4})
 end
 local plugin = {[1] = "neovim/nvim-lspconfig", config = configureLSP}
 do
