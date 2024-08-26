@@ -5,6 +5,9 @@ import { CONFIGURATION } from "./lua/toggles";
 
 vim.g.mapleader = " "; // Use space key as leader
 
+vim.cmd("map w <Nop>");
+vim.cmd("map W <Nop>");
+
 const MOVEMENT_DIRECTION_KEYS = {
   left: {
     key: 'h',
