@@ -1,3 +1,9 @@
 export function useExternalModule<ModuleType>(importTarget: string) {
-  return require(importTarget) as ModuleType;
+  try {
+    return require(importTarget) as ModuleType;
+  }
+  catch {
+    console.error(`Failed to import module ${importTarget}`);
+    return undefined!;
+  }
 }

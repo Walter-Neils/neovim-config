@@ -295,7 +295,7 @@ applyKeyMapping({
 
 applyKeyMapping({
   mode: 'n',
-  inputStroke: ',',
+  inputStroke: '<leader>,',
   action: function(this: void) {
     vim.lsp.buf.signature_help();
     vim.lsp.buf.hover();

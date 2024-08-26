@@ -79,5 +79,9 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (CONFIGURATION.useFireNvim) {
     result.push(require('firenvim').default);
   }
+  if (CONFIGURATION.useFireNvim) {
+    result.push(require('nvim-notify').default);
+  }
+  result.push(require('nui').default);
   return result;
 }

@@ -19,6 +19,27 @@ type VimLSPProtocolClientCapabilities = {
   }
 };
 
+type NvimWindowInfo = {
+  variables: {
+    [key: string]: unknown
+  },
+  tabnr: number,
+  winrow: number,
+  textoff: number,
+  winid: number,
+  winbar: number,
+  quickfix: number,
+  loclist: number,
+  bufnr: number,
+  terminal: number,
+  height: number,
+  winnr: number,
+  wincol: number,
+  botline: number,
+  width: number,
+  topline: number
+};
+
 type VimLoopSpawnHandle = {
   close: (this: VimLoopSpawnHandle) => void,
   kill: (this: VimLoopSpawnHandle, signum?: number) => void,
@@ -26,6 +47,24 @@ type VimLoopSpawnHandle = {
 
 type NeovimBuffer = unknown;
 type NeovimWindow = unknown;
+
+type NvimOptionInfo = {
+  allows_duplicates: false,
+  last_set_sid: number,
+  default: string,
+  was_set: string,
+  shortname: string,
+  global_local: boolean,
+  flaglist: boolean,
+  scope: 'global' | 'local',
+  last_set_chan: number,
+  last_set_linenr: number,
+  name: string,
+  type: 'string' | 'number' | 'boolean',
+  commalist: boolean
+};
+
+type NvimBufOption = '';
 
 type VimAutocmdEvent = 'BufAdd' | 'BufDelete' | 'BufEnter' | 'BufFilePost' | 'BufFilePre' | 'BufHidden' | 'BufLeave' | 'BufModifiedSet' | 'BufNew' | 'BufNewFile' | 'BufRead' | 'BufReadCmd' | 'BufReadPre' | 'BufUnload' | 'BufWinEnter' | 'BufWinLeave' | 'BufWipeout' | 'BufWrite' | 'BufWriteCmd' | 'BufWritePost' | 'ChanInfo' | 'ChanOpen' | 'CmdUndefined' | 'CmdlineChanged' | 'CmdlineEnter' | 'CmdlineLeave' | 'CmdwinEnter' | 'CmdwinLeave' | 'ColorScheme' | 'ColorSchemePre' | 'CompleteChanged' | 'CompleteDonePre' | 'CompleteDone' | 'CursorHold' | 'CursorHoldI' | 'CursorMoved' | 'CursorMovedI' | 'DiffUpdated' | 'DirChanged' | 'DirChangedPre' | 'ExitPre' | 'FileAppendCmd' | 'FileAppendPost' | 'FileAppendPre' | 'FileChangedRO' | 'FileChangedShell' | 'FileChangedShellPost' | 'FileReadCmd' | 'FileReadPost' | 'FileReadPre' | 'FileType' | 'FileWriteCmd' | 'FileWritePost' | 'FileWritePre' | 'FilterReadPost' | 'FilterReadPre' | 'FilterWritePost' | 'FilterWritePre' | 'FocusGained' | 'FocusLost' | 'FuncUndefined' | 'UIEnter' | 'UILeave' | 'InsertChange' | 'InsertCharPre' | 'InsertEnter' | 'InsertLeavePre' | 'InsertLeave' | 'MenuPopup' | 'ModeChanged' | 'OptionSet' | 'QuickFixCmdPre' | 'QuickFixCmdPost' | 'QuitPre' | 'RemoteReply' | 'SearchWrapped' | 'RecordingEnter' | 'RecordingLeave' | 'SafeState' | 'SessionLoadPost' | 'SessionWritePost' | 'ShellCmdPost' | 'Signal' | 'ShellFilterPost' | 'SourcePre' | 'SourcePost' | 'SourceCmd' | 'SpellFileMissing' | 'StdinReadPost' | 'StdinReadPre' | 'SwapExists' | 'Syntax' | 'TabEnter' | 'TabLeave' | 'TabNew' | 'TabNewEntered' | 'TabClosed' | 'TermOpen' | 'TermEnter' | 'TermLeave' | 'TermClose' | 'TermRequest' | 'TermResponse' | 'TextChanged' | 'TextChangedI' | 'TextChangedP' | 'TextChangedT' | 'TextYankPost' | 'User' | 'UserGettingBored' | 'VimEnter' | 'VimLeave' | 'VimLeavePre' | 'VimResized' | 'VimResume' | 'VimSuspend' | 'WinClosed' | 'WinEnter' | 'WinLeave' | 'WinNew' | 'WinScrolled' | 'WinResized';
 
@@ -35,6 +74,7 @@ type VimAPI = {
   print: (this: void, value: any) => void,
   schedule: (this: void, callback: (this: void) => void) => void,
   defer_fn: (this: void, callback: (this: void) => void, ms: number) => void,
+  tbl_deep_extend: <T1, T2>(this: void, behaviour: 'error' | 'keep' | 'force', table1: T1, table2: T2) => T1 & T2,
   json: {
     encode: (this: void, value: unknown) => string,
     decode: (this: void, value: string) => unknown
@@ -50,6 +90,8 @@ type VimAPI = {
     }
   },
   api: {
+    nvim_get_current_line: (this: void) => number,
+    nvim_get_all_options_info: (this: void) => { [key: string]: NvimOptionInfo }
     nvim_set_hl: (this: void, arg1: number, arg2: string, params: VimHLColorParams) => void,
     nvim_create_user_command: (this: void, commandName: string, luaFunc: (this: void, args: { fargs: string[] }) => void, options: {
       nargs?: number | '+' | '*',
@@ -61,14 +103,21 @@ type VimAPI = {
     }) => void,
     nvim_win_get_cursor: (this: void, arg1: number) => number[],
     nvim_get_current_buf: (this: void) => NeovimBuffer,
-    nvim_get_current_window: (this: void) => NeovimWindow,
-    nvim_create_buf: (this: void, arg1: boolean, arg2: boolean) => NeovimBuffer,
+    nvim_create_buf: (this: void, listed: boolean, scratch: boolean) => NeovimBuffer,
     nvim_buf_set_option: (this: void, buffer: NeovimBuffer, ev: Lowercase<VimAutocmdEvent>, action: string) => void,
+    nvim_win_set_option: (this: void, win: NeovimWindow, ev: Lowercase<VimAutocmdEvent>, value: string) => void,
     nvim_set_option_value: (this: void, name: string, value: unknown, opts: {
       scope?: 'global' | 'local',
       win?: number,
       buf?: number
-    }) => void
+    }) => void,
+    nvim_buf_set_lines: (this: void, buf: NeovimBuffer, start: number, end: number, strict_indexing: boolean, values: string[]) => void,
+    nvim_buf_set_name: (this: void, buf: NeovimBuffer, name: string) => void,
+    nvim_buf_delete: (this: void, buf: number | NeovimBuffer, opts: { force?: boolean }) => void,
+    nvim_set_current_buf: (this: void, buf: number | NeovimBuffer) => void,
+    nvim_win_get_width: (this: void, win: number | NeovimWindow) => number,
+    nvim_win_get_height: (this: void, win: number | NeovimWindow) => number,
+    nvim_get_current_win: (this: void) => NeovimWindow,
   },
   lsp: {
     inlay_hint: {
@@ -109,6 +158,7 @@ type VimAPI = {
     input: (this: void, config: { prompt: string }, callback: (this: void, input: string) => void) => void
   },
   o: {
+    cmdheight: number,
     fillchars: string,
     shell: string,
     shiftwidth: number,
@@ -132,6 +182,8 @@ type VimAPI = {
     }>, unknownArg: boolean) => void
   },
   fn: {
+    // Returns -1 if a buffer is not currently in a window
+    bufwinid: (this: void, buf: NeovimBuffer | number) => number,
     executable: (this: void, exe: string) => boolean,
     getcwd: (this: void) => string,
     sign_define: (this: void, id: string, options: {
@@ -146,7 +198,8 @@ type VimAPI = {
     expand: (this: void, input: string) => string,
     getreg: (this: void, register: string) => string,
     setreg: (this: void, register: string, value: string) => void,
-    getpid: (this: void) => number
+    getpid: (this: void) => number,
+    getwininfo: (this: void, window: NeovimWindow | number) => NvimWindowInfo[]
   },
   loop: {
     fs_stat: (this: void, path: string) => boolean,

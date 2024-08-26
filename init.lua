@@ -2839,7 +2839,8 @@ ____exports.CONFIGURATION = {
     useNvimDapUI = true,
     useDiffView = true,
     useLazyGit = true,
-    useNoice = true,
+    useNoice = false,
+    useNvimNotify = true,
     useCopilot = false,
     useActionsPreview = true,
     useFireNvim = true,
@@ -2908,10 +2909,204 @@ vim.api.nvim_create_user_command(
 )
 return ____exports
  end,
+["lua.helpers.text.center"] = function(...) 
+local ____exports = {}
+function ____exports.centerText(input, width, spacer)
+    if spacer == nil then
+        spacer = " "
+    end
+    while #input + #spacer < width do
+        input = (spacer .. input) .. spacer
+    end
+    return input
+end
+return ____exports
+ end,
+["lua.helpers.window-dimensions.index"] = function(...) 
+local ____exports = {}
+function ____exports.actualBufferDimensions(target)
+    local window = vim.fn.bufwinid(target)
+    local wininfos = vim.fn.getwininfo(window)
+    if wininfos == nil then
+        return nil
+    end
+    local wininfo = wininfos[1]
+    return {actualWidth = wininfo.width - wininfo.textoff}
+end
+return ____exports
+ end,
 ["lua.helpers.module.useModule"] = function(...) 
 local ____exports = {}
 function ____exports.useExternalModule(importTarget)
-    return require(importTarget)
+    do
+        local function ____catch()
+            console.error("Failed to import module " .. importTarget)
+            return true, nil
+        end
+        local ____try, ____hasReturned, ____returnValue = pcall(function()
+            return true, require(importTarget)
+        end)
+        if not ____try then
+            ____hasReturned, ____returnValue = ____catch()
+        end
+        if ____hasReturned then
+            return ____returnValue
+        end
+    end
+end
+return ____exports
+ end,
+["lua.plugins.nui"] = function(...) 
+local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+____exports.useNUI = function()
+    return {
+        Popup = useExternalModule("nui.popup"),
+        Layout = useExternalModule("nui.layout"),
+        Input = useExternalModule("nui.input"),
+        Menu = useExternalModule("nui.menu"),
+        event = useExternalModule("nui.utils.autocmd")
+    }
+end
+local plugin = {[1] = "MunifTanjim/nui.nvim"}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.shims.mainLoopCallbacks"] = function(...) 
+local ____exports = {}
+function ____exports.setTimeout(callback, ms)
+    local cancelFlag = false
+    local function cancel()
+        cancelFlag = true
+    end
+    local function wrapper()
+        if not cancelFlag then
+            callback()
+        end
+    end
+    vim.defer_fn(wrapper, ms)
+    return cancel
+end
+function ____exports.setImmediate(callback)
+    return vim.schedule(callback)
+end
+function ____exports.setInterval(callback, interval)
+    local cancelFlag = false
+    local wrapper
+    wrapper = function()
+        if not cancelFlag then
+            callback()
+            ____exports.setTimeout(wrapper, interval)
+        end
+    end
+    local function cancel()
+        cancelFlag = true
+    end
+    ____exports.setTimeout(wrapper, interval)
+    return cancel
+end
+function ____exports.clearTimeout(handle)
+    handle()
+end
+function ____exports.clearInterval(handle)
+    handle()
+end
+function ____exports.insertMainLoopCallbackShims()
+    local global = _G
+    global.setTimeout = ____exports.setTimeout
+    global.clearTimeout = ____exports.clearTimeout
+    global.setInterval = ____exports.setInterval
+    global.clearInterval = ____exports.clearInterval
+    global.setImmediate = ____exports.setImmediate
+end
+return ____exports
+ end,
+["components.welcome-page.index"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local __TS__ArrayMap = ____lualib.__TS__ArrayMap
+local ____exports = {}
+local ____nui = require("lua.plugins.nui")
+local useNUI = ____nui.useNUI
+local ____mainLoopCallbacks = require("lua.shims.mainLoopCallbacks")
+local setTimeout = ____mainLoopCallbacks.setTimeout
+function ____exports.activateWelcomePage()
+    setTimeout(
+        function()
+            local NUI = useNUI()
+            local menu = NUI.Menu(
+                {position = "50%", size = {width = 25, height = 5}, border = {style = "single", text = {top = "Select an item"}}},
+                {
+                    lines = __TS__ArrayMap(
+                        {"Update", "Test2", "Test3"},
+                        function(____, x) return NUI.Menu.item(x, {x = 3}) end
+                    ),
+                    on_submit = function(item)
+                        console.log(item.text)
+                    end
+                }
+            )
+        end,
+        2500
+    )
+end
+return ____exports
+ end,
+["lua.custom.tmux.index"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local Error = ____lualib.Error
+local RangeError = ____lualib.RangeError
+local ReferenceError = ____lualib.ReferenceError
+local SyntaxError = ____lualib.SyntaxError
+local TypeError = ____lualib.TypeError
+local URIError = ____lualib.URIError
+local __TS__New = ____lualib.__TS__New
+local ____exports = {}
+local ____nui = require("lua.plugins.nui")
+local useNUI = ____nui.useNUI
+local function setTmuxScope(isolationScope)
+    if isolationScope == "global" then
+        vim.o.shell = "tmux"
+    elseif isolationScope == "neovim-shared" then
+        vim.o.shell = "tmux -L neovim"
+    elseif isolationScope == "per-instance" then
+        vim.o.shell = "tmux -L neovim-" .. tostring(vim.fn.getpid())
+    else
+        error(
+            __TS__New(Error, "Invalid scope " .. isolationScope),
+            0
+        )
+    end
+end
+local function changeTmuxScope()
+    local NUI = useNUI()
+    local menu = NUI.Menu(
+        {position = "50%", size = {width = 33, height = 3}, border = {style = "single", text = {top = "Change TMUX scope"}}},
+        {
+            lines = {
+                NUI.Menu.item("Global", {target = "global"}),
+                NUI.Menu.item("Shared between neovim instances", {target = "neovim-shared"}),
+                NUI.Menu.item("Isolated", {target = "per-instance"})
+            },
+            on_submit = function(_item)
+                local item = _item
+                setTmuxScope(item.target)
+            end
+        }
+    )
+    menu:mount()
+end
+function ____exports.initCustomTmux()
+    vim.api.nvim_create_user_command("ChangeTmuxScope", changeTmuxScope, {})
+end
+return ____exports
+ end,
+["lua.custom.index"] = function(...) 
+local ____exports = {}
+local ____tmux = require("lua.custom.tmux.index")
+local initCustomTmux = ____tmux.initCustomTmux
+function ____exports.setupCustomLogic()
+    initCustomTmux()
 end
 return ____exports
  end,
@@ -3215,7 +3410,29 @@ function ____exports.getPlugins()
     if CONFIGURATION.useFireNvim then
         result[#result + 1] = require("lua.plugins.firenvim").default
     end
+    if CONFIGURATION.useFireNvim then
+        result[#result + 1] = require("lua.plugins.nvim-notify").default
+    end
+    result[#result + 1] = require("lua.plugins.nui").default
     return result
+end
+return ____exports
+ end,
+["lua.shims.console.index"] = function(...) 
+local ____exports = {}
+function ____exports.insertConsoleShims()
+    if _G.console == nil then
+        _G.console = {}
+    end
+    _G.console.log = function(message)
+        vim.notify(message, vim.log.levels.INFO)
+    end
+    _G.console.warn = function(message)
+        vim.notify(message, vim.log.levels.WARN)
+    end
+    _G.console.error = function(message)
+        vim.notify(message, vim.log.levels.ERROR)
+    end
 end
 return ____exports
  end,
@@ -3276,6 +3493,10 @@ return ____exports
 local ____lualib = require("lualib_bundle")
 local __TS__StringIncludes = ____lualib.__TS__StringIncludes
 local ____exports = {}
+local ____welcome_2Dpage = require("components.welcome-page.index")
+local activateWelcomePage = ____welcome_2Dpage.activateWelcomePage
+local ____custom = require("lua.custom.index")
+local setupCustomLogic = ____custom.setupCustomLogic
 local ____useModule = require("lua.helpers.module.useModule")
 local useExternalModule = ____useModule.useExternalModule
 local ____persistent_2Ddata = require("lua.helpers.persistent-data.index")
@@ -3291,14 +3512,23 @@ local ____portable_2Dappimage = require("lua.integrations.portable-appimage")
 local enablePortableAppImageLogic = ____portable_2Dappimage.enablePortableAppImageLogic
 local ____init = require("lua.plugins.init")
 local getPlugins = ____init.getPlugins
+local ____console = require("lua.shims.console.index")
+local insertConsoleShims = ____console.insertConsoleShims
 local ____json = require("lua.shims.json.index")
 local insertJSONShims = ____json.insertJSONShims
+local ____mainLoopCallbacks = require("lua.shims.mainLoopCallbacks")
+local insertMainLoopCallbackShims = ____mainLoopCallbacks.insertMainLoopCallbackShims
+local setImmediate = ____mainLoopCallbacks.setImmediate
 local ____theme = require("lua.theme")
 local THEME_APPLIERS = ____theme.THEME_APPLIERS
 local ____toggles = require("lua.toggles")
 local CONFIGURATION = ____toggles.CONFIGURATION
 insertJSONShims()
+insertConsoleShims()
+insertMainLoopCallbackShims()
 enablePortableAppImageLogic()
+vim.cmd("map w <Nop>")
+vim.cmd("map W <Nop>")
 local getValue, setValue = unpack(usePersistentValue("test", "testing"))
 setValue("test")
 local function setupNeovide()
@@ -3347,12 +3577,12 @@ vim.opt.relativenumber = true
 vim.opt.signcolumn = "number"
 vim.opt.numberwidth = 2
 vim.opt.ruler = false
+activateWelcomePage()
 require("mappings")
 require("commands")
 if CONFIGURATION.behaviour.shell.target == "tmux" then
     local term = os.getenv("TERM") or "__term_value_not_supplied"
     if not __TS__StringIncludes(term, "tmux") then
-        vim.print("Setup: using terminal emulator 'tmux'")
         vim.g.terminal_emulator = "tmux"
         local isolationScope = CONFIGURATION.behaviour.shell.tmux.isolation.scope
         if isolationScope == "global" then
@@ -3368,6 +3598,7 @@ if CONFIGURATION.behaviour.shell.target == "tmux" then
     else
     end
 end
+setImmediate(setupCustomLogic)
 return ____exports
  end,
 ["lua.helpers.keymap.index"] = function(...) 
@@ -3577,7 +3808,7 @@ applyKeyMapping({
 })
 applyKeyMapping({
     mode = "n",
-    inputStroke = ",",
+    inputStroke = "<leader>,",
     action = function()
         vim.lsp.buf.signature_help()
         vim.lsp.buf.hover()
@@ -4022,6 +4253,30 @@ local plugin = {
 ____exports.default = plugin
 return ____exports
  end,
+["lua.plugins.nvim-notify"] = function(...) 
+local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+local function getNvimNotify()
+    local noice = useExternalModule("notify")
+    return noice
+end
+local plugin = {
+    [1] = "rcarriga/nvim-notify",
+    event = "VeryLazy",
+    dependencies = {"MunifTanjim/nui.nvim", "rcarriga/nvim-notify"},
+    config = function()
+        if vim.g.started_by_firenvim then
+        else
+            local notify = getNvimNotify()
+            notify.setup({})
+            vim.notify = notify
+        end
+    end
+}
+____exports.default = plugin
+return ____exports
+ end,
 ["lua.plugins.nvim-tree-devicons"] = function(...) 
 local ____exports = {}
 local ____useModule = require("lua.helpers.module.useModule")
@@ -4168,47 +4423,6 @@ local plugin = {
     end
 }
 ____exports.default = plugin
-return ____exports
- end,
-["lua.shims.mainLoopCallbacks"] = function(...) 
-local ____exports = {}
-function ____exports.setTimeout(callback, ms)
-    local cancelFlag = false
-    local function cancel()
-        cancelFlag = true
-    end
-    local function wrapper()
-        if not cancelFlag then
-            callback()
-        end
-    end
-    vim.defer_fn(wrapper, ms)
-    return cancel
-end
-function ____exports.setImmediate(callback)
-    return vim.schedule(callback)
-end
-function ____exports.setInterval(callback, interval)
-    local cancelFlag = false
-    local wrapper
-    wrapper = function()
-        if not cancelFlag then
-            callback()
-            ____exports.setTimeout(wrapper, interval)
-        end
-    end
-    local function cancel()
-        cancelFlag = true
-    end
-    ____exports.setTimeout(wrapper, interval)
-    return cancel
-end
-function ____exports.clearTimeout(handle)
-    handle()
-end
-function ____exports.clearInterval(handle)
-    handle()
-end
 return ____exports
  end,
 }

@@ -45,3 +45,11 @@ export function clearTimeout(this: void, handle: ReturnType<typeof setTimeout>) 
 export function clearInterval(this: void, handle: ReturnType<typeof setInterval>) {
   handle();
 }
+export function insertMainLoopCallbackShims() {
+  const global = globalThis as any;
+  global.setTimeout = setTimeout;
+  global.clearTimeout = clearTimeout;
+  global.setInterval = setInterval;
+  global.clearInterval = clearInterval;
+  global.setImmediate = setImmediate;
+}
