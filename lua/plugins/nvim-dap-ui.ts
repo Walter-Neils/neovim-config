@@ -1,6 +1,6 @@
 import { LazyPlugin } from "../../ambient/lazy";
+import { getGlobalConfiguration } from "../helpers/configuration";
 import { useExternalModule } from "../helpers/module/useModule";
-import { CONFIGURATION } from "../toggles";
 
 type DapUIModule = {
   setup: (this: void, arg: unknown) => void,
@@ -104,17 +104,33 @@ vim.api.nvim_create_autocmd('DirChanged', {
   }
 });
 
+type DapGlobalConfig = {
+  lldb: {
+    host?: string,
+    port: number,
+    executable?: string,
+    additionalArgs?: string[]
+  }
+};
+
 function configureActiveLanguages(this: void) {
+  const config = getGlobalConfiguration();
+  const dapConfig = config.packages["nvimDapUI"]?.config as DapGlobalConfig;
+  if (dapConfig === undefined) {
+    vim.notify("DAP configuration undefined. Unable to continue setup.", vim.log.levels.ERROR);
+    return;
+  }
   const dap = getDap();
-  if (CONFIGURATION.dap.cPlusPlus) {
-    const LLDB_PORT = 1828;
+  if (config.targetEnvironments["c++"]?.enabled || config.targetEnvironments["c"]?.enabled) {
+
+    const LLDB_PORT = dapConfig.lldb.port;
     dap.adapters['lldb'] = {
       type: 'server',
       port: LLDB_PORT,
-      host: '127.0.0.1',
+      host: dapConfig.lldb.host ?? '127.0.0.1',
       executable: {
-        command: 'codelldb',
-        args: ['--port', LLDB_PORT.toString()]
+        command: dapConfig.lldb.executable ?? 'codelldb',
+        args: ['--port', LLDB_PORT.toString(), ...dapConfig.lldb.additionalArgs ?? []]
       }
     }
 
@@ -131,7 +147,10 @@ function configureActiveLanguages(this: void) {
       }]
     }
   }
-  if (CONFIGURATION.dap.nodeJS) {
+  const possibleTargets = ["nodejs", "javascript", "typescript"];
+  if (possibleTargets.some(x => {
+    return config.targetEnvironments[x]?.enabled ?? false;
+  })) {
     dap.adapters['pwa-node'] = {
       type: 'server',
       host: '::1',
@@ -142,14 +161,16 @@ function configureActiveLanguages(this: void) {
     };
 
     for (const language of ['javascript', 'typescript'] as const) {
-      dap.configurations[language] = [{
-        type: 'pwa-node',
-        request: 'launch',
-        name: 'Launch file',
-        program: '${file}',
-        cwd: '${workspaceFolder}',
-        runtimeExecutable: 'node'
-      }]
+      if (config.targetEnvironments[language]?.enabled) {
+        dap.configurations[language] = [{
+          type: 'pwa-node',
+          request: 'launch',
+          name: 'Launch file',
+          program: '${file}',
+          cwd: '${workspaceFolder}',
+          runtimeExecutable: 'node'
+        }];
+      }
     }
   }
 }

@@ -21,11 +21,7 @@ insertMainLoopCallbackShims();
 
 enablePortableAppImageLogic();
 
-vim.cmd("map w <Nop>");
-vim.cmd("map W <Nop>");
 
-const [getValue, setValue] = usePersistentValue('test', 'testing');
-setValue("test");
 
 function setupNeovide() {
   const vim = getNeovideExtendedVimContext();

@@ -1,6 +1,6 @@
 import { LazyPlugin } from "../../ambient/lazy";
+import { getGlobalConfiguration } from "../helpers/configuration";
 import { useExternalModule } from "../helpers/module/useModule";
-import { CONFIGURATION } from "../toggles";
 
 const plugin: LazyPlugin = {
   1: 'neovim/nvim-lspconfig',
@@ -28,8 +28,23 @@ export type LSPConfig = {
   }
 } & LSPConfigServers;
 
+type GlobalConfigLSPConfig = {
+  inlayHints: {
+    enabled: true,
+    displayMode: 'only-in-normal-mode'
+  }
+};
+
+function getConfig() {
+  const config = getGlobalConfiguration();
+  const lspConfigRoot = config.packages["lspconfig"]!;
+  const lspConfig: GlobalConfigLSPConfig = lspConfigRoot.config! as GlobalConfigLSPConfig;
+  return lspConfig;
+}
+
 function on_attach(this: void, client: LSPClient, bufnr: number) {
-  if (CONFIGURATION.lspconfig.useInlayHints) {
+  const lspConfig = getConfig();
+  if (lspConfig.inlayHints.enabled) {
     let error: any | undefined;
     try {
       if (client.server_capabilities.inlayHintProvider) {
@@ -49,22 +64,25 @@ function on_attach(this: void, client: LSPClient, bufnr: number) {
   }
 }
 
-if (CONFIGURATION.lspconfig.useInlayHints) {
-  vim.api.nvim_create_autocmd('InsertEnter', {
-    callback: () => {
-      if (CONFIGURATION.lspconfig.inlayHints.displayMode === 'only-in-normal-mode') {
-        vim.lsp.inlay_hint.enable(false);
+{
+  const lspConfig = getConfig();
+  if (lspConfig.inlayHints.enabled) {
+    vim.api.nvim_create_autocmd('InsertEnter', {
+      callback: () => {
+        if (lspConfig.inlayHints.displayMode === 'only-in-normal-mode') {
+          vim.lsp.inlay_hint.enable(false);
+        }
       }
-    }
-  });
+    });
 
-  vim.api.nvim_create_autocmd('InsertLeave', {
-    callback: () => {
-      if (CONFIGURATION.lspconfig.inlayHints.displayMode === 'only-in-normal-mode') {
-        vim.lsp.inlay_hint.enable(true);
+    vim.api.nvim_create_autocmd('InsertLeave', {
+      callback: () => {
+        if (lspConfig.inlayHints.displayMode === 'only-in-normal-mode') {
+          vim.lsp.inlay_hint.enable(true);
+        }
       }
-    }
-  });
+    });
+  }
 }
 
 

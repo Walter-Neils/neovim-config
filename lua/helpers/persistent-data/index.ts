@@ -8,6 +8,9 @@ const dataPath = vim.fn.stdpath("data") + "/winvim";
 
 vim.fn.system(["mkdir", "-p", dataPath]);
 
+export function getWinvimLocalDataDirectory() {
+  return dataPath;
+}
 
 export function usePersistentValue<TValue>(key: string, defaultValue: TValue) {
   {
@@ -22,7 +25,7 @@ export function usePersistentValue<TValue>(key: string, defaultValue: TValue) {
   let currentValue: TValue = defaultValue;
 
   if (fs.existsSync(filePath)) {
-    currentValue = JSON.parse(fs.readFileSync(filePath)) as TValue;
+    currentValue = vim.json.decode(fs.readFileSync(filePath)) as TValue;
   }
 
   const get = () => {
@@ -31,7 +34,7 @@ export function usePersistentValue<TValue>(key: string, defaultValue: TValue) {
 
   const set = (newValue: TValue) => {
     currentValue = newValue;
-    fs.writeFileSync(filePath, JSON.stringify(newValue));
+    fs.writeFileSync(filePath, vim.json.encode(newValue));
     return currentValue;
   };
 

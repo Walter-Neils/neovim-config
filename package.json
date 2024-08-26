@@ -7,5 +7,8 @@
     "lua-types": "^2.13.1",
     "typescript": "^5.5.2",
     "typescript-to-lua": "^1.26.2"
+  },
+  "dependencies": {
+    "yaml": "^2.5.0"
   }
 }

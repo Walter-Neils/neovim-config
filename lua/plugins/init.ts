@@ -1,85 +1,86 @@
 import { LazyPlugin } from "../../ambient/lazy";
-import { CONFIGURATION } from "../toggles";
+import { getGlobalConfiguration } from "../helpers/configuration";
 
 export function getPlugins(this: void): LazyPlugin[] {
+  const globalConfig = getGlobalConfiguration();
   const result: LazyPlugin[] = [];
   result.push(require('nvim-tree').default);
   result.push(require('floatterm').default);
-  if (CONFIGURATION.useTelescope) {
-    result.push(require('telescope').default);
-  }
   result.push(require('treesitter').default);
   result.push(require('lspconfig').default);
   result.push(require('mason').default);
   result.push(require('autopairs').default);
-  if (CONFIGURATION.useCMP) {
+  result.push(require('tokyonight').default);
+  if (globalConfig.packages.telescope.enabled) {
+    result.push(require('telescope').default);
+  }
+  if (globalConfig.packages.cmp.enabled) {
     result.push(require('cmp').default);
   }
-  if (CONFIGURATION.useLSPLines) {
+  if (globalConfig.packages.lspLines.enabled) {
     result.push(require('lsp_lines').default);
   }
-  if (CONFIGURATION.useLSPUI) {
+  if (globalConfig.packages.lspUI.enabled) {
     result.push(require('lspUI').default);
   }
-  if (CONFIGURATION.useRustaceanvim) {
+  if (globalConfig.packages.rustaceanvim.enabled) {
     result.push(require('rustaceanvim').default);
   }
-  result.push(require('tokyonight').default);
-  if (CONFIGURATION.useLSPSignature) {
+  if (globalConfig.packages.lspSignature.enabled) {
     result.push(require('lsp_signature').default);
   }
-  if (CONFIGURATION.useIndentBlankline) {
+  if (globalConfig.packages.indentBlankline.enabled) {
     result.push(require('indent-blankline').default);
   }
-  if (CONFIGURATION.useTreeDevIcons) {
+  if (globalConfig.packages.treeDevIcons.enabled) {
     result.push(require('nvim-tree-devicons').default);
   }
-  if (CONFIGURATION.useLualine) {
+  if (globalConfig.packages.luaLine.enabled) {
     result.push(require('lualine').default);
   }
-  if (CONFIGURATION.useBarBar) {
+  if (globalConfig.packages.barBar.enabled) {
     result.push(require('barbar').default);
   }
-  if (CONFIGURATION.useUFO) {
+  if (globalConfig.packages.ufo.enabled) {
     result.push(require('ufo').default);
   }
-  if (CONFIGURATION.useComments) {
+  if (globalConfig.packages.comments.enabled) {
     result.push(require('comment').default);
   }
-  if (CONFIGURATION.useMarks) {
+  if (globalConfig.packages.marks.enabled) {
     result.push(require('marks').default);
   }
-  if (CONFIGURATION.useTrouble) {
+  if (globalConfig.packages.trouble.enabled) {
     result.push(require('trouble').default);
   }
-  if (CONFIGURATION.useOutline) {
+  if (globalConfig.packages.outline.enabled) {
     result.push(require('outline').default);
   }
-  if (CONFIGURATION.useGlance) {
+  if (globalConfig.packages.glance.enabled) {
     result.push(require('glance').default);
   }
-  if (CONFIGURATION.useNvimDapUI) {
+  if (globalConfig.packages.nvimDapUI.enabled) {
     result.push(require('nvim-dap-ui').default);
   }
-  if (CONFIGURATION.useDiffView) {
+  if (globalConfig.packages.diffView.enabled) {
     result.push(require('diffview').default);
   }
-  if (CONFIGURATION.useLazyGit) {
+  if (globalConfig.packages.lazyGit.enabled) {
     result.push(require('lazygit').default);
   }
-  if (CONFIGURATION.useNoice) {
+  if (globalConfig.packages.noice.enabled) {
     result.push(require('noice').default);
   }
-  if (CONFIGURATION.useNoice) {
+  if (globalConfig.packages.copilot.enabled) {
     result.push(require('copilot').default);
   }
-  if (CONFIGURATION.useActionsPreview) {
+  if (globalConfig.packages.actionsPreview.enabled) {
     result.push(require('actions-preview').default);
   }
-  if (CONFIGURATION.useFireNvim) {
+  if (globalConfig.packages.fireNvim.enabled) {
     result.push(require('firenvim').default);
   }
-  if (CONFIGURATION.useFireNvim) {
+  if (globalConfig.packages.nvimNotify.enabled) {
     result.push(require('nvim-notify').default);
   }
   result.push(require('nui').default);

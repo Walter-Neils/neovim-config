@@ -2818,43 +2818,9 @@ function ____exports.parseArgs(args)
 end
 return ____exports
  end,
-["lua.toggles"] = function(...) 
-local ____exports = {}
-____exports.CONFIGURATION = {
-    useLSPLines = false,
-    useCMP = true,
-    useTelescope = true,
-    useLSPUI = false,
-    useRustaceanvim = true,
-    useLSPSignature = true,
-    useIndentBlankline = true,
-    useTreeDevIcons = true,
-    useLualine = true,
-    useBarBar = true,
-    useComments = true,
-    useMarks = true,
-    useTrouble = true,
-    useOutline = true,
-    useGlance = true,
-    useNvimDapUI = true,
-    useDiffView = true,
-    useLazyGit = true,
-    useNoice = false,
-    useNvimNotify = true,
-    useCopilot = false,
-    useActionsPreview = true,
-    useFireNvim = true,
-    ollama = {enabled = false, targetModel = "codellama:code"},
-    dap = {nodeJS = true, cPlusPlus = true, rust = true},
-    mason = {defaultInstalled = {"typescript-language-server", "clangd", "lua-language-server", "yaml-language-server"}},
-    lspconfig = {useInlayHints = true, inlayHints = {displayMode = "only-in-normal-mode"}, configuredLSPServers = {"tsserver", "lua_ls", "clangd", "yamlls"}, rename = {enabled = true, bind = "<F2>"}},
-    useUFO = true,
-    behaviour = {wrappedLinesAsSeparateLines = true, shell = {target = "tmux", tmux = {isolation = {scope = "per-instance"}}}},
-    customCommands = {fixRustAnalyzer = {enabled = true}, installDefaultLSPServers = {enabled = true}, resetInstall = {enabled = false}}
-}
-return ____exports
- end,
 ["commands"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local __TS__Iterator = ____lualib.__TS__Iterator
 local ____exports = {}
 local ____argparser = require("lua.helpers.user_command.argparser")
 local parseArgs = ____argparser.parseArgs
@@ -2864,8 +2830,8 @@ if CONFIGURATION.customCommands.installDefaultLSPServers.enabled then
     vim.api.nvim_create_user_command(
         "InstallDefaultLSPServers",
         function()
-            for ____, server in ipairs(CONFIGURATION.mason.defaultInstalled) do
-                vim.cmd("MasonInstall " .. server)
+            for ____, server in __TS__Iterator(CONFIGURATION.mason.defaultInstalled) do
+                vim.cmd("MasonInstall " .. tostring(server))
             end
         end,
         {nargs = 0}
@@ -3168,6 +3134,9 @@ local fs = ____fs.fs
 local persistValueInstances = {}
 local dataPath = vim.fn.stdpath("data") .. "/winvim"
 vim.fn.system({"mkdir", "-p", dataPath})
+function ____exports.getWinvimLocalDataDirectory()
+    return dataPath
+end
 function ____exports.usePersistentValue(key, defaultValue)
     do
         local target = persistValueInstances[key]
@@ -3178,7 +3147,7 @@ function ____exports.usePersistentValue(key, defaultValue)
     local filePath = (dataPath .. "/") .. key
     local currentValue = defaultValue
     if fs.existsSync(filePath) then
-        currentValue = JSON:parse(fs.readFileSync(filePath))
+        currentValue = vim.json.decode(fs.readFileSync(filePath))
     end
     local function get()
         return currentValue
@@ -3187,7 +3156,7 @@ function ____exports.usePersistentValue(key, defaultValue)
         currentValue = newValue
         fs.writeFileSync(
             filePath,
-            JSON:stringify(newValue)
+            vim.json.encode(newValue)
         )
         return currentValue
     end
@@ -3328,89 +3297,150 @@ function ____exports.enablePortableAppImageLogic()
 end
 return ____exports
  end,
+["lua.helpers.configuration.index"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local __TS__ObjectKeys = ____lualib.__TS__ObjectKeys
+local ____exports = {}
+local saveConfiguration, configuration, getGlobalConfig, setGlobalConfig
+local ____persistent_2Ddata = require("lua.helpers.persistent-data.index")
+local usePersistentValue = ____persistent_2Ddata.usePersistentValue
+function saveConfiguration()
+    setGlobalConfig(configuration)
+end
+function ____exports.saveGlobalConfiguration()
+    saveConfiguration()
+end
+configuration = nil
+getGlobalConfig, setGlobalConfig = unpack(usePersistentValue("configuration.json", {}))
+local function reloadConfiguration()
+    local config = getGlobalConfig()
+    if #__TS__ObjectKeys(config) < 1 then
+        configuration = ____exports.CONFIGURATION_DEFAULTS
+        ____exports.saveGlobalConfiguration()
+        configuration = getGlobalConfig()
+    else
+        configuration = config
+    end
+end
+____exports.CONFIGURATION_DEFAULTS = {packages = {
+    lspLines = {enabled = false},
+    cmp = {enabled = true},
+    telescope = {enabled = true},
+    lspUI = {enabled = false},
+    rustaceanvim = {enabled = true},
+    lspSignature = {enabled = true},
+    indentBlankline = {enabled = true},
+    treeDevIcons = {enabled = true},
+    luaLine = {enabled = true},
+    barBar = {enabled = true},
+    comments = {enabled = true},
+    marks = {enabled = true},
+    trouble = {enabled = true},
+    outline = {enabled = true},
+    glance = {enabled = true},
+    nvimDapUI = {enabled = true, config = {lldb = {port = 1828}}},
+    diffView = {enabled = true},
+    lazyGit = {enabled = true},
+    noice = {enabled = false},
+    nvimNotify = {enabled = true},
+    copilot = {enabled = false},
+    actionsPreview = {enabled = true},
+    fireNvim = {enabled = true},
+    ufo = {enabled = true},
+    lspconfig = {enabled = true, config = {inlayHints = {enabled = true, displayMode = "only-in-normal-mode"}}}
+}, targetEnvironments = {typescript = {enabled = true}}}
+function ____exports.getGlobalConfiguration()
+    if configuration == nil then
+        reloadConfiguration()
+    end
+    return configuration
+end
+return ____exports
+ end,
 ["lua.plugins.init"] = function(...) 
 local ____exports = {}
-local ____toggles = require("lua.toggles")
-local CONFIGURATION = ____toggles.CONFIGURATION
+local ____configuration = require("lua.helpers.configuration.index")
+local getGlobalConfiguration = ____configuration.getGlobalConfiguration
 function ____exports.getPlugins()
+    local globalConfig = getGlobalConfiguration()
     local result = {}
     result[#result + 1] = require("lua.plugins.nvim-tree").default
     result[#result + 1] = require("lua.plugins.floatterm").default
-    if CONFIGURATION.useTelescope then
-        result[#result + 1] = require("lua.plugins.telescope").default
-    end
     result[#result + 1] = require("lua.plugins.treesitter").default
     result[#result + 1] = require("lua.plugins.lspconfig").default
     result[#result + 1] = require("lua.plugins.mason").default
     result[#result + 1] = require("lua.plugins.autopairs").default
-    if CONFIGURATION.useCMP then
+    result[#result + 1] = require("lua.plugins.tokyonight").default
+    if globalConfig.packages.telescope.enabled then
+        result[#result + 1] = require("lua.plugins.telescope").default
+    end
+    if globalConfig.packages.cmp.enabled then
         result[#result + 1] = require("lua.plugins.cmp").default
     end
-    if CONFIGURATION.useLSPLines then
+    if globalConfig.packages.lspLines.enabled then
         result[#result + 1] = require("lua.plugins.lsp_lines").default
     end
-    if CONFIGURATION.useLSPUI then
+    if globalConfig.packages.lspUI.enabled then
         result[#result + 1] = require("lua.plugins.lspUI").default
     end
-    if CONFIGURATION.useRustaceanvim then
+    if globalConfig.packages.rustaceanvim.enabled then
         result[#result + 1] = require("lua.plugins.rustaceanvim").default
     end
-    result[#result + 1] = require("lua.plugins.tokyonight").default
-    if CONFIGURATION.useLSPSignature then
+    if globalConfig.packages.lspSignature.enabled then
         result[#result + 1] = require("lua.plugins.lsp_signature").default
     end
-    if CONFIGURATION.useIndentBlankline then
+    if globalConfig.packages.indentBlankline.enabled then
         result[#result + 1] = require("lua.plugins.indent-blankline").default
     end
-    if CONFIGURATION.useTreeDevIcons then
+    if globalConfig.packages.treeDevIcons.enabled then
         result[#result + 1] = require("lua.plugins.nvim-tree-devicons").default
     end
-    if CONFIGURATION.useLualine then
+    if globalConfig.packages.luaLine.enabled then
         result[#result + 1] = require("lua.plugins.lualine").default
     end
-    if CONFIGURATION.useBarBar then
+    if globalConfig.packages.barBar.enabled then
         result[#result + 1] = require("lua.plugins.barbar").default
     end
-    if CONFIGURATION.useUFO then
+    if globalConfig.packages.ufo.enabled then
         result[#result + 1] = require("lua.plugins.ufo").default
     end
-    if CONFIGURATION.useComments then
+    if globalConfig.packages.comments.enabled then
         result[#result + 1] = require("lua.plugins.comment").default
     end
-    if CONFIGURATION.useMarks then
+    if globalConfig.packages.marks.enabled then
         result[#result + 1] = require("lua.plugins.marks").default
     end
-    if CONFIGURATION.useTrouble then
+    if globalConfig.packages.trouble.enabled then
         result[#result + 1] = require("lua.plugins.trouble").default
     end
-    if CONFIGURATION.useOutline then
+    if globalConfig.packages.outline.enabled then
         result[#result + 1] = require("lua.plugins.outline").default
     end
-    if CONFIGURATION.useGlance then
+    if globalConfig.packages.glance.enabled then
         result[#result + 1] = require("lua.plugins.glance").default
     end
-    if CONFIGURATION.useNvimDapUI then
+    if globalConfig.packages.nvimDapUI.enabled then
         result[#result + 1] = require("lua.plugins.nvim-dap-ui").default
     end
-    if CONFIGURATION.useDiffView then
+    if globalConfig.packages.diffView.enabled then
         result[#result + 1] = require("lua.plugins.diffview").default
     end
-    if CONFIGURATION.useLazyGit then
+    if globalConfig.packages.lazyGit.enabled then
         result[#result + 1] = require("lua.plugins.lazygit").default
     end
-    if CONFIGURATION.useNoice then
+    if globalConfig.packages.noice.enabled then
         result[#result + 1] = require("lua.plugins.noice").default
     end
-    if CONFIGURATION.useNoice then
+    if globalConfig.packages.copilot.enabled then
         result[#result + 1] = require("lua.plugins.copilot").default
     end
-    if CONFIGURATION.useActionsPreview then
+    if globalConfig.packages.actionsPreview.enabled then
         result[#result + 1] = require("lua.plugins.actions-preview").default
     end
-    if CONFIGURATION.useFireNvim then
+    if globalConfig.packages.fireNvim.enabled then
         result[#result + 1] = require("lua.plugins.firenvim").default
     end
-    if CONFIGURATION.useFireNvim then
+    if globalConfig.packages.nvimNotify.enabled then
         result[#result + 1] = require("lua.plugins.nvim-notify").default
     end
     result[#result + 1] = require("lua.plugins.nui").default
@@ -3499,8 +3529,6 @@ local ____custom = require("lua.custom.index")
 local setupCustomLogic = ____custom.setupCustomLogic
 local ____useModule = require("lua.helpers.module.useModule")
 local useExternalModule = ____useModule.useExternalModule
-local ____persistent_2Ddata = require("lua.helpers.persistent-data.index")
-local usePersistentValue = ____persistent_2Ddata.usePersistentValue
 local ____hyprland = require("lua.integrations.hyprland")
 local Hyprland = ____hyprland.Hyprland
 local isDesktopHyprland = ____hyprland.isDesktopHyprland
@@ -3527,10 +3555,6 @@ insertJSONShims()
 insertConsoleShims()
 insertMainLoopCallbackShims()
 enablePortableAppImageLogic()
-vim.cmd("map w <Nop>")
-vim.cmd("map W <Nop>")
-local getValue, setValue = unpack(usePersistentValue("test", "testing"))
-setValue("test")
 local function setupNeovide()
     local vim = getNeovideExtendedVimContext()
     if vim.g.neovide then
@@ -3634,11 +3658,12 @@ local SyntaxError = ____lualib.SyntaxError
 local TypeError = ____lualib.TypeError
 local URIError = ____lualib.URIError
 local __TS__New = ____lualib.__TS__New
+local __TS__ArraySome = ____lualib.__TS__ArraySome
 local ____exports = {}
+local ____configuration = require("lua.helpers.configuration.index")
+local getGlobalConfiguration = ____configuration.getGlobalConfiguration
 local ____useModule = require("lua.helpers.module.useModule")
 local useExternalModule = ____useModule.useExternalModule
-local ____toggles = require("lua.toggles")
-local CONFIGURATION = ____toggles.CONFIGURATION
 function ____exports.getDap()
     local target = "dap"
     local dapui = useExternalModule(target)
@@ -3690,18 +3715,32 @@ vim.api.nvim_create_autocmd(
     end}
 )
 local function configureActiveLanguages()
+    local config = getGlobalConfiguration()
+    local ____opt_0 = config.packages.nvimDapUI
+    local dapConfig = ____opt_0 and ____opt_0.config
+    if dapConfig == nil then
+        vim.notify("DAP configuration undefined. Unable to continue setup.", vim.log.levels.ERROR)
+        return
+    end
     local dap = ____exports.getDap()
-    if CONFIGURATION.dap.cPlusPlus then
-        local LLDB_PORT = 1828
+    local ____opt_2 = config.targetEnvironments["c++"]
+    local ____temp_6 = ____opt_2 and ____opt_2.enabled
+    if not ____temp_6 then
+        local ____opt_4 = config.targetEnvironments.c
+        ____temp_6 = ____opt_4 and ____opt_4.enabled
+    end
+    if ____temp_6 then
+        local LLDB_PORT = dapConfig.lldb.port
         dap.adapters.lldb = {
             type = "server",
             port = LLDB_PORT,
-            host = "127.0.0.1",
+            host = dapConfig.lldb.host or "127.0.0.1",
             executable = {
-                command = "codelldb",
+                command = dapConfig.lldb.executable or "codelldb",
                 args = {
                     "--port",
-                    tostring(LLDB_PORT)
+                    tostring(LLDB_PORT),
+                    unpack(dapConfig.lldb.additionalArgs or ({}))
                 }
             }
         }
@@ -3718,17 +3757,31 @@ local function configureActiveLanguages()
             }}
         end
     end
-    if CONFIGURATION.dap.nodeJS then
+    local possibleTargets = {"nodejs", "javascript", "typescript"}
+    if __TS__ArraySome(
+        possibleTargets,
+        function(____, x)
+            local ____opt_7 = config.targetEnvironments[x]
+            local ____temp_9 = ____opt_7 and ____opt_7.enabled
+            if ____temp_9 == nil then
+                ____temp_9 = false
+            end
+            return ____temp_9
+        end
+    ) then
         dap.adapters["pwa-node"] = {type = "server", host = "::1", port = 8123, executable = {command = "js-debug-adapter"}}
         for ____, language in ipairs({"javascript", "typescript"}) do
-            dap.configurations[language] = {{
-                type = "pwa-node",
-                request = "launch",
-                name = "Launch file",
-                program = "${file}",
-                cwd = "${workspaceFolder}",
-                runtimeExecutable = "node"
-            }}
+            local ____opt_10 = config.targetEnvironments[language]
+            if ____opt_10 and ____opt_10.enabled then
+                dap.configurations[language] = {{
+                    type = "pwa-node",
+                    request = "launch",
+                    name = "Launch file",
+                    program = "${file}",
+                    cwd = "${workspaceFolder}",
+                    runtimeExecutable = "node"
+                }}
+            end
         end
     end
 end
@@ -3755,6 +3808,8 @@ local getDapUI = ____nvim_2Ddap_2Dui.getDapUI
 local ____toggles = require("lua.toggles")
 local CONFIGURATION = ____toggles.CONFIGURATION
 vim.g.mapleader = " "
+vim.cmd("map w <Nop>")
+vim.cmd("map W <Nop>")
 local MOVEMENT_DIRECTION_KEYS = {left = {key = "h", command = "<Left>"}, right = {key = "l", command = "<Right>"}, up = {key = "k", command = "<Up>"}, down = {key = "j", command = "<Down>"}}
 for direction in pairs(MOVEMENT_DIRECTION_KEYS) do
     local key = MOVEMENT_DIRECTION_KEYS[direction]
@@ -4116,14 +4171,23 @@ ____exports.default = plugin
 return ____exports
  end,
 ["lua.plugins.lspconfig"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local __TS__Iterator = ____lualib.__TS__Iterator
 local ____exports = {}
-local on_attach, configureLSP
+local getConfig, on_attach, configureLSP
+local ____configuration = require("lua.helpers.configuration.index")
+local getGlobalConfiguration = ____configuration.getGlobalConfiguration
 local ____useModule = require("lua.helpers.module.useModule")
 local useExternalModule = ____useModule.useExternalModule
-local ____toggles = require("lua.toggles")
-local CONFIGURATION = ____toggles.CONFIGURATION
+function getConfig()
+    local config = getGlobalConfiguration()
+    local lspConfigRoot = config.packages.lspconfig
+    local lspConfig = lspConfigRoot.config
+    return lspConfig
+end
 function on_attach(client, bufnr)
-    if CONFIGURATION.lspconfig.useInlayHints then
+    local lspConfig = getConfig()
+    if lspConfig.inlayHints.enabled then
         local ____error
         do
             local function ____catch(e)
@@ -4161,29 +4225,32 @@ function configureLSP()
     if CONFIGURATION.useCMP then
         capabilities = useExternalModule("cmp_nvim_lsp").default_capabilities()
     end
-    for ____, target in ipairs(CONFIGURATION.lspconfig.configuredLSPServers) do
+    for ____, target in __TS__Iterator(CONFIGURATION.lspconfig.configuredLSPServers) do
         lspconfig[target].setup({capabilities = capabilities, on_attach = on_attach})
     end
     vim.diagnostic.config({update_in_insert = true, virtual_text = not CONFIGURATION.useLSPLines})
 end
 local plugin = {[1] = "neovim/nvim-lspconfig", config = configureLSP}
-if CONFIGURATION.lspconfig.useInlayHints then
-    vim.api.nvim_create_autocmd(
-        "InsertEnter",
-        {callback = function()
-            if CONFIGURATION.lspconfig.inlayHints.displayMode == "only-in-normal-mode" then
-                vim.lsp.inlay_hint.enable(false)
-            end
-        end}
-    )
-    vim.api.nvim_create_autocmd(
-        "InsertLeave",
-        {callback = function()
-            if CONFIGURATION.lspconfig.inlayHints.displayMode == "only-in-normal-mode" then
-                vim.lsp.inlay_hint.enable(true)
-            end
-        end}
-    )
+do
+    local lspConfig = getConfig()
+    if lspConfig.inlayHints.enabled then
+        vim.api.nvim_create_autocmd(
+            "InsertEnter",
+            {callback = function()
+                if lspConfig.inlayHints.displayMode == "only-in-normal-mode" then
+                    vim.lsp.inlay_hint.enable(false)
+                end
+            end}
+        )
+        vim.api.nvim_create_autocmd(
+            "InsertLeave",
+            {callback = function()
+                if lspConfig.inlayHints.displayMode == "only-in-normal-mode" then
+                    vim.lsp.inlay_hint.enable(true)
+                end
+            end}
+        )
+    end
 end
 ____exports.default = plugin
 return ____exports
