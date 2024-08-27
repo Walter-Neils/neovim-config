@@ -3218,6 +3218,13 @@ vim.api.nvim_create_user_command(
                 )
             end
             ____exports.saveGlobalConfiguration()
+        else
+            local target = args.mode
+            if target == nil then
+                console.warn("Argument 'mode' is required, either get or set")
+            else
+                console.error(("Mode '" .. tostring(target)) .. "' is unsupported")
+            end
         end
     end,
     {nargs = "*"}

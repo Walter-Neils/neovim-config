@@ -204,6 +204,15 @@ vim.api.nvim_create_user_command("Configuration", _args => {
     }
     saveGlobalConfiguration();
   }
+  else {
+    const target = (args as any).mode;
+    if (target === undefined) {
+      console.warn("Argument 'mode' is required, either get or set");
+    }
+    else {
+      console.error(`Mode '${target}' is unsupported`);
+    }
+  }
 }, {
   nargs: '*'
-})
+});
