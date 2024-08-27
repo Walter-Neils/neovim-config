@@ -105,6 +105,9 @@ function environmentKeyToConfig(env: string) {
   const configs = [{
     key: 'typescript',
     lspKey: 'tsserver'
+  }, {
+    key: 'c/c++',
+    lspKey: 'clangd'
   }];
 
   return configs.find(x => x.key === env);

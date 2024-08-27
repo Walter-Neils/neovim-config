@@ -138,6 +138,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
   targetEnvironments: {
     typescript: {
       enabled: true
+    },
+    'c/c++': {
+      enabled: true
     }
   },
   shell: {
@@ -164,14 +167,65 @@ export function saveGlobalConfiguration() {
 
 vim.api.nvim_create_user_command("Configuration", _args => {
   const args = parseArgs<{
+    mode: 'delete',
+    key: string
+  } | {
+    mode: 'list',
+    key: string
+  } | {
     mode: 'get',
     key: string
   } | {
     mode: 'set',
+    type?: 'string' | 'number' | 'boolean',
     key: string,
     value: string
   }>(_args.fargs);
-  if (args.mode === 'get') {
+  if (args.mode === 'delete') {
+    let parts = args.key.split('.').reverse();
+    const currentTarget = function() { return parts[parts.length - 1]; };
+    let current: any = getGlobalConfiguration();
+    while (parts.length > 1) {
+      let next = current[currentTarget()];
+      if (next === undefined) {
+        next = {};
+        current[currentTarget()] = next;
+        current = next;
+      }
+      else {
+        current = next;
+      }
+
+      parts.pop();
+    }
+    current[currentTarget()] = undefined;
+  }
+  else if (args.mode === 'list') {
+    args.key ??= "";
+    let parts = args.key.split('.').reverse();
+    if (args.key === "") {
+      parts = [];
+    }
+    const currentTarget = function() { return parts[parts.length - 1]; };
+    let current: any = getGlobalConfiguration();
+    while (parts.length > 0) {
+      current = current[currentTarget()];
+      parts.pop();
+    }
+    if (typeof current === 'undefined') {
+      console.error(`Config path '${args.key}' is undefined`);
+      return;
+    }
+    else if (typeof current === 'object') {
+      for (const key in current) {
+        console.log(`'${key}': <${current[key]}> (${typeof current[key]})`);
+      }
+    }
+    else {
+      console.log(`${current}`);
+    }
+  }
+  else if (args.mode === 'get') {
     let parts = args.key.split('.').reverse();
     const currentTarget = function() { return parts[parts.length - 1]; };
     let current: any = getGlobalConfiguration();
@@ -186,10 +240,24 @@ vim.api.nvim_create_user_command("Configuration", _args => {
     const currentTarget = function() { return parts[parts.length - 1]; };
     let current: any = getGlobalConfiguration();
     while (parts.length > 1) {
-      current = current[currentTarget()];
+      let next = current[currentTarget()];
+      if (next === undefined) {
+        next = {};
+        current[currentTarget()] = next;
+        current = next;
+      }
+      else {
+        current = next;
+      }
+
       parts.pop();
     }
-    const currentType = typeof current[currentTarget()];
+    const currentType = args.type ?? typeof current[currentTarget()];
+    if (currentType === 'undefined') {
+      console.error("Cannot infer desired type from existing value: does not exist. ");
+      console.error("Supply --type 'string' | 'number' | 'boolean' argument");
+      return;
+    }
     if (currentType === 'string') {
       current[currentTarget()] = args.value;
     }

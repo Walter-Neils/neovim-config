@@ -3172,7 +3172,7 @@ ____exports.CONFIGURATION_DEFAULTS = {packages = {
     fireNvim = {enabled = true},
     ufo = {enabled = true},
     lspconfig = {enabled = true, config = {inlayHints = {enabled = true, displayMode = "only-in-normal-mode"}}}
-}, targetEnvironments = {typescript = {enabled = true}}, shell = {target = "tmux", isolationScope = "isolated"}, integrations = {ollama = {enabled = true}}}
+}, targetEnvironments = {typescript = {enabled = true}, ["c/c++"] = {enabled = true}}, shell = {target = "tmux", isolationScope = "isolated"}, integrations = {ollama = {enabled = true}}}
 function ____exports.getGlobalConfiguration()
     if configuration == nil then
         reloadConfiguration()
@@ -3183,7 +3183,51 @@ vim.api.nvim_create_user_command(
     "Configuration",
     function(_args)
         local args = parseArgs(_args.fargs)
-        if args.mode == "get" then
+        if args.mode == "delete" then
+            local parts = __TS__ArrayReverse(__TS__StringSplit(args.key, "."))
+            local function currentTarget()
+                return parts[#parts]
+            end
+            local current = ____exports.getGlobalConfiguration()
+            while #parts > 1 do
+                local next = current[currentTarget()]
+                if next == nil then
+                    next = {}
+                    current[currentTarget()] = next
+                    current = next
+                else
+                    current = next
+                end
+                table.remove(parts)
+            end
+            current[currentTarget()] = nil
+        elseif args.mode == "list" then
+            if args.key == nil then
+                args.key = ""
+            end
+            local parts = __TS__ArrayReverse(__TS__StringSplit(args.key, "."))
+            if args.key == "" then
+                parts = {}
+            end
+            local function currentTarget()
+                return parts[#parts]
+            end
+            local current = ____exports.getGlobalConfiguration()
+            while #parts > 0 do
+                current = current[currentTarget()]
+                table.remove(parts)
+            end
+            if type(current) == "nil" then
+                console.error(("Config path '" .. args.key) .. "' is undefined")
+                return
+            elseif type(current) == "table" then
+                for key in pairs(current) do
+                    console.log(((((("'" .. key) .. "': <") .. tostring(current[key])) .. "> (") .. __TS__TypeOf(current[key])) .. ")")
+                end
+            else
+                console.log(tostring(current))
+            end
+        elseif args.mode == "get" then
             local parts = __TS__ArrayReverse(__TS__StringSplit(args.key, "."))
             local function currentTarget()
                 return parts[#parts]
@@ -3201,10 +3245,22 @@ vim.api.nvim_create_user_command(
             end
             local current = ____exports.getGlobalConfiguration()
             while #parts > 1 do
-                current = current[currentTarget()]
+                local next = current[currentTarget()]
+                if next == nil then
+                    next = {}
+                    current[currentTarget()] = next
+                    current = next
+                else
+                    current = next
+                end
                 table.remove(parts)
             end
-            local currentType = __TS__TypeOf(current[currentTarget()])
+            local currentType = args.type or __TS__TypeOf(current[currentTarget()])
+            if currentType == "undefined" then
+                console.error("Cannot infer desired type from existing value: does not exist. ")
+                console.error("Supply --type 'string' | 'number' | 'boolean' argument")
+                return
+            end
             if currentType == "string" then
                 current[currentTarget()] = args.value
             elseif currentType == "boolean" then
@@ -4271,7 +4327,7 @@ function getPluginConfig()
     return config.packages.lspconfig
 end
 function environmentKeyToConfig(env)
-    local configs = {{key = "typescript", lspKey = "tsserver"}}
+    local configs = {{key = "typescript", lspKey = "tsserver"}, {key = "c/c++", lspKey = "clangd"}}
     return __TS__ArrayFind(
         configs,
         function(____, x) return x.key == env end
