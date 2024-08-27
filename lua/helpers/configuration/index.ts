@@ -1,4 +1,5 @@
 import { usePersistentValue } from "../persistent-data";
+import { parseArgs } from "../user_command/argparser";
 
 let configuration: GlobalConfiguration = undefined!;
 
@@ -160,3 +161,49 @@ export function getGlobalConfiguration() {
 export function saveGlobalConfiguration() {
   saveConfiguration();
 }
+
+vim.api.nvim_create_user_command("Configuration", _args => {
+  const args = parseArgs<{
+    mode: 'get',
+    key: string
+  } | {
+    mode: 'set',
+    key: string,
+    value: string
+  }>(_args.fargs);
+  if (args.mode === 'get') {
+    let parts = args.key.split('.').reverse();
+    const currentTarget = function() { return parts[parts.length - 1]; };
+    let current: any = getGlobalConfiguration();
+    while (parts.length > 1) {
+      current = current[currentTarget()];
+      parts.pop();
+    }
+    console.log(`${current[parts[0]]}`);
+  }
+  else if (args.mode === 'set') {
+    let parts = args.key.split('.').reverse();
+    const currentTarget = function() { return parts[parts.length - 1]; };
+    let current: any = getGlobalConfiguration();
+    while (parts.length > 1) {
+      current = current[currentTarget()];
+      parts.pop();
+    }
+    const currentType = typeof current[currentTarget()];
+    if (currentType === 'string') {
+      current[currentTarget()] = args.value;
+    }
+    else if (currentType === 'boolean') {
+      current[currentTarget()] = args.value === 'true';
+    }
+    else if (currentType === 'number') {
+      current[currentTarget()] = tonumber(args.value);
+    }
+    else {
+      throw new Error(`Cannot convert target type to ${currentType}: unsupported`);
+    }
+    saveGlobalConfiguration();
+  }
+}, {
+  nargs: '*'
+})

@@ -3045,13 +3045,89 @@ function ____exports.usePersistentValue(key, defaultValue)
 end
 return ____exports
  end,
+["lua.helpers.user_command.argparser"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local __TS__StringStartsWith = ____lualib.__TS__StringStartsWith
+local Error = ____lualib.Error
+local RangeError = ____lualib.RangeError
+local ReferenceError = ____lualib.ReferenceError
+local SyntaxError = ____lualib.SyntaxError
+local TypeError = ____lualib.TypeError
+local URIError = ____lualib.URIError
+local __TS__New = ____lualib.__TS__New
+local __TS__StringAccess = ____lualib.__TS__StringAccess
+local __TS__StringEndsWith = ____lualib.__TS__StringEndsWith
+local __TS__StringSlice = ____lualib.__TS__StringSlice
+local ____exports = {}
+function ____exports.parseArgs(args)
+    local result = {}
+    local primedKey = nil
+    do
+        local i = 0
+        while i < #args do
+            local segment = args[i + 1]
+            if __TS__StringStartsWith(segment, "--") then
+                if primedKey ~= nil then
+                    result[primedKey] = true
+                end
+                primedKey = string.sub(segment, 3)
+            else
+                if primedKey == nil then
+                    error(
+                        __TS__New(Error, "Expected a key, got a value"),
+                        0
+                    )
+                elseif __TS__StringStartsWith(segment, "\"") or __TS__StringStartsWith(segment, "'") then
+                    local delim = __TS__StringAccess(segment, 0)
+                    local valueResult = string.sub(segment, 2)
+                    local ____end = i
+                    while ____end < #args and not __TS__StringEndsWith(args[____end + 1], delim) do
+                        ____end = ____end + 1
+                        valueResult = valueResult .. " " .. args[____end + 1]
+                    end
+                    if ____end >= #args or not __TS__StringEndsWith(args[____end + 1], delim) then
+                        error(
+                            __TS__New(Error, "Unterminated string: " .. args[____end + 1]),
+                            0
+                        )
+                    end
+                    valueResult = __TS__StringSlice(valueResult, 0, #valueResult - 1)
+                    result[primedKey] = valueResult
+                    i = ____end
+                else
+                    result[primedKey] = segment
+                end
+                primedKey = nil
+            end
+            i = i + 1
+        end
+    end
+    if primedKey ~= nil then
+        result[primedKey] = true
+    end
+    return result
+end
+return ____exports
+ end,
 ["lua.helpers.configuration.index"] = function(...) 
 local ____lualib = require("lualib_bundle")
 local __TS__ObjectKeys = ____lualib.__TS__ObjectKeys
+local __TS__StringSplit = ____lualib.__TS__StringSplit
+local __TS__ArrayReverse = ____lualib.__TS__ArrayReverse
+local __TS__TypeOf = ____lualib.__TS__TypeOf
+local Error = ____lualib.Error
+local RangeError = ____lualib.RangeError
+local ReferenceError = ____lualib.ReferenceError
+local SyntaxError = ____lualib.SyntaxError
+local TypeError = ____lualib.TypeError
+local URIError = ____lualib.URIError
+local __TS__New = ____lualib.__TS__New
 local ____exports = {}
 local saveConfiguration, configuration, getGlobalConfig, setGlobalConfig
 local ____persistent_2Ddata = require("lua.helpers.persistent-data.index")
 local usePersistentValue = ____persistent_2Ddata.usePersistentValue
+local ____argparser = require("lua.helpers.user_command.argparser")
+local parseArgs = ____argparser.parseArgs
 function saveConfiguration()
     setGlobalConfig(configuration)
 end
@@ -3103,6 +3179,49 @@ function ____exports.getGlobalConfiguration()
     end
     return configuration
 end
+vim.api.nvim_create_user_command(
+    "Configuration",
+    function(_args)
+        local args = parseArgs(_args.fargs)
+        if args.mode == "get" then
+            local parts = __TS__ArrayReverse(__TS__StringSplit(args.key, "."))
+            local function currentTarget()
+                return parts[#parts]
+            end
+            local current = ____exports.getGlobalConfiguration()
+            while #parts > 1 do
+                current = current[currentTarget()]
+                table.remove(parts)
+            end
+            console.log(tostring(current[parts[1]]))
+        elseif args.mode == "set" then
+            local parts = __TS__ArrayReverse(__TS__StringSplit(args.key, "."))
+            local function currentTarget()
+                return parts[#parts]
+            end
+            local current = ____exports.getGlobalConfiguration()
+            while #parts > 1 do
+                current = current[currentTarget()]
+                table.remove(parts)
+            end
+            local currentType = __TS__TypeOf(current[currentTarget()])
+            if currentType == "string" then
+                current[currentTarget()] = args.value
+            elseif currentType == "boolean" then
+                current[currentTarget()] = args.value == "true"
+            elseif currentType == "number" then
+                current[currentTarget()] = tonumber(args.value)
+            else
+                error(
+                    __TS__New(Error, ("Cannot convert target type to " .. currentType) .. ": unsupported"),
+                    0
+                )
+            end
+            ____exports.saveGlobalConfiguration()
+        end
+    end,
+    {nargs = "*"}
+)
 return ____exports
  end,
 ["lua.integrations.hyprland"] = function(...) 
@@ -3874,70 +3993,6 @@ end
 local ____opt_14 = config.packages.lazyGit
 if ____opt_14 and ____opt_14.enabled then
     applyKeyMapping({mode = "n", inputStroke = "<leader>lg", outputStroke = "<cmd>LazyGit<CR>", options = {desc = "Show code actions"}})
-end
-return ____exports
- end,
-["lua.helpers.user_command.argparser"] = function(...) 
-local ____lualib = require("lualib_bundle")
-local __TS__StringStartsWith = ____lualib.__TS__StringStartsWith
-local Error = ____lualib.Error
-local RangeError = ____lualib.RangeError
-local ReferenceError = ____lualib.ReferenceError
-local SyntaxError = ____lualib.SyntaxError
-local TypeError = ____lualib.TypeError
-local URIError = ____lualib.URIError
-local __TS__New = ____lualib.__TS__New
-local __TS__StringAccess = ____lualib.__TS__StringAccess
-local __TS__StringEndsWith = ____lualib.__TS__StringEndsWith
-local __TS__StringSlice = ____lualib.__TS__StringSlice
-local ____exports = {}
-function ____exports.parseArgs(args)
-    local result = {}
-    local primedKey = nil
-    do
-        local i = 0
-        while i < #args do
-            local segment = args[i + 1]
-            if __TS__StringStartsWith(segment, "--") then
-                if primedKey ~= nil then
-                    result[primedKey] = true
-                end
-                primedKey = string.sub(segment, 3)
-            else
-                if primedKey == nil then
-                    error(
-                        __TS__New(Error, "Expected a key, got a value"),
-                        0
-                    )
-                elseif __TS__StringStartsWith(segment, "\"") or __TS__StringStartsWith(segment, "'") then
-                    local delim = __TS__StringAccess(segment, 0)
-                    local valueResult = string.sub(segment, 2)
-                    local ____end = i
-                    while ____end < #args and not __TS__StringEndsWith(args[____end + 1], delim) do
-                        ____end = ____end + 1
-                        valueResult = valueResult .. " " .. args[____end + 1]
-                    end
-                    if ____end >= #args or not __TS__StringEndsWith(args[____end + 1], delim) then
-                        error(
-                            __TS__New(Error, "Unterminated string: " .. args[____end + 1]),
-                            0
-                        )
-                    end
-                    valueResult = __TS__StringSlice(valueResult, 0, #valueResult - 1)
-                    result[primedKey] = valueResult
-                    i = ____end
-                else
-                    result[primedKey] = segment
-                end
-                primedKey = nil
-            end
-            i = i + 1
-        end
-    end
-    if primedKey ~= nil then
-        result[primedKey] = true
-    end
-    return result
 end
 return ____exports
  end,
