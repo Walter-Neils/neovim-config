@@ -195,10 +195,10 @@ vim.api.nvim_create_user_command("Configuration", _args => {
       else {
         current = next;
       }
-
       parts.pop();
     }
     current[currentTarget()] = undefined;
+    saveGlobalConfiguration();
   }
   else if (args.mode === 'list') {
     args.key ??= "";

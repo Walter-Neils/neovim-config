@@ -75,7 +75,7 @@ const plugin: LazyPlugin = {
       formatting: {
         format: function(this: void, _entry: any, vim_item: any) {
           let icons = KIND_ICONS;
-          let icon: string = icons[vim_item.kind as keyof typeof KIND_ICONS];
+          let icon: string = icons[vim_item.kind as keyof typeof KIND_ICONS] ?? "?";
           icon = ` ${icon} `;
           vim_item.menu = `  (${vim_item.kind})  `;
           vim_item.kind = string.format("%s %s", icon, vim_item.kind);

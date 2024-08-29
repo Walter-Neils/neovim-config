@@ -2897,64 +2897,6 @@ function ____exports.activateWelcomePage()
 end
 return ____exports
  end,
-["lua.custom.tmux.index"] = function(...) 
-local ____lualib = require("lualib_bundle")
-local Error = ____lualib.Error
-local RangeError = ____lualib.RangeError
-local ReferenceError = ____lualib.ReferenceError
-local SyntaxError = ____lualib.SyntaxError
-local TypeError = ____lualib.TypeError
-local URIError = ____lualib.URIError
-local __TS__New = ____lualib.__TS__New
-local ____exports = {}
-local ____nui = require("lua.plugins.nui")
-local useNUI = ____nui.useNUI
-local function setTmuxScope(isolationScope)
-    if isolationScope == "global" then
-        vim.o.shell = "tmux"
-    elseif isolationScope == "neovim-shared" then
-        vim.o.shell = "tmux -L neovim"
-    elseif isolationScope == "per-instance" then
-        vim.o.shell = "tmux -L neovim-" .. tostring(vim.fn.getpid())
-    else
-        error(
-            __TS__New(Error, "Invalid scope " .. isolationScope),
-            0
-        )
-    end
-end
-local function changeTmuxScope()
-    local NUI = useNUI()
-    local menu = NUI.Menu(
-        {position = "50%", size = {width = 33, height = 3}, border = {style = "single", text = {top = "Change TMUX scope"}}},
-        {
-            lines = {
-                NUI.Menu.item("Global", {target = "global"}),
-                NUI.Menu.item("Shared between neovim instances", {target = "neovim-shared"}),
-                NUI.Menu.item("Isolated", {target = "per-instance"})
-            },
-            on_submit = function(_item)
-                local item = _item
-                setTmuxScope(item.target)
-            end
-        }
-    )
-    menu:mount()
-end
-function ____exports.initCustomTmux()
-    vim.api.nvim_create_user_command("ChangeTmuxScope", changeTmuxScope, {})
-end
-return ____exports
- end,
-["lua.custom.index"] = function(...) 
-local ____exports = {}
-local ____tmux = require("lua.custom.tmux.index")
-local initCustomTmux = ____tmux.initCustomTmux
-function ____exports.setupCustomLogic()
-    initCustomTmux()
-end
-return ____exports
- end,
 ["lua.shims.fs.index"] = function(...) 
 local ____lualib = require("lualib_bundle")
 local Error = ____lualib.Error
@@ -3201,6 +3143,7 @@ vim.api.nvim_create_user_command(
                 table.remove(parts)
             end
             current[currentTarget()] = nil
+            ____exports.saveGlobalConfiguration()
         elseif args.mode == "list" then
             if args.key == nil then
                 args.key = ""
@@ -3285,6 +3228,70 @@ vim.api.nvim_create_user_command(
     end,
     {nargs = "*"}
 )
+return ____exports
+ end,
+["lua.custom.tmux.index"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local Error = ____lualib.Error
+local RangeError = ____lualib.RangeError
+local ReferenceError = ____lualib.ReferenceError
+local SyntaxError = ____lualib.SyntaxError
+local TypeError = ____lualib.TypeError
+local URIError = ____lualib.URIError
+local __TS__New = ____lualib.__TS__New
+local ____exports = {}
+local ____configuration = require("lua.helpers.configuration.index")
+local getGlobalConfiguration = ____configuration.getGlobalConfiguration
+local ____nui = require("lua.plugins.nui")
+local useNUI = ____nui.useNUI
+local function setTmuxScope(isolationScope)
+    local globalConfig = getGlobalConfiguration()
+    if isolationScope == "global" then
+        vim.o.shell = "tmux"
+        globalConfig.shell.isolationScope = "global"
+    elseif isolationScope == "neovim-shared" then
+        vim.o.shell = "tmux -L neovim"
+        globalConfig.shell.isolationScope = "neovim-shared"
+    elseif isolationScope == "per-instance" then
+        vim.o.shell = "tmux -L neovim-" .. tostring(vim.fn.getpid())
+        globalConfig.shell.isolationScope = "isolated"
+    else
+        error(
+            __TS__New(Error, "Invalid scope " .. isolationScope),
+            0
+        )
+    end
+end
+local function changeTmuxScope()
+    local NUI = useNUI()
+    local menu = NUI.Menu(
+        {position = "50%", size = {width = 33, height = 3}, border = {style = "single", text = {top = "Change TMUX scope"}}},
+        {
+            lines = {
+                NUI.Menu.item("Global", {target = "global"}),
+                NUI.Menu.item("Shared between neovim instances", {target = "neovim-shared"}),
+                NUI.Menu.item("Isolated", {target = "per-instance"})
+            },
+            on_submit = function(_item)
+                local item = _item
+                setTmuxScope(item.target)
+            end
+        }
+    )
+    menu:mount()
+end
+function ____exports.initCustomTmux()
+    vim.api.nvim_create_user_command("ChangeTmuxScope", changeTmuxScope, {})
+end
+return ____exports
+ end,
+["lua.custom.index"] = function(...) 
+local ____exports = {}
+local ____tmux = require("lua.custom.tmux.index")
+local initCustomTmux = ____tmux.initCustomTmux
+function ____exports.setupCustomLogic()
+    initCustomTmux()
+end
 return ____exports
  end,
 ["lua.integrations.hyprland"] = function(...) 
@@ -4128,7 +4135,7 @@ local plugin = {
             window = {completion = {winhighlight = "Normal:Pmenu,FloatBorder:Pmenu,Search:None", col_offset = -3, side_padding = 0}},
             formatting = {format = function(_entry, vim_item)
                 local icons = KIND_ICONS
-                local icon = icons[vim_item.kind]
+                local icon = icons[vim_item.kind] or "?"
                 icon = (" " .. icon) .. " "
                 vim_item.menu = ("  (" .. tostring(vim_item.kind)) .. ")  "
                 vim_item.kind = string.format("%s %s", icon, vim_item.kind)
