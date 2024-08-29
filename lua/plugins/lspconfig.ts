@@ -108,6 +108,9 @@ function environmentKeyToConfig(env: string) {
   }, {
     key: 'c/c++',
     lspKey: 'clangd'
+  }, {
+    key: 'markdown',
+    lspKey: 'marksman'
   }];
 
   return configs.find(x => x.key === env);

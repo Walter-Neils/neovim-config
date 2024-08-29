@@ -3114,7 +3114,7 @@ ____exports.CONFIGURATION_DEFAULTS = {packages = {
     fireNvim = {enabled = true},
     ufo = {enabled = true},
     lspconfig = {enabled = true, config = {inlayHints = {enabled = true, displayMode = "only-in-normal-mode"}}}
-}, targetEnvironments = {typescript = {enabled = true}, ["c/c++"] = {enabled = true}}, shell = {target = "tmux", isolationScope = "isolated"}, integrations = {ollama = {enabled = true}}}
+}, targetEnvironments = {typescript = {enabled = true}, ["c/c++"] = {enabled = true}, markdown = {enabled = true}}, shell = {target = "tmux", isolationScope = "isolated"}, integrations = {ollama = {enabled = true}}}
 function ____exports.getGlobalConfiguration()
     if configuration == nil then
         reloadConfiguration()
@@ -4334,7 +4334,7 @@ function getPluginConfig()
     return config.packages.lspconfig
 end
 function environmentKeyToConfig(env)
-    local configs = {{key = "typescript", lspKey = "tsserver"}, {key = "c/c++", lspKey = "clangd"}}
+    local configs = {{key = "typescript", lspKey = "tsserver"}, {key = "c/c++", lspKey = "clangd"}, {key = "markdown", lspKey = "marksman"}}
     return __TS__ArrayFind(
         configs,
         function(____, x) return x.key == env end

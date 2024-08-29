@@ -141,6 +141,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     'c/c++': {
       enabled: true
+    },
+    'markdown': {
+      enabled: true
     }
   },
   shell: {
