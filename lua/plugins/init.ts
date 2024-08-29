@@ -83,6 +83,9 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (globalConfig.packages.nvimNotify?.enabled) {
     result.push(require('nvim-notify').default);
   }
+  if (globalConfig.packages.markdownPreview?.enabled) {
+    result.push(require('markdown-preview').default);
+  }
   result.push(require('nui').default);
   return result;
 }

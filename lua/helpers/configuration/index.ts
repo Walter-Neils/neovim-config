@@ -133,6 +133,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
           displayMode: 'only-in-normal-mode'
         }
       }
+    },
+    markdownPreview: {
+      enabled: true
     }
   },
   targetEnvironments: {

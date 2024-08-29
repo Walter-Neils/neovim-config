@@ -3113,7 +3113,8 @@ ____exports.CONFIGURATION_DEFAULTS = {packages = {
     actionsPreview = {enabled = true},
     fireNvim = {enabled = true},
     ufo = {enabled = true},
-    lspconfig = {enabled = true, config = {inlayHints = {enabled = true, displayMode = "only-in-normal-mode"}}}
+    lspconfig = {enabled = true, config = {inlayHints = {enabled = true, displayMode = "only-in-normal-mode"}}},
+    markdownPreview = {enabled = true}
 }, targetEnvironments = {typescript = {enabled = true}, ["c/c++"] = {enabled = true}, markdown = {enabled = true}}, shell = {target = "tmux", isolationScope = "isolated"}, integrations = {ollama = {enabled = true}}}
 function ____exports.getGlobalConfiguration()
     if configuration == nil then
@@ -3539,6 +3540,10 @@ function ____exports.getPlugins()
     local ____opt_46 = globalConfig.packages.nvimNotify
     if ____opt_46 and ____opt_46.enabled then
         result[#result + 1] = require("lua.plugins.nvim-notify").default
+    end
+    local ____opt_48 = globalConfig.packages.markdownPreview
+    if ____opt_48 and ____opt_48.enabled then
+        result[#result + 1] = require("lua.plugins.markdown-preview").default
     end
     result[#result + 1] = require("lua.plugins.nui").default
     return result
@@ -4402,6 +4407,20 @@ local plugin = {
         local module = useExternalModule("lualine")
         module.setup({options = {theme = "material"}})
     end
+}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.markdown-preview"] = function(...) 
+local ____exports = {}
+local plugin = {
+    [1] = "iamcco/markdown-preview.nvim",
+    cmd = {"MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop"},
+    build = "cd app && npm install",
+    init = function()
+        vim.g.mkdp_filetypes = {"markdown"}
+    end,
+    ft = {"markdown"}
 }
 ____exports.default = plugin
 return ____exports
