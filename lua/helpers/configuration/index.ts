@@ -136,6 +136,20 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     markdownPreview: {
       enabled: true
+    },
+    gitBrowse: {
+      enabled: true
+    },
+    obsidian: {
+      enabled: true,
+      config: {
+        workspaces: [
+          {
+            name: 'notes',
+            path: '~/Documents/obsidian/notes'
+          }
+        ]
+      }
     }
   },
   targetEnvironments: {

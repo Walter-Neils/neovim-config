@@ -86,6 +86,12 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (globalConfig.packages.markdownPreview?.enabled) {
     result.push(require('markdown-preview').default);
   }
+  if (globalConfig.packages.gitBrowse?.enabled) {
+    result.push(require('git-browse').default);
+  }
+  if (globalConfig.packages.obsidian?.enabled) {
+    result.push(require('obsidian').default);
+  }
   result.push(require('nui').default);
   return result;
 }

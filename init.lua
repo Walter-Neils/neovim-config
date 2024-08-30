@@ -3114,7 +3114,9 @@ ____exports.CONFIGURATION_DEFAULTS = {packages = {
     fireNvim = {enabled = true},
     ufo = {enabled = true},
     lspconfig = {enabled = true, config = {inlayHints = {enabled = true, displayMode = "only-in-normal-mode"}}},
-    markdownPreview = {enabled = true}
+    markdownPreview = {enabled = true},
+    gitBrowse = {enabled = true},
+    obsidian = {enabled = true, config = {workspaces = {{name = "notes", path = "~/Documents/obsidian/notes"}}}}
 }, targetEnvironments = {typescript = {enabled = true}, ["c/c++"] = {enabled = true}, markdown = {enabled = true}}, shell = {target = "tmux", isolationScope = "isolated"}, integrations = {ollama = {enabled = true}}}
 function ____exports.getGlobalConfiguration()
     if configuration == nil then
@@ -3545,6 +3547,14 @@ function ____exports.getPlugins()
     if ____opt_48 and ____opt_48.enabled then
         result[#result + 1] = require("lua.plugins.markdown-preview").default
     end
+    local ____opt_50 = globalConfig.packages.gitBrowse
+    if ____opt_50 and ____opt_50.enabled then
+        result[#result + 1] = require("lua.plugins.git-browse").default
+    end
+    local ____opt_52 = globalConfig.packages.obsidian
+    if ____opt_52 and ____opt_52.enabled then
+        result[#result + 1] = require("lua.plugins.obsidian").default
+    end
     result[#result + 1] = require("lua.plugins.nui").default
     return result
 end
@@ -3832,13 +3842,8 @@ local function configureActiveLanguages()
         return
     end
     local dap = ____exports.getDap()
-    local ____opt_2 = config.targetEnvironments["c++"]
-    local ____temp_6 = ____opt_2 and ____opt_2.enabled
-    if not ____temp_6 then
-        local ____opt_4 = config.targetEnvironments.c
-        ____temp_6 = ____opt_4 and ____opt_4.enabled
-    end
-    if ____temp_6 then
+    local ____opt_2 = config.targetEnvironments["c/c++"]
+    if ____opt_2 and ____opt_2.enabled then
         local LLDB_PORT = dapConfig.lldb.port
         dap.adapters.lldb = {
             type = "server",
@@ -3870,18 +3875,18 @@ local function configureActiveLanguages()
     if __TS__ArraySome(
         possibleTargets,
         function(____, x)
-            local ____opt_7 = config.targetEnvironments[x]
-            local ____temp_9 = ____opt_7 and ____opt_7.enabled
-            if ____temp_9 == nil then
-                ____temp_9 = false
+            local ____opt_4 = config.targetEnvironments[x]
+            local ____temp_6 = ____opt_4 and ____opt_4.enabled
+            if ____temp_6 == nil then
+                ____temp_6 = false
             end
-            return ____temp_9
+            return ____temp_6
         end
     ) then
         dap.adapters["pwa-node"] = {type = "server", host = "::1", port = 8123, executable = {command = "js-debug-adapter"}}
         for ____, language in ipairs({"javascript", "typescript"}) do
-            local ____opt_10 = config.targetEnvironments[language]
-            if ____opt_10 and ____opt_10.enabled then
+            local ____opt_7 = config.targetEnvironments[language]
+            if ____opt_7 and ____opt_7.enabled then
                 dap.configurations[language] = {{
                     type = "pwa-node",
                     request = "launch",
@@ -4196,6 +4201,12 @@ end
 local plugin = {[1] = "voldikss/vim-floaterm", cmd = {"FloatermNew", "FloatermToggle", "FloatermShow", "FloatermHide"}}
 local nvim = ____exports.extendNeovimAPIWithFloattermConfig()
 nvim.g.floaterm_title = ""
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.git-browse"] = function(...) 
+local ____exports = {}
+local plugin = {[1] = "Morozzzko/git_browse.nvim"}
 ____exports.default = plugin
 return ____exports
  end,
@@ -4561,6 +4572,25 @@ local plugin = {
         }
         return options
     end
+}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.obsidian"] = function(...) 
+local ____exports = {}
+local ____configuration = require("lua.helpers.configuration.index")
+local getGlobalConfiguration = ____configuration.getGlobalConfiguration
+local ____temp_4 = {"markdown"}
+local ____temp_5 = {"nvim-lua/plenary.nvim"}
+local ____opt_2 = getGlobalConfiguration().packages.obsidian
+local ____opt_0 = ____opt_2 and ____opt_2.config
+local plugin = {
+    [1] = "epwalsh/obsidian.nvim",
+    version = "*",
+    lazy = true,
+    ft = ____temp_4,
+    dependencies = ____temp_5,
+    opts = {workspaces = ____opt_0 and ____opt_0.workspaces or ({})}
 }
 ____exports.default = plugin
 return ____exports

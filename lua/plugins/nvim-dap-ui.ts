@@ -121,7 +121,7 @@ function configureActiveLanguages(this: void) {
     return;
   }
   const dap = getDap();
-  if (config.targetEnvironments["c++"]?.enabled || config.targetEnvironments["c"]?.enabled) {
+  if (config.targetEnvironments["c/c++"]?.enabled) {
 
     const LLDB_PORT = dapConfig.lldb.port;
     dap.adapters['lldb'] = {
