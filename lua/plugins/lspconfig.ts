@@ -24,7 +24,8 @@ type LSPConfigServers = {
 
 export type LSPConfig = {
   util: {
-    available_servers: (this: void) => (keyof LSPConfigServers)[]
+    available_servers: (this: void) => (keyof LSPConfigServers)[],
+    root_pattern: (this: void, ...patterns: string[]) => unknown,
   }
 } & LSPConfigServers;
 
@@ -102,9 +103,23 @@ function getPluginConfig() {
 }
 
 function environmentKeyToConfig(env: string) {
-  const configs = [{
+  const configs: {
+    key: string,
+    lspKey: string,
+    additionalOptions?: unknown
+  }[] = [{
     key: 'typescript',
-    lspKey: 'tsserver'
+    lspKey: 'tsserver',
+    additionalOptions: {
+      single_file_support: false,
+      root_dir: getLSPConfig().util.root_pattern("package.json")
+    }
+  }, {
+    key: 'deno',
+    lspKey: 'denols',
+    additionalOptions: {
+      root_dir: getLSPConfig().util.root_pattern("deno.json", "deno.jsonc")
+    }
   }, {
     key: 'c/c++',
     lspKey: 'clangd'
@@ -116,6 +131,18 @@ function environmentKeyToConfig(env: string) {
   return configs.find(x => x.key === env);
 }
 
+vim.api.nvim_create_autocmd('LspAttach', {
+  callback: _args => {
+    type ArgsType = {
+      buf: number,
+      data: {
+        client_id: string
+      }
+    };
+    const args = _args as ArgsType;
+  }
+})
+
 function configureLSP(this: void) {
   const lspconfig = getLSPConfig();
   const config = getPluginConfig();
@@ -125,16 +152,17 @@ function configureLSP(this: void) {
   }
   const targetEnvironments = getGlobalConfiguration().targetEnvironments;
   for (const targetEnvKey in targetEnvironments) {
-    const target = targetEnvironments[targetEnvKey];
     const config = environmentKeyToConfig(targetEnvKey);
     if (config === undefined) {
       vim.notify(`Failed to locate configuration for environment ${targetEnvKey}`, vim.log.levels.WARN);
     }
     else {
-      lspconfig[config.lspKey].setup({
+      const setupConfig = {
         capabilities,
-        on_attach
-      });
+        on_attach,
+        ...config.additionalOptions ?? {}
+      };
+      lspconfig[config.lspKey].setup(setupConfig);
     }
   }
   vim.diagnostic.config({

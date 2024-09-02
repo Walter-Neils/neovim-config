@@ -63,10 +63,42 @@ type NvimOptionInfo = {
   type: 'string' | 'number' | 'boolean',
   commalist: boolean
 };
+type NvimLspClientRPC = {
+
+};
+type NvimLspClientRequests = unknown;
+
+type NvimLspClientHandlers = unknown;
+
+type NvimLspClientConfig = unknown;
+
+type NvimLspClientCapabilities = unknown;
+
+type NvimLspClientProgress = unknown;
+
+type NvimLspClientWorkspaceFolders = unknown;
+
+type NvimLspClientAttachedBuffers = Record<string, true>;
+
+type LspCommand = unknown;
+
+type NvimLspClientCommands = Record<string, (command: LspCommand, ctx: unknown) => void>
+
+type NvimLspClient = {
+  id: number,
+  name: string,
+  rpc: NvimLspClientRPC,
+  offset_encoding: string,
+  handlers: NvimLspClientHandlers,
+  requests: NvimLspClientRequests,
+  config: NvimLspClientConfig
+  // WIP
+  // :h vim.lsp.client
+};
 
 type NvimBufOption = '';
 
-type VimAutocmdEvent = 'BufAdd' | 'BufDelete' | 'BufEnter' | 'BufFilePost' | 'BufFilePre' | 'BufHidden' | 'BufLeave' | 'BufModifiedSet' | 'BufNew' | 'BufNewFile' | 'BufRead' | 'BufReadCmd' | 'BufReadPre' | 'BufUnload' | 'BufWinEnter' | 'BufWinLeave' | 'BufWipeout' | 'BufWrite' | 'BufWriteCmd' | 'BufWritePost' | 'ChanInfo' | 'ChanOpen' | 'CmdUndefined' | 'CmdlineChanged' | 'CmdlineEnter' | 'CmdlineLeave' | 'CmdwinEnter' | 'CmdwinLeave' | 'ColorScheme' | 'ColorSchemePre' | 'CompleteChanged' | 'CompleteDonePre' | 'CompleteDone' | 'CursorHold' | 'CursorHoldI' | 'CursorMoved' | 'CursorMovedI' | 'DiffUpdated' | 'DirChanged' | 'DirChangedPre' | 'ExitPre' | 'FileAppendCmd' | 'FileAppendPost' | 'FileAppendPre' | 'FileChangedRO' | 'FileChangedShell' | 'FileChangedShellPost' | 'FileReadCmd' | 'FileReadPost' | 'FileReadPre' | 'FileType' | 'FileWriteCmd' | 'FileWritePost' | 'FileWritePre' | 'FilterReadPost' | 'FilterReadPre' | 'FilterWritePost' | 'FilterWritePre' | 'FocusGained' | 'FocusLost' | 'FuncUndefined' | 'UIEnter' | 'UILeave' | 'InsertChange' | 'InsertCharPre' | 'InsertEnter' | 'InsertLeavePre' | 'InsertLeave' | 'MenuPopup' | 'ModeChanged' | 'OptionSet' | 'QuickFixCmdPre' | 'QuickFixCmdPost' | 'QuitPre' | 'RemoteReply' | 'SearchWrapped' | 'RecordingEnter' | 'RecordingLeave' | 'SafeState' | 'SessionLoadPost' | 'SessionWritePost' | 'ShellCmdPost' | 'Signal' | 'ShellFilterPost' | 'SourcePre' | 'SourcePost' | 'SourceCmd' | 'SpellFileMissing' | 'StdinReadPost' | 'StdinReadPre' | 'SwapExists' | 'Syntax' | 'TabEnter' | 'TabLeave' | 'TabNew' | 'TabNewEntered' | 'TabClosed' | 'TermOpen' | 'TermEnter' | 'TermLeave' | 'TermClose' | 'TermRequest' | 'TermResponse' | 'TextChanged' | 'TextChangedI' | 'TextChangedP' | 'TextChangedT' | 'TextYankPost' | 'User' | 'UserGettingBored' | 'VimEnter' | 'VimLeave' | 'VimLeavePre' | 'VimResized' | 'VimResume' | 'VimSuspend' | 'WinClosed' | 'WinEnter' | 'WinLeave' | 'WinNew' | 'WinScrolled' | 'WinResized';
+type VimAutocmdEvent = 'BufAdd' | 'BufDelete' | 'BufEnter' | 'BufFilePost' | 'BufFilePre' | 'BufHidden' | 'BufLeave' | 'BufModifiedSet' | 'BufNew' | 'BufNewFile' | 'BufRead' | 'BufReadCmd' | 'BufReadPre' | 'BufUnload' | 'BufWinEnter' | 'BufWinLeave' | 'BufWipeout' | 'BufWrite' | 'BufWriteCmd' | 'BufWritePost' | 'ChanInfo' | 'ChanOpen' | 'CmdUndefined' | 'CmdlineChanged' | 'CmdlineEnter' | 'CmdlineLeave' | 'CmdwinEnter' | 'CmdwinLeave' | 'ColorScheme' | 'ColorSchemePre' | 'CompleteChanged' | 'CompleteDonePre' | 'CompleteDone' | 'CursorHold' | 'CursorHoldI' | 'CursorMoved' | 'CursorMovedI' | 'DiffUpdated' | 'DirChanged' | 'DirChangedPre' | 'ExitPre' | 'FileAppendCmd' | 'FileAppendPost' | 'FileAppendPre' | 'FileChangedRO' | 'FileChangedShell' | 'FileChangedShellPost' | 'FileReadCmd' | 'FileReadPost' | 'FileReadPre' | 'FileType' | 'FileWriteCmd' | 'FileWritePost' | 'FileWritePre' | 'FilterReadPost' | 'FilterReadPre' | 'FilterWritePost' | 'FilterWritePre' | 'FocusGained' | 'FocusLost' | 'FuncUndefined' | 'UIEnter' | 'UILeave' | 'InsertChange' | 'InsertCharPre' | 'InsertEnter' | 'InsertLeavePre' | 'InsertLeave' | 'MenuPopup' | 'ModeChanged' | 'OptionSet' | 'QuickFixCmdPre' | 'QuickFixCmdPost' | 'QuitPre' | 'RemoteReply' | 'SearchWrapped' | 'RecordingEnter' | 'RecordingLeave' | 'SafeState' | 'SessionLoadPost' | 'SessionWritePost' | 'ShellCmdPost' | 'Signal' | 'ShellFilterPost' | 'SourcePre' | 'SourcePost' | 'SourceCmd' | 'SpellFileMissing' | 'StdinReadPost' | 'StdinReadPre' | 'SwapExists' | 'Syntax' | 'TabEnter' | 'TabLeave' | 'TabNew' | 'TabNewEntered' | 'TabClosed' | 'TermOpen' | 'TermEnter' | 'TermLeave' | 'TermClose' | 'TermRequest' | 'TermResponse' | 'TextChanged' | 'TextChangedI' | 'TextChangedP' | 'TextChangedT' | 'TextYankPost' | 'User' | 'UserGettingBored' | 'VimEnter' | 'VimLeave' | 'VimLeavePre' | 'VimResized' | 'VimResume' | 'VimSuspend' | 'WinClosed' | 'WinEnter' | 'WinLeave' | 'WinNew' | 'WinScrolled' | 'WinResized' | 'LspAttach' | 'LspDetach';
 
 type VimAPI = {
   cmd: (this: void, params: string) => void,
@@ -99,7 +131,7 @@ type VimAPI = {
     }) => void,
     nvim_create_autocmd: (this: void, eventName: VimAutocmdEvent, config: {
       group?: string,
-      callback: (this: void) => void
+      callback: (this: void, args?: unknown) => void
     }) => void,
     nvim_win_get_cursor: (this: void, arg1: number) => number[],
     nvim_get_current_buf: (this: void) => NeovimBuffer,
@@ -120,6 +152,7 @@ type VimAPI = {
     nvim_get_current_win: (this: void) => NeovimWindow,
   },
   lsp: {
+    get_client_by_id: (this: void, client_id: number) => NvimLspClient,
     inlay_hint: {
       enable: (this: void, enable: boolean, filter?: { bufnr?: number }) => void,
       is_enabled: (this: void) => void

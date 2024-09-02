@@ -156,6 +156,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     typescript: {
       enabled: true
     },
+    deno: {
+      enabled: true,
+    },
     'c/c++': {
       enabled: true
     },

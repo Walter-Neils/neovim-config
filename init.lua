@@ -3117,7 +3117,7 @@ ____exports.CONFIGURATION_DEFAULTS = {packages = {
     markdownPreview = {enabled = true},
     gitBrowse = {enabled = true},
     obsidian = {enabled = true, config = {workspaces = {{name = "notes", path = "~/Documents/obsidian/notes"}}}}
-}, targetEnvironments = {typescript = {enabled = true}, ["c/c++"] = {enabled = true}, markdown = {enabled = true}}, shell = {target = "tmux", isolationScope = "isolated"}, integrations = {ollama = {enabled = true}}}
+}, targetEnvironments = {typescript = {enabled = true}, deno = {enabled = true}, ["c/c++"] = {enabled = true}, markdown = {enabled = true}}, shell = {target = "tmux", isolationScope = "isolated"}, integrations = {ollama = {enabled = true}}}
 function ____exports.getGlobalConfiguration()
     if configuration == nil then
         reloadConfiguration()
@@ -4299,6 +4299,7 @@ return ____exports
 ["lua.plugins.lspconfig"] = function(...) 
 local ____lualib = require("lualib_bundle")
 local __TS__ArrayFind = ____lualib.__TS__ArrayFind
+local __TS__ObjectAssign = ____lualib.__TS__ObjectAssign
 local ____exports = {}
 local getConfig, on_attach, getPluginConfig, environmentKeyToConfig, configureLSP
 local ____configuration = require("lua.helpers.configuration.index")
@@ -4350,7 +4351,23 @@ function getPluginConfig()
     return config.packages.lspconfig
 end
 function environmentKeyToConfig(env)
-    local configs = {{key = "typescript", lspKey = "tsserver"}, {key = "c/c++", lspKey = "clangd"}, {key = "markdown", lspKey = "marksman"}}
+    local configs = {
+        {
+            key = "typescript",
+            lspKey = "tsserver",
+            additionalOptions = {
+                single_file_support = false,
+                root_dir = ____exports.getLSPConfig().util.root_pattern("package.json")
+            }
+        },
+        {
+            key = "deno",
+            lspKey = "denols",
+            additionalOptions = {root_dir = ____exports.getLSPConfig().util.root_pattern("deno.json", "deno.jsonc")}
+        },
+        {key = "c/c++", lspKey = "clangd"},
+        {key = "markdown", lspKey = "marksman"}
+    }
     return __TS__ArrayFind(
         configs,
         function(____, x) return x.key == env end
@@ -4366,21 +4383,27 @@ function configureLSP()
     end
     local targetEnvironments = getGlobalConfiguration().targetEnvironments
     for targetEnvKey in pairs(targetEnvironments) do
-        local target = targetEnvironments[targetEnvKey]
         local config = environmentKeyToConfig(targetEnvKey)
         if config == nil then
             vim.notify("Failed to locate configuration for environment " .. targetEnvKey, vim.log.levels.WARN)
         else
-            lspconfig[config.lspKey].setup({capabilities = capabilities, on_attach = on_attach})
+            local ____capabilities_3 = capabilities
+            local ____on_attach_4 = on_attach
+            local ____config_additionalOptions_2 = config.additionalOptions
+            if ____config_additionalOptions_2 == nil then
+                ____config_additionalOptions_2 = {}
+            end
+            local setupConfig = __TS__ObjectAssign({capabilities = ____capabilities_3, on_attach = ____on_attach_4}, ____config_additionalOptions_2)
+            lspconfig[config.lspKey].setup(setupConfig)
         end
     end
-    local ____vim_diagnostic_config_5 = vim.diagnostic.config
-    local ____opt_2 = getGlobalConfiguration().packages.lspLines
-    local ____temp_4 = ____opt_2 and ____opt_2.enabled
-    if ____temp_4 == nil then
-        ____temp_4 = false
+    local ____vim_diagnostic_config_8 = vim.diagnostic.config
+    local ____opt_5 = getGlobalConfiguration().packages.lspLines
+    local ____temp_7 = ____opt_5 and ____opt_5.enabled
+    if ____temp_7 == nil then
+        ____temp_7 = false
     end
-    ____vim_diagnostic_config_5({update_in_insert = true, virtual_text = not ____temp_4})
+    ____vim_diagnostic_config_8({update_in_insert = true, virtual_text = not ____temp_7})
 end
 local plugin = {[1] = "neovim/nvim-lspconfig", config = configureLSP}
 do
@@ -4404,6 +4427,12 @@ do
         )
     end
 end
+vim.api.nvim_create_autocmd(
+    "LspAttach",
+    {callback = function(_args)
+        local args = _args
+    end}
+)
 ____exports.default = plugin
 return ____exports
  end,
