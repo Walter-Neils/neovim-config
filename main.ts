@@ -3,13 +3,11 @@ import { activateWelcomePage } from "./components/welcome-page";
 import { setupCustomLogic } from "./lua/custom";
 import { getGlobalConfiguration } from "./lua/helpers/configuration";
 import { useExternalModule } from "./lua/helpers/module/useModule";
-import { usePersistentValue } from "./lua/helpers/persistent-data";
 import { Hyprland, isDesktopHyprland } from "./lua/integrations/hyprland";
 import { getNeovideExtendedVimContext } from "./lua/integrations/neovide";
 import { setupOllamaCopilot } from "./lua/integrations/ollama";
 import { enablePortableAppImageLogic } from "./lua/integrations/portable-appimage";
 import { getPlugins } from "./lua/plugins/init";
-import { useNUI } from "./lua/plugins/nui";
 import { insertConsoleShims } from "./lua/shims/console";
 import { insertJSONShims } from "./lua/shims/json";
 import { insertMainLoopCallbackShims, setImmediate, setInterval, setTimeout } from "./lua/shims/mainLoopCallbacks";
@@ -18,10 +16,7 @@ import { THEME_APPLIERS } from "./lua/theme";
 insertJSONShims();
 insertConsoleShims();
 insertMainLoopCallbackShims();
-
 enablePortableAppImageLogic();
-
-
 
 function setupNeovide() {
   const vim = getNeovideExtendedVimContext();
@@ -79,74 +74,7 @@ vim.opt.numberwidth = 2;
 vim.opt.ruler = false;
 
 activateWelcomePage();
-// vim.o.whichwrap.append("<>[]hl");
 
 require("mappings");
 
-{
-  const shellConfig = getGlobalConfiguration().shell;
-  if (shellConfig.target === 'tmux') {
-    const term = os.getenv("TERM") ?? '__term_value_not_supplied';
-    if (!term.includes('tmux')) {
-      vim.g.terminal_emulator = 'tmux';
-      const isolationScope = shellConfig.isolationScope;
-      if (isolationScope === 'global') {
-        vim.o.shell = 'tmux';
-      }
-      else if (isolationScope === 'neovim-shared') {
-        vim.o.shell = 'tmux -L neovim';
-      }
-      else if (isolationScope === 'isolated') {
-        vim.o.shell = `tmux -L neovim-${vim.fn.getpid()}`
-      }
-      else {
-        vim.notify(`Invalid option '${isolationScope}' for tmux isolation scope.`);
-        vim.o.shell = 'tmux';
-      }
-    } else {
-      // Running `tmux` as the terminal provider would cause nesting, which is NOT desirable. 
-    }
-  }
-}
-
 setImmediate(setupCustomLogic);
-// setTimeout(() => {
-//   const NUI = useNUI();
-//   const popup = NUI.Popup({
-//     relative: 'cursor',
-//     border: {
-//       style: 'single',
-//       text: {
-//         top: 'Yep'
-//       }
-//     },
-//     size: {
-//       width: 5,
-//       height: 5
-//     },
-//     position: 0
-//   });
-//
-//   popup.mount();
-//
-//   for (const event of ["CursorMoved", "CursorMovedI"] as const) {
-//     vim.api.nvim_create_autocmd(event, {
-//       callback: () => {
-//         setImmediate(() => {
-//           popup.update_layout({
-//             relative: 'cursor',
-//             size: {
-//               width: 3,
-//               height: 1,
-//             },
-//             position: {
-//               row: 0,
-//               col: 0
-//             },
-//             anchor: 'NE'
-//           })
-//         });
-//       }
-//     })
-//   }
-// }, 2500);

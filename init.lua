@@ -3286,6 +3286,7 @@ local SyntaxError = ____lualib.SyntaxError
 local TypeError = ____lualib.TypeError
 local URIError = ____lualib.URIError
 local __TS__New = ____lualib.__TS__New
+local __TS__StringIncludes = ____lualib.__TS__StringIncludes
 local ____exports = {}
 local ____configuration = require("lua.helpers.configuration.index")
 local getGlobalConfiguration = ____configuration.getGlobalConfiguration
@@ -3328,6 +3329,25 @@ local function changeTmuxScope()
     menu:mount()
 end
 function ____exports.initCustomTmux()
+    local shellConfig = getGlobalConfiguration().shell
+    if shellConfig.target == "tmux" then
+        local term = os.getenv("TERM") or "__term_value_not_supplied"
+        if not __TS__StringIncludes(term, "tmux") then
+            vim.g.terminal_emulator = "tmux"
+            local isolationScope = shellConfig.isolationScope
+            if isolationScope == "global" then
+                vim.o.shell = "tmux"
+            elseif isolationScope == "neovim-shared" then
+                vim.o.shell = "tmux -L neovim"
+            elseif isolationScope == "isolated" then
+                vim.o.shell = "tmux -L neovim-" .. tostring(vim.fn.getpid())
+            else
+                vim.notify(("Invalid option '" .. tostring(isolationScope)) .. "' for tmux isolation scope.")
+                vim.o.shell = "tmux"
+            end
+        else
+        end
+    end
     vim.api.nvim_create_user_command("ChangeTmuxScope", changeTmuxScope, {})
 end
 return ____exports
@@ -3480,8 +3500,19 @@ function ____exports.enablePortableAppImageLogic()
 end
 return ____exports
  end,
+["lua.custom.nixos.index"] = function(...) 
+local ____exports = {}
+local ____fs = require("lua.shims.fs.index")
+local fs = ____fs.fs
+function ____exports.isRunningUnderNixOS()
+    return fs.existsSync("/etc/NIXOS")
+end
+return ____exports
+ end,
 ["lua.plugins.init"] = function(...) 
 local ____exports = {}
+local ____nixos = require("lua.custom.nixos.index")
+local isRunningUnderNixOS = ____nixos.isRunningUnderNixOS
 local ____configuration = require("lua.helpers.configuration.index")
 local getGlobalConfiguration = ____configuration.getGlobalConfiguration
 function ____exports.getPlugins()
@@ -3491,7 +3522,11 @@ function ____exports.getPlugins()
     result[#result + 1] = require("lua.plugins.floatterm").default
     result[#result + 1] = require("lua.plugins.treesitter").default
     result[#result + 1] = require("lua.plugins.lspconfig").default
-    result[#result + 1] = require("lua.plugins.mason").default
+    if not isRunningUnderNixOS() then
+        result[#result + 1] = require("lua.plugins.mason").default
+    else
+        console.log("NIXOS detected. Disabling mason.")
+    end
     result[#result + 1] = require("lua.plugins.autopairs").default
     result[#result + 1] = require("lua.plugins.tokyonight").default
     local ____opt_0 = globalConfig.packages.telescope
@@ -3679,8 +3714,6 @@ ____exports.THEME_APPLIERS = {VSCode = VSCode, TokyoNight = TokyoNight}
 return ____exports
  end,
 ["main"] = function(...) 
-local ____lualib = require("lualib_bundle")
-local __TS__StringIncludes = ____lualib.__TS__StringIncludes
 local ____exports = {}
 local ____welcome_2Dpage = require("components.welcome-page.index")
 local activateWelcomePage = ____welcome_2Dpage.activateWelcomePage
@@ -3767,27 +3800,6 @@ vim.opt.numberwidth = 2
 vim.opt.ruler = false
 activateWelcomePage()
 require("mappings")
-do
-    local shellConfig = getGlobalConfiguration().shell
-    if shellConfig.target == "tmux" then
-        local term = os.getenv("TERM") or "__term_value_not_supplied"
-        if not __TS__StringIncludes(term, "tmux") then
-            vim.g.terminal_emulator = "tmux"
-            local isolationScope = shellConfig.isolationScope
-            if isolationScope == "global" then
-                vim.o.shell = "tmux"
-            elseif isolationScope == "neovim-shared" then
-                vim.o.shell = "tmux -L neovim"
-            elseif isolationScope == "isolated" then
-                vim.o.shell = "tmux -L neovim-" .. tostring(vim.fn.getpid())
-            else
-                vim.notify(("Invalid option '" .. tostring(isolationScope)) .. "' for tmux isolation scope.")
-                vim.o.shell = "tmux"
-            end
-        else
-        end
-    end
-end
 setImmediate(setupCustomLogic)
 return ____exports
  end,
@@ -4192,7 +4204,6 @@ local plugin = {
             window = {completion = {winhighlight = "Normal:Pmenu,FloatBorder:Pmenu,Search:None", col_offset = -3, side_padding = 0}},
             formatting = {format = function(_entry, vim_item)
                 local target_icon = KIND_ICONS[vim_item.kind]
-                vim.notify("Unable to locate icon for " .. target_icon)
                 local icon = target_icon or "?"
                 icon = (" " .. icon) .. " "
                 vim_item.menu = ("  (" .. tostring(vim_item.kind)) .. ")  "

@@ -1,4 +1,5 @@
 import { LazyPlugin } from "../../ambient/lazy";
+import { isRunningUnderNixOS } from "../custom/nixos";
 import { getGlobalConfiguration } from "../helpers/configuration";
 
 export function getPlugins(this: void): LazyPlugin[] {
@@ -8,7 +9,12 @@ export function getPlugins(this: void): LazyPlugin[] {
   result.push(require('floatterm').default);
   result.push(require('treesitter').default);
   result.push(require('lspconfig').default);
-  result.push(require('mason').default);
+  if (!isRunningUnderNixOS()) {
+    result.push(require('mason').default);
+  }
+  else {
+    console.log(`NIXOS detected. Disabling mason.`);
+  }
   result.push(require('autopairs').default);
   result.push(require('tokyonight').default);
   if (globalConfig.packages.telescope?.enabled) {

@@ -47,5 +47,28 @@ function changeTmuxScope() {
 }
 
 export function initCustomTmux() {
+  const shellConfig = getGlobalConfiguration().shell;
+  if (shellConfig.target === 'tmux') {
+    const term = os.getenv("TERM") ?? '__term_value_not_supplied';
+    if (!term.includes('tmux')) {
+      vim.g.terminal_emulator = 'tmux';
+      const isolationScope = shellConfig.isolationScope;
+      if (isolationScope === 'global') {
+        vim.o.shell = 'tmux';
+      }
+      else if (isolationScope === 'neovim-shared') {
+        vim.o.shell = 'tmux -L neovim';
+      }
+      else if (isolationScope === 'isolated') {
+        vim.o.shell = `tmux -L neovim-${vim.fn.getpid()}`
+      }
+      else {
+        vim.notify(`Invalid option '${isolationScope}' for tmux isolation scope.`);
+        vim.o.shell = 'tmux';
+      }
+    } else {
+      // Running `tmux` as the terminal provider would cause nesting, which is NOT desirable. 
+    }
+  }
   vim.api.nvim_create_user_command('ChangeTmuxScope', changeTmuxScope, {});
 }
