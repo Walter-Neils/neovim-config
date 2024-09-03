@@ -98,6 +98,10 @@ type NvimLspClient = {
 
 type NvimBufOption = '';
 
+type VimRegex = {
+  match_str: (this: VimRegex, str: string) => boolean
+};
+
 type VimAutocmdEvent = 'BufAdd' | 'BufDelete' | 'BufEnter' | 'BufFilePost' | 'BufFilePre' | 'BufHidden' | 'BufLeave' | 'BufModifiedSet' | 'BufNew' | 'BufNewFile' | 'BufRead' | 'BufReadCmd' | 'BufReadPre' | 'BufUnload' | 'BufWinEnter' | 'BufWinLeave' | 'BufWipeout' | 'BufWrite' | 'BufWriteCmd' | 'BufWritePost' | 'ChanInfo' | 'ChanOpen' | 'CmdUndefined' | 'CmdlineChanged' | 'CmdlineEnter' | 'CmdlineLeave' | 'CmdwinEnter' | 'CmdwinLeave' | 'ColorScheme' | 'ColorSchemePre' | 'CompleteChanged' | 'CompleteDonePre' | 'CompleteDone' | 'CursorHold' | 'CursorHoldI' | 'CursorMoved' | 'CursorMovedI' | 'DiffUpdated' | 'DirChanged' | 'DirChangedPre' | 'ExitPre' | 'FileAppendCmd' | 'FileAppendPost' | 'FileAppendPre' | 'FileChangedRO' | 'FileChangedShell' | 'FileChangedShellPost' | 'FileReadCmd' | 'FileReadPost' | 'FileReadPre' | 'FileType' | 'FileWriteCmd' | 'FileWritePost' | 'FileWritePre' | 'FilterReadPost' | 'FilterReadPre' | 'FilterWritePost' | 'FilterWritePre' | 'FocusGained' | 'FocusLost' | 'FuncUndefined' | 'UIEnter' | 'UILeave' | 'InsertChange' | 'InsertCharPre' | 'InsertEnter' | 'InsertLeavePre' | 'InsertLeave' | 'MenuPopup' | 'ModeChanged' | 'OptionSet' | 'QuickFixCmdPre' | 'QuickFixCmdPost' | 'QuitPre' | 'RemoteReply' | 'SearchWrapped' | 'RecordingEnter' | 'RecordingLeave' | 'SafeState' | 'SessionLoadPost' | 'SessionWritePost' | 'ShellCmdPost' | 'Signal' | 'ShellFilterPost' | 'SourcePre' | 'SourcePost' | 'SourceCmd' | 'SpellFileMissing' | 'StdinReadPost' | 'StdinReadPre' | 'SwapExists' | 'Syntax' | 'TabEnter' | 'TabLeave' | 'TabNew' | 'TabNewEntered' | 'TabClosed' | 'TermOpen' | 'TermEnter' | 'TermLeave' | 'TermClose' | 'TermRequest' | 'TermResponse' | 'TextChanged' | 'TextChangedI' | 'TextChangedP' | 'TextChangedT' | 'TextYankPost' | 'User' | 'UserGettingBored' | 'VimEnter' | 'VimLeave' | 'VimLeavePre' | 'VimResized' | 'VimResume' | 'VimSuspend' | 'WinClosed' | 'WinEnter' | 'WinLeave' | 'WinNew' | 'WinScrolled' | 'WinResized' | 'LspAttach' | 'LspDetach';
 
 type VimAPI = {
@@ -107,6 +111,7 @@ type VimAPI = {
   schedule: (this: void, callback: (this: void) => void) => void,
   defer_fn: (this: void, callback: (this: void) => void, ms: number) => void,
   tbl_deep_extend: <T1, T2>(this: void, behaviour: 'error' | 'keep' | 'force', table1: T1, table2: T2) => T1 & T2,
+  regex: (this: void, pattern: string) => VimRegex,
   json: {
     encode: (this: void, value: unknown) => string,
     decode: (this: void, value: string) => unknown
@@ -188,7 +193,10 @@ type VimAPI = {
     set: (this: void, mode: 'i' | 'n' | 'a' | 't' | 'v' | 'x', stroke: string, ...args: any[]) => void
   },
   ui: {
-    input: (this: void, config: { prompt: string }, callback: (this: void, input: string) => void) => void
+    input: (this: void, config: { prompt: string }, callback: (this: void, input: string) => void) => void,
+    open: (this: void, path: string) => {
+      wait: (this: unknown) => void
+    },
   },
   o: {
     cmdheight: number,

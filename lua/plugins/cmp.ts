@@ -74,8 +74,9 @@ const plugin: LazyPlugin = {
       },
       formatting: {
         format: function(this: void, _entry: any, vim_item: any) {
-          let icons = KIND_ICONS;
-          let icon: string = icons[vim_item.kind as keyof typeof KIND_ICONS] ?? "?";
+          const target_icon = KIND_ICONS[vim_item.kind as keyof typeof KIND_ICONS];
+          vim.notify(`Unable to locate icon for ${target_icon}`);
+          let icon: string = target_icon ?? "?";
           icon = ` ${icon} `;
           vim_item.menu = `  (${vim_item.kind})  `;
           vim_item.kind = string.format("%s %s", icon, vim_item.kind);

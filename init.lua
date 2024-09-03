@@ -2897,6 +2897,50 @@ function ____exports.activateWelcomePage()
 end
 return ____exports
  end,
+["lua.custom.custom-open.index"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local __TS__ArrayFilter = ____lualib.__TS__ArrayFilter
+local __TS__ArrayMap = ____lualib.__TS__ArrayMap
+local __TS__StringReplaceAll = ____lualib.__TS__StringReplaceAll
+local ____exports = {}
+local ____nui = require("lua.plugins.nui")
+local useNUI = ____nui.useNUI
+local VIM_OPEN = vim.ui.open
+local function open(target)
+    local targets = __TS__ArrayFilter(
+        {{pattern = ".*", name = "Firefox", command = "firefox %OPEN_TARGET%"}},
+        function(____, pmatch)
+            local result = vim.regex(pmatch.pattern):match_str(target)
+            console.log(tostring(result))
+            return result
+        end
+    )
+    if #targets < 1 then
+        return VIM_OPEN(target)
+    end
+    local NUI = useNUI()
+    local menu = NUI.Menu(
+        {position = "50%", size = {width = 33, height = 5}, border = {style = "single", text = {top = "Select Handler Program"}}},
+        {
+            lines = __TS__ArrayMap(
+                targets,
+                function(____, target) return NUI.Menu.item(target.name, {target = target}) end
+            ),
+            on_submit = function(_item)
+                local item = _item
+                local command = __TS__StringReplaceAll(item.target.command, "%OPEN_TARGET%", target)
+                os.execute(command)
+            end
+        }
+    )
+    menu:mount()
+    return nil
+end
+function ____exports.initCustomOpen()
+    vim.ui.open = open
+end
+return ____exports
+ end,
 ["lua.shims.fs.index"] = function(...) 
 local ____lualib = require("lualib_bundle")
 local Error = ____lualib.Error
@@ -3290,10 +3334,13 @@ return ____exports
  end,
 ["lua.custom.index"] = function(...) 
 local ____exports = {}
+local ____custom_2Dopen = require("lua.custom.custom-open.index")
+local initCustomOpen = ____custom_2Dopen.initCustomOpen
 local ____tmux = require("lua.custom.tmux.index")
 local initCustomTmux = ____tmux.initCustomTmux
 function ____exports.setupCustomLogic()
     initCustomTmux()
+    initCustomOpen()
 end
 return ____exports
  end,
@@ -4144,8 +4191,9 @@ local plugin = {
         cmp.setup({
             window = {completion = {winhighlight = "Normal:Pmenu,FloatBorder:Pmenu,Search:None", col_offset = -3, side_padding = 0}},
             formatting = {format = function(_entry, vim_item)
-                local icons = KIND_ICONS
-                local icon = icons[vim_item.kind] or "?"
+                local target_icon = KIND_ICONS[vim_item.kind]
+                vim.notify("Unable to locate icon for " .. target_icon)
+                local icon = target_icon or "?"
                 icon = (" " .. icon) .. " "
                 vim_item.menu = ("  (" .. tostring(vim_item.kind)) .. ")  "
                 vim_item.kind = string.format("%s %s", icon, vim_item.kind)
