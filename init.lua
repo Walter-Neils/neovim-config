@@ -2992,6 +2992,15 @@ end
 ____exports.fs = {readFileSync = readFileSync, existsSync = existsSync, writeFileSync = writeFileSync}
 return ____exports
  end,
+["lua.custom.nixos.index"] = function(...) 
+local ____exports = {}
+local ____fs = require("lua.shims.fs.index")
+local fs = ____fs.fs
+function ____exports.isRunningUnderNixOS()
+    return fs.existsSync("/etc/NIXOS")
+end
+return ____exports
+ end,
 ["lua.helpers.persistent-data.index"] = function(...) 
 local ____exports = {}
 local ____fs = require("lua.shims.fs.index")
@@ -3110,6 +3119,8 @@ local URIError = ____lualib.URIError
 local __TS__New = ____lualib.__TS__New
 local ____exports = {}
 local saveConfiguration, configuration, getGlobalConfig, setGlobalConfig
+local ____nixos = require("lua.custom.nixos.index")
+local isRunningUnderNixOS = ____nixos.isRunningUnderNixOS
 local ____persistent_2Ddata = require("lua.helpers.persistent-data.index")
 local usePersistentValue = ____persistent_2Ddata.usePersistentValue
 local ____argparser = require("lua.helpers.user_command.argparser")
@@ -3132,36 +3143,47 @@ local function reloadConfiguration()
         configuration = config
     end
 end
-____exports.CONFIGURATION_DEFAULTS = {packages = {
-    lspLines = {enabled = false},
-    cmp = {enabled = true},
-    telescope = {enabled = true},
-    lspUI = {enabled = false},
-    rustaceanvim = {enabled = true},
-    lspSignature = {enabled = true},
-    indentBlankline = {enabled = true},
-    treeDevIcons = {enabled = true},
-    luaLine = {enabled = true},
-    barBar = {enabled = true},
-    comments = {enabled = true},
-    marks = {enabled = true},
-    trouble = {enabled = true},
-    outline = {enabled = true},
-    glance = {enabled = true},
-    nvimDapUI = {enabled = true, config = {lldb = {port = 1828}}},
-    diffView = {enabled = true},
-    lazyGit = {enabled = true},
-    noice = {enabled = false},
-    nvimNotify = {enabled = true},
-    copilot = {enabled = false},
-    actionsPreview = {enabled = true},
-    fireNvim = {enabled = true},
-    ufo = {enabled = true},
-    lspconfig = {enabled = true, config = {inlayHints = {enabled = true, displayMode = "only-in-normal-mode"}}},
-    markdownPreview = {enabled = true},
-    gitBrowse = {enabled = true},
-    obsidian = {enabled = true, config = {workspaces = {{name = "notes", path = "~/Documents/obsidian/notes"}}}}
-}, targetEnvironments = {typescript = {enabled = true}, deno = {enabled = true}, ["c/c++"] = {enabled = true}, markdown = {enabled = true}}, shell = {target = "tmux", isolationScope = "isolated"}, integrations = {ollama = {enabled = true}}}
+____exports.CONFIGURATION_DEFAULTS = {
+    packages = {
+        mason = {enabled = not isRunningUnderNixOS()},
+        nvimTree = {enabled = true},
+        floatTerm = {enabled = true},
+        autoPairs = {enabled = true},
+        lspConfig = {enabled = true},
+        treeSitter = {enabled = true},
+        lspLines = {enabled = false},
+        cmp = {enabled = true},
+        telescope = {enabled = true},
+        lspUI = {enabled = false},
+        rustaceanvim = {enabled = true},
+        lspSignature = {enabled = true},
+        indentBlankline = {enabled = true},
+        treeDevIcons = {enabled = true},
+        luaLine = {enabled = true},
+        barBar = {enabled = true},
+        comments = {enabled = true},
+        marks = {enabled = true},
+        trouble = {enabled = true},
+        outline = {enabled = true},
+        glance = {enabled = true},
+        nvimDapUI = {enabled = true, config = {lldb = {port = 1828}}},
+        diffView = {enabled = true},
+        lazyGit = {enabled = true},
+        noice = {enabled = false},
+        nvimNotify = {enabled = true},
+        copilot = {enabled = false},
+        actionsPreview = {enabled = true},
+        fireNvim = {enabled = true},
+        ufo = {enabled = true},
+        lspconfig = {enabled = true, config = {inlayHints = {enabled = true, displayMode = "only-in-normal-mode"}}},
+        markdownPreview = {enabled = true},
+        gitBrowse = {enabled = true},
+        obsidian = {enabled = true, config = {workspaces = {{name = "notes", path = "~/Documents/obsidian/notes"}}}}
+    },
+    targetEnvironments = {typescript = {enabled = true}, deno = {enabled = true}, ["c/c++"] = {enabled = true}, markdown = {enabled = true}},
+    shell = {target = "tmux", isolationScope = "isolated"},
+    integrations = {ollama = {enabled = true}}
+}
 function ____exports.getGlobalConfiguration()
     if configuration == nil then
         reloadConfiguration()
@@ -3500,141 +3522,144 @@ function ____exports.enablePortableAppImageLogic()
 end
 return ____exports
  end,
-["lua.custom.nixos.index"] = function(...) 
-local ____exports = {}
-local ____fs = require("lua.shims.fs.index")
-local fs = ____fs.fs
-function ____exports.isRunningUnderNixOS()
-    return fs.existsSync("/etc/NIXOS")
-end
-return ____exports
- end,
 ["lua.plugins.init"] = function(...) 
 local ____exports = {}
-local ____nixos = require("lua.custom.nixos.index")
-local isRunningUnderNixOS = ____nixos.isRunningUnderNixOS
 local ____configuration = require("lua.helpers.configuration.index")
 local getGlobalConfiguration = ____configuration.getGlobalConfiguration
 function ____exports.getPlugins()
     local globalConfig = getGlobalConfiguration()
     local result = {}
-    result[#result + 1] = require("lua.plugins.nvim-tree").default
-    result[#result + 1] = require("lua.plugins.floatterm").default
-    result[#result + 1] = require("lua.plugins.treesitter").default
-    result[#result + 1] = require("lua.plugins.lspconfig").default
-    if not isRunningUnderNixOS() then
-        result[#result + 1] = require("lua.plugins.mason").default
-    else
-        console.log("NIXOS detected. Disabling mason.")
-    end
-    result[#result + 1] = require("lua.plugins.autopairs").default
     result[#result + 1] = require("lua.plugins.tokyonight").default
-    local ____opt_0 = globalConfig.packages.telescope
+    local ____opt_0 = globalConfig.packages.treeSitter
     if ____opt_0 and ____opt_0.enabled then
+        result[#result + 1] = require("lua.plugins.treesitter").default
+    end
+    local ____opt_2 = globalConfig.packages.lspConfig
+    if ____opt_2 and ____opt_2.enabled then
+        result[#result + 1] = require("lua.plugins.lspconfig").default
+    end
+    local ____opt_4 = globalConfig.packages.autoPairs
+    if ____opt_4 and ____opt_4.enabled then
+        result[#result + 1] = require("lua.plugins.autopairs").default
+    end
+    local ____opt_6 = globalConfig.packages.floatTerm
+    if ____opt_6 and ____opt_6.enabled then
+        result[#result + 1] = require("lua.plugins.floatterm").default
+    end
+    local ____opt_8 = globalConfig.packages.nvimTree
+    if ____opt_8 and ____opt_8.enabled then
+        result[#result + 1] = require("lua.plugins.nvim-tree").default
+    end
+    local ____opt_10 = globalConfig.packages.telescope
+    if ____opt_10 and ____opt_10.enabled then
+        result[#result + 1] = require("lua.plugins.mason").default
+    end
+    local ____opt_12 = globalConfig.packages.telescope
+    if ____opt_12 and ____opt_12.enabled then
         result[#result + 1] = require("lua.plugins.telescope").default
     end
-    local ____opt_2 = globalConfig.packages.cmp
-    if ____opt_2 and ____opt_2.enabled then
+    local ____opt_14 = globalConfig.packages.cmp
+    if ____opt_14 and ____opt_14.enabled then
         result[#result + 1] = require("lua.plugins.cmp").default
     end
-    local ____opt_4 = globalConfig.packages.lspLines
-    if ____opt_4 and ____opt_4.enabled then
+    local ____opt_16 = globalConfig.packages.lspLines
+    if ____opt_16 and ____opt_16.enabled then
         result[#result + 1] = require("lua.plugins.lsp_lines").default
     end
-    local ____opt_6 = globalConfig.packages.lspUI
-    if ____opt_6 and ____opt_6.enabled then
+    local ____opt_18 = globalConfig.packages.lspUI
+    if ____opt_18 and ____opt_18.enabled then
         result[#result + 1] = require("lua.plugins.lspUI").default
     end
-    local ____opt_8 = globalConfig.packages.rustaceanvim
-    if ____opt_8 and ____opt_8.enabled then
+    local ____opt_20 = globalConfig.packages.rustaceanvim
+    if ____opt_20 and ____opt_20.enabled then
         result[#result + 1] = require("lua.plugins.rustaceanvim").default
     end
-    local ____opt_10 = globalConfig.packages.lspSignature
-    if ____opt_10 and ____opt_10.enabled then
+    local ____opt_22 = globalConfig.packages.lspSignature
+    if ____opt_22 and ____opt_22.enabled then
         result[#result + 1] = require("lua.plugins.lsp_signature").default
     end
-    local ____opt_12 = globalConfig.packages.indentBlankline
-    if ____opt_12 and ____opt_12.enabled then
+    local ____opt_24 = globalConfig.packages.indentBlankline
+    if ____opt_24 and ____opt_24.enabled then
         result[#result + 1] = require("lua.plugins.indent-blankline").default
     end
-    local ____opt_14 = globalConfig.packages.treeDevIcons
-    if ____opt_14 and ____opt_14.enabled then
+    local ____opt_26 = globalConfig.packages.treeDevIcons
+    if ____opt_26 and ____opt_26.enabled then
         result[#result + 1] = require("lua.plugins.nvim-tree-devicons").default
     end
-    local ____opt_16 = globalConfig.packages.luaLine
-    if ____opt_16 and ____opt_16.enabled then
+    local ____opt_28 = globalConfig.packages.luaLine
+    if ____opt_28 and ____opt_28.enabled then
         result[#result + 1] = require("lua.plugins.lualine").default
     end
-    local ____opt_18 = globalConfig.packages.barBar
-    if ____opt_18 and ____opt_18.enabled then
+    local ____opt_30 = globalConfig.packages.barBar
+    if ____opt_30 and ____opt_30.enabled then
         result[#result + 1] = require("lua.plugins.barbar").default
     end
-    local ____opt_20 = globalConfig.packages.ufo
-    if ____opt_20 and ____opt_20.enabled then
+    local ____opt_32 = globalConfig.packages.ufo
+    if ____opt_32 and ____opt_32.enabled then
         result[#result + 1] = require("lua.plugins.ufo").default
     end
-    local ____opt_22 = globalConfig.packages.comments
-    if ____opt_22 and ____opt_22.enabled then
+    local ____opt_34 = globalConfig.packages.comments
+    if ____opt_34 and ____opt_34.enabled then
         result[#result + 1] = require("lua.plugins.comment").default
     end
-    local ____opt_24 = globalConfig.packages.marks
-    if ____opt_24 and ____opt_24.enabled then
+    local ____opt_36 = globalConfig.packages.marks
+    if ____opt_36 and ____opt_36.enabled then
         result[#result + 1] = require("lua.plugins.marks").default
     end
-    local ____opt_26 = globalConfig.packages.trouble
-    if ____opt_26 and ____opt_26.enabled then
+    local ____opt_38 = globalConfig.packages.trouble
+    if ____opt_38 and ____opt_38.enabled then
         result[#result + 1] = require("lua.plugins.trouble").default
     end
-    local ____opt_28 = globalConfig.packages.outline
-    if ____opt_28 and ____opt_28.enabled then
+    local ____opt_40 = globalConfig.packages.outline
+    if ____opt_40 and ____opt_40.enabled then
         result[#result + 1] = require("lua.plugins.outline").default
     end
-    local ____opt_30 = globalConfig.packages.glance
-    if ____opt_30 and ____opt_30.enabled then
+    local ____opt_42 = globalConfig.packages.glance
+    if ____opt_42 and ____opt_42.enabled then
         result[#result + 1] = require("lua.plugins.glance").default
     end
-    local ____opt_32 = globalConfig.packages.nvimDapUI
-    if ____opt_32 and ____opt_32.enabled then
+    local ____opt_44 = globalConfig.packages.nvimDapUI
+    if ____opt_44 and ____opt_44.enabled then
         result[#result + 1] = require("lua.plugins.nvim-dap-ui").default
     end
-    local ____opt_34 = globalConfig.packages.diffView
-    if ____opt_34 and ____opt_34.enabled then
+    local ____opt_46 = globalConfig.packages.diffView
+    if ____opt_46 and ____opt_46.enabled then
         result[#result + 1] = require("lua.plugins.diffview").default
     end
-    local ____opt_36 = globalConfig.packages.lazyGit
-    if ____opt_36 and ____opt_36.enabled then
+    local ____opt_48 = globalConfig.packages.lazyGit
+    if ____opt_48 and ____opt_48.enabled then
         result[#result + 1] = require("lua.plugins.lazygit").default
     end
-    local ____opt_38 = globalConfig.packages.noice
-    if ____opt_38 and ____opt_38.enabled then
+    local ____opt_50 = globalConfig.packages.noice
+    if ____opt_50 and ____opt_50.enabled then
         result[#result + 1] = require("lua.plugins.noice").default
     end
-    local ____opt_40 = globalConfig.packages.copilot
-    if ____opt_40 and ____opt_40.enabled then
+    local ____opt_52 = globalConfig.packages.copilot
+    if ____opt_52 and ____opt_52.enabled then
         result[#result + 1] = require("lua.plugins.copilot").default
     end
-    local ____opt_42 = globalConfig.packages.actionsPreview
-    if ____opt_42 and ____opt_42.enabled then
+    local ____opt_54 = globalConfig.packages.actionsPreview
+    if ____opt_54 and ____opt_54.enabled then
         result[#result + 1] = require("lua.plugins.actions-preview").default
     end
-    local ____opt_44 = globalConfig.packages.fireNvim
-    if ____opt_44 and ____opt_44.enabled then
+    local ____opt_56 = globalConfig.packages.fireNvim
+    if ____opt_56 and ____opt_56.enabled then
         result[#result + 1] = require("lua.plugins.firenvim").default
     end
-    local ____opt_46 = globalConfig.packages.nvimNotify
-    if ____opt_46 and ____opt_46.enabled then
+    local ____opt_58 = globalConfig.packages.nvimNotify
+    if ____opt_58 and ____opt_58.enabled then
         result[#result + 1] = require("lua.plugins.nvim-notify").default
     end
-    local ____opt_48 = globalConfig.packages.markdownPreview
-    if ____opt_48 and ____opt_48.enabled then
+    local ____opt_60 = globalConfig.packages.markdownPreview
+    if ____opt_60 and ____opt_60.enabled then
         result[#result + 1] = require("lua.plugins.markdown-preview").default
     end
-    local ____opt_50 = globalConfig.packages.gitBrowse
-    if ____opt_50 and ____opt_50.enabled then
+    local ____opt_62 = globalConfig.packages.gitBrowse
+    if ____opt_62 and ____opt_62.enabled then
         result[#result + 1] = require("lua.plugins.git-browse").default
     end
-    local ____opt_52 = globalConfig.packages.obsidian
-    if ____opt_52 and ____opt_52.enabled then
+    local ____opt_64 = globalConfig.packages.obsidian
+    if ____opt_64 and ____opt_64.enabled then
         result[#result + 1] = require("lua.plugins.obsidian").default
     end
     result[#result + 1] = require("lua.plugins.nui").default

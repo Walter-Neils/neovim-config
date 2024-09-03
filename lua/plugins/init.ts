@@ -5,18 +5,25 @@ import { getGlobalConfiguration } from "../helpers/configuration";
 export function getPlugins(this: void): LazyPlugin[] {
   const globalConfig = getGlobalConfiguration();
   const result: LazyPlugin[] = [];
-  result.push(require('nvim-tree').default);
-  result.push(require('floatterm').default);
-  result.push(require('treesitter').default);
-  result.push(require('lspconfig').default);
-  if (!isRunningUnderNixOS()) {
+  result.push(require('tokyonight').default);
+  if (globalConfig.packages.treeSitter?.enabled) {
+    result.push(require('treesitter').default);
+  }
+  if (globalConfig.packages.lspConfig?.enabled) {
+    result.push(require('lspconfig').default);
+  }
+  if (globalConfig.packages.autoPairs?.enabled) {
+    result.push(require('autopairs').default);
+  }
+  if (globalConfig.packages.floatTerm?.enabled) {
+    result.push(require('floatterm').default);
+  }
+  if (globalConfig.packages.nvimTree?.enabled) {
+    result.push(require('nvim-tree').default);
+  }
+  if (globalConfig.packages.telescope?.enabled) {
     result.push(require('mason').default);
   }
-  else {
-    console.log(`NIXOS detected. Disabling mason.`);
-  }
-  result.push(require('autopairs').default);
-  result.push(require('tokyonight').default);
   if (globalConfig.packages.telescope?.enabled) {
     result.push(require('telescope').default);
   }

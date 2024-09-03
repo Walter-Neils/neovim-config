@@ -1,3 +1,4 @@
+import { isRunningUnderNixOS } from "../../custom/nixos";
 import { usePersistentValue } from "../persistent-data";
 import { parseArgs } from "../user_command/argparser";
 
@@ -48,6 +49,24 @@ type GlobalConfiguration = {
 
 export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
   packages: {
+    mason: {
+      enabled: !isRunningUnderNixOS()
+    },
+    nvimTree: {
+      enabled: true
+    },
+    floatTerm: {
+      enabled: true
+    },
+    autoPairs: {
+      enabled: true
+    },
+    lspConfig: {
+      enabled: true
+    },
+    treeSitter: {
+      enabled: true,
+    },
     lspLines: {
       enabled: false
     },
