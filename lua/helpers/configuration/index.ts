@@ -50,6 +50,7 @@ type GlobalConfiguration = {
 export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
   packages: {
     mason: {
+      // Mason doesn't work correctly under NixOS
       enabled: !isRunningUnderNixOS()
     },
     nvimTree: {

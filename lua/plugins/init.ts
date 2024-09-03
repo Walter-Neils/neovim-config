@@ -1,5 +1,4 @@
 import { LazyPlugin } from "../../ambient/lazy";
-import { isRunningUnderNixOS } from "../custom/nixos";
 import { getGlobalConfiguration } from "../helpers/configuration";
 
 export function getPlugins(this: void): LazyPlugin[] {
