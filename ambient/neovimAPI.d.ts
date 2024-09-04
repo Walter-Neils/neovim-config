@@ -102,7 +102,26 @@ type VimRegex = {
   match_str: (this: VimRegex, str: string) => boolean
 };
 
+type VimPipe = unknown;
+
 type VimAutocmdEvent = 'BufAdd' | 'BufDelete' | 'BufEnter' | 'BufFilePost' | 'BufFilePre' | 'BufHidden' | 'BufLeave' | 'BufModifiedSet' | 'BufNew' | 'BufNewFile' | 'BufRead' | 'BufReadCmd' | 'BufReadPre' | 'BufUnload' | 'BufWinEnter' | 'BufWinLeave' | 'BufWipeout' | 'BufWrite' | 'BufWriteCmd' | 'BufWritePost' | 'ChanInfo' | 'ChanOpen' | 'CmdUndefined' | 'CmdlineChanged' | 'CmdlineEnter' | 'CmdlineLeave' | 'CmdwinEnter' | 'CmdwinLeave' | 'ColorScheme' | 'ColorSchemePre' | 'CompleteChanged' | 'CompleteDonePre' | 'CompleteDone' | 'CursorHold' | 'CursorHoldI' | 'CursorMoved' | 'CursorMovedI' | 'DiffUpdated' | 'DirChanged' | 'DirChangedPre' | 'ExitPre' | 'FileAppendCmd' | 'FileAppendPost' | 'FileAppendPre' | 'FileChangedRO' | 'FileChangedShell' | 'FileChangedShellPost' | 'FileReadCmd' | 'FileReadPost' | 'FileReadPre' | 'FileType' | 'FileWriteCmd' | 'FileWritePost' | 'FileWritePre' | 'FilterReadPost' | 'FilterReadPre' | 'FilterWritePost' | 'FilterWritePre' | 'FocusGained' | 'FocusLost' | 'FuncUndefined' | 'UIEnter' | 'UILeave' | 'InsertChange' | 'InsertCharPre' | 'InsertEnter' | 'InsertLeavePre' | 'InsertLeave' | 'MenuPopup' | 'ModeChanged' | 'OptionSet' | 'QuickFixCmdPre' | 'QuickFixCmdPost' | 'QuitPre' | 'RemoteReply' | 'SearchWrapped' | 'RecordingEnter' | 'RecordingLeave' | 'SafeState' | 'SessionLoadPost' | 'SessionWritePost' | 'ShellCmdPost' | 'Signal' | 'ShellFilterPost' | 'SourcePre' | 'SourcePost' | 'SourceCmd' | 'SpellFileMissing' | 'StdinReadPost' | 'StdinReadPre' | 'SwapExists' | 'Syntax' | 'TabEnter' | 'TabLeave' | 'TabNew' | 'TabNewEntered' | 'TabClosed' | 'TermOpen' | 'TermEnter' | 'TermLeave' | 'TermClose' | 'TermRequest' | 'TermResponse' | 'TextChanged' | 'TextChangedI' | 'TextChangedP' | 'TextChangedT' | 'TextYankPost' | 'User' | 'UserGettingBored' | 'VimEnter' | 'VimLeave' | 'VimLeavePre' | 'VimResized' | 'VimResume' | 'VimSuspend' | 'WinClosed' | 'WinEnter' | 'WinLeave' | 'WinNew' | 'WinScrolled' | 'WinResized' | 'LspAttach' | 'LspDetach';
+
+type VimFnJobStartOpts = {
+  clear_env?: boolean,
+  cwd?: string,
+  detach?: boolean,
+  env: Record<string, string>,
+  height?: number,
+  on_stdout: (this: void, channel_id: number, data: string, name: 'stdout' | 'stderr' | 'stdin') => void,
+  on_stderr: (this: void, channel_id: number, data: string, name: 'stdout' | 'stderr' | 'stdin') => void,
+  on_stdin: (this: void, channel_id: number, data: string, name: 'stdout' | 'stderr' | 'stdin') => void,
+  pty?: boolean
+  rpc?: boolean
+  stderr_buffered?: boolean,
+  stdout_buffered?: boolean,
+  stdin?: VimPipe | undefined,
+  width?: number
+};
 
 type VimAPI = {
   cmd: (this: void, params: string) => void,
@@ -117,7 +136,10 @@ type VimAPI = {
     decode: (this: void, value: string) => unknown
   },
   v: {
-    shell_error: number
+    shell_error: number,
+    swapname: string,
+    afile: string,
+    swapchoice: 'o' | 'e' | 'r' | 'd' | 'q' | 'a' | ''
   },
   log: {
     levels: {
@@ -225,6 +247,7 @@ type VimAPI = {
   fn: {
     // Returns -1 if a buffer is not currently in a window
     bufwinid: (this: void, buf: NeovimBuffer | number) => number,
+    jobstart: (this: void, command: string, opts: VimFnJobStartOpts) => void,
     executable: (this: void, exe: string) => boolean,
     getcwd: (this: void) => string,
     sign_define: (this: void, id: string, options: {

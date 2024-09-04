@@ -3178,9 +3178,10 @@ ____exports.CONFIGURATION_DEFAULTS = {
         lspconfig = {enabled = true, config = {inlayHints = {enabled = true, displayMode = "only-in-normal-mode"}}},
         markdownPreview = {enabled = true},
         gitBrowse = {enabled = true},
-        obsidian = {enabled = true, config = {workspaces = {{name = "notes", path = "~/Documents/obsidian/notes"}}}}
+        obsidian = {enabled = true, config = {workspaces = {{name = "notes", path = "~/Documents/obsidian/notes"}}}},
+        undoTree = {enabled = true}
     },
-    targetEnvironments = {typescript = {enabled = true}, deno = {enabled = true}, ["c/c++"] = {enabled = true}, markdown = {enabled = true}},
+    targetEnvironments = {typescript = {enabled = true}, deno = {enabled = false}, ["c/c++"] = {enabled = true}, markdown = {enabled = true}},
     shell = {target = "tmux", isolationScope = "isolated"},
     integrations = {ollama = {enabled = true}}
 }
@@ -3661,6 +3662,10 @@ function ____exports.getPlugins()
     local ____opt_64 = globalConfig.packages.obsidian
     if ____opt_64 and ____opt_64.enabled then
         result[#result + 1] = require("lua.plugins.obsidian").default
+    end
+    local ____opt_66 = globalConfig.packages.undoTree
+    if ____opt_66 and ____opt_66.enabled then
+        result[#result + 1] = require("lua.plugins.undotree").default
     end
     result[#result + 1] = require("lua.plugins.nui").default
     return result
@@ -4467,27 +4472,34 @@ function configureLSP()
     end
     local targetEnvironments = getGlobalConfiguration().targetEnvironments
     for targetEnvKey in pairs(targetEnvironments) do
-        local config = environmentKeyToConfig(targetEnvKey)
-        if config == nil then
-            vim.notify("Failed to locate configuration for environment " .. targetEnvKey, vim.log.levels.WARN)
-        else
-            local ____capabilities_3 = capabilities
-            local ____on_attach_4 = on_attach
-            local ____config_additionalOptions_2 = config.additionalOptions
-            if ____config_additionalOptions_2 == nil then
-                ____config_additionalOptions_2 = {}
+        do
+            local ____opt_2 = targetEnvironments[targetEnvKey]
+            if not (____opt_2 and ____opt_2.enabled) then
+                goto __continue24
             end
-            local setupConfig = __TS__ObjectAssign({capabilities = ____capabilities_3, on_attach = ____on_attach_4}, ____config_additionalOptions_2)
-            lspconfig[config.lspKey].setup(setupConfig)
+            local config = environmentKeyToConfig(targetEnvKey)
+            if config == nil then
+                vim.notify("Failed to locate configuration for environment " .. targetEnvKey, vim.log.levels.WARN)
+            else
+                local ____capabilities_5 = capabilities
+                local ____on_attach_6 = on_attach
+                local ____config_additionalOptions_4 = config.additionalOptions
+                if ____config_additionalOptions_4 == nil then
+                    ____config_additionalOptions_4 = {}
+                end
+                local setupConfig = __TS__ObjectAssign({capabilities = ____capabilities_5, on_attach = ____on_attach_6}, ____config_additionalOptions_4)
+                lspconfig[config.lspKey].setup(setupConfig)
+            end
         end
+        ::__continue24::
     end
-    local ____vim_diagnostic_config_8 = vim.diagnostic.config
-    local ____opt_5 = getGlobalConfiguration().packages.lspLines
-    local ____temp_7 = ____opt_5 and ____opt_5.enabled
-    if ____temp_7 == nil then
-        ____temp_7 = false
+    local ____vim_diagnostic_config_10 = vim.diagnostic.config
+    local ____opt_7 = getGlobalConfiguration().packages.lspLines
+    local ____temp_9 = ____opt_7 and ____opt_7.enabled
+    if ____temp_9 == nil then
+        ____temp_9 = false
     end
-    ____vim_diagnostic_config_8({update_in_insert = true, virtual_text = not ____temp_7})
+    ____vim_diagnostic_config_10({update_in_insert = true, virtual_text = not ____temp_9})
 end
 local plugin = {[1] = "neovim/nvim-lspconfig", config = configureLSP}
 do
@@ -4786,6 +4798,44 @@ local plugin = {
         end
         useExternalModule("ufo").setup({})
     end
+}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.undotree"] = function(...) 
+local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+local function getUndoTree()
+    return useExternalModule("undotree")
+end
+local plugin = {
+    [1] = "jiaoshijie/undotree",
+    config = function()
+        getUndoTree().setup()
+        vim.api.nvim_create_user_command(
+            "UndoTreeToggle",
+            function()
+                getUndoTree().toggle()
+            end,
+            {}
+        )
+        vim.api.nvim_create_user_command(
+            "UndoTreeOpen",
+            function()
+                getUndoTree().open()
+            end,
+            {}
+        )
+        vim.api.nvim_create_user_command(
+            "UndoTreeClose",
+            function()
+                getUndoTree().close()
+            end,
+            {}
+        )
+    end,
+    dependencies = {"nvim-lua/plenary.nvim"}
 }
 ____exports.default = plugin
 return ____exports
