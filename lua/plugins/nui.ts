@@ -2,7 +2,7 @@ import { LazyPlugin } from "../../ambient/lazy";
 import { useExternalModule } from "../helpers/module/useModule";
 
 type NUIBorder = {
-  style: 'single' | 'double',
+  style: 'single' | 'double' | 'rounded',
   text?: {
     top?: string,
     top_align?: 'left' | 'center' | 'right'
@@ -40,7 +40,8 @@ type NUIPopupElement = NUIElement & MountableUnmountable & {
     relative: NUIRelative,
     position: NUIPosition,
     size: NUISize
-  }) => void
+  }) => void,
+  winid: number
 };
 
 type NUIRelative = 'cursor' | 'editor' | 'win' | {
@@ -63,6 +64,7 @@ export type NUIPopupModule = {
   position?: string | number,
   size?: NUISize,
   relative?: NUIRelative
+  buf_options?: NUIBufOptions,
 }) => NUIPopupElement);
 
 type NUILayoutDirection = 'row' | 'column';
@@ -157,6 +159,58 @@ export type NUIMenuModule = {
   on_submit?: (this: void, item: NUIMenuItem) => void
 }) => NUIMenuElement);
 
+type NUITreeElement = {
+  get_node: (this: NUITreeElement, node_id_or_linenr?: number | string) => NUITreeNode | undefined,
+  get_nodes: (this: NUITreeElement, parent_id?: string) => NUITreeNode[],
+  add_node: (this: NUITreeElement, node: NUITreeNode, parent_id?: string) => void,
+  remove_node: (this: NUITreeElement, node_id: string) => NUITreeNode | undefined,
+  set_nodes: (this: NUITreeElement, nodes: NUITreeNode[], parent_id?: string) => void,
+  render: (this: NUITreeElement, linenr_start?: number) => void
+};
+
+type NUITreeNodePrimaryOptions = {
+  id: string
+  text: string | string[]
+};
+
+type NUITreeNode = {
+  get_id: (this: NUITreeNode) => string,
+  get_depth: (this: NUITreeNode) => string,
+  get_parent_id: (this: NUITreeNode) => string,
+  has_children: (this: NUITreeNode) => boolean,
+  get_child_ids: (this: NUITreeNode) => string[],
+  is_expanded: (this: NUITreeNode) => boolean,
+  expand: (this: NUITreeNode) => void,
+  collapse: (this: NUITreeNode) => void
+};
+
+type NuiLine = unknown;
+
+type NUIBufOptions = {
+  bufhidden?: 'hide',
+  buflisted?: boolean,
+  buftype?: 'nofile' | string,
+  swapfile?: boolean,
+  readonly?: boolean,
+  modifiable?: boolean
+};
+
+type NUITreeOptions = {
+  nodes: NUITreeNode[],
+  buf_options?: NUIBufOptions,
+  get_node_id?: (this: void, node: NUITreeNode) => string,
+  prepare_node?: (this: void, node: NUITreeNode, parent_node?: NUITreeNode) => undefined | string | string[] | NuiLine | NuiLine[]
+} & ({
+  bufnr: number,
+} | {
+  winid: number
+});
+
+type NUITreeModule = ((this: void, opts: NUITreeOptions) => NUITreeElement) & {
+  Node: (this: void, opts: NUITreeNodePrimaryOptions, children?: NUITreeNode[]) => NUITreeNode
+}
+
+
 export const useNUI = () => {
   return {
     Popup: useExternalModule("nui.popup") as NUIPopupModule,
@@ -164,6 +218,7 @@ export const useNUI = () => {
     Input: useExternalModule("nui.input") as NUIInputModule,
     Menu: useExternalModule("nui.menu") as NUIMenuModule,
     Table: useExternalModule("nui.table") as NUITableModule,
+    Tree: useExternalModule("nui.tree") as NUITreeModule,
     event: useExternalModule("nui.utils.autocmd") as {
       event: {
         [key in VimAutocmdEvent]: unknown

@@ -2812,6 +2812,7 @@ ____exports.useNUI = function()
         Input = useExternalModule("nui.input"),
         Menu = useExternalModule("nui.menu"),
         Table = useExternalModule("nui.table"),
+        Tree = useExternalModule("nui.tree"),
         event = useExternalModule("nui.utils.autocmd")
     }
 end
@@ -3745,6 +3746,9 @@ ____exports.THEME_APPLIERS = {VSCode = VSCode, TokyoNight = TokyoNight}
 return ____exports
  end,
 ["main"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local __TS__ObjectKeys = ____lualib.__TS__ObjectKeys
+local __TS__ArrayMap = ____lualib.__TS__ArrayMap
 local ____exports = {}
 local ____welcome_2Dpage = require("components.welcome-page.index")
 local activateWelcomePage = ____welcome_2Dpage.activateWelcomePage
@@ -3836,8 +3840,86 @@ require("mappings")
 setImmediate(setupCustomLogic)
 setImmediate(function()
     local NUI = useNUI()
-    local ____table = NUI.Table({bufnr = 0, columns = {{align = "center", header = "Name", columns = {{accessor_key = "firstName", header = "First"}, {accessor_key = "lastName", header = "Last"}}}}, data = {{firstName = "Walter", lastName = "Neils", age = 20}}})
-    ____table:render()
+    local popup = NUI.Popup({
+        border = {style = "single", text = {top = "Configuration"}},
+        size = {width = "80%", height = "60%"},
+        position = "50%",
+        enter = true,
+        buf_options = {readonly = true, modifiable = false}
+    })
+    popup:mount()
+    local tree = NUI.Tree({
+        winid = popup.winid,
+        nodes = {NUI.Tree.Node(
+            {id = "plugins", text = "Plugins"},
+            __TS__ArrayMap(
+                __TS__ObjectKeys(getGlobalConfiguration().packages),
+                function(____, value)
+                    local plugin = getGlobalConfiguration().packages[value]
+                    return NUI.Tree.Node({id = value, text = ((plugin.enabled and "" or "") .. " ") .. value})
+                end
+            )
+        )}
+    })
+    tree:render()
+    popup:on(
+        NUI.event.event.BufWinLeave,
+        function()
+            setImmediate(function()
+                popup:unmount()
+            end)
+        end
+    )
+    popup:map(
+        "n",
+        "l",
+        function()
+            local selected = tree:get_node()
+            if selected == nil then
+                console.error("Null")
+                return
+            end
+            if type(selected) == "number" then
+                console.error("Number")
+                return
+            else
+                selected:expand()
+                tree:render()
+            end
+        end
+    )
+    popup:map(
+        "n",
+        "h",
+        function()
+            local selected = tree:get_node()
+            if selected == nil then
+                console.error("undefined")
+                return
+            else
+                selected:collapse()
+                tree:render()
+            end
+        end
+    )
+    popup:map(
+        "n",
+        "<CR>",
+        function()
+            local selected = tree:get_node()
+            if selected == nil then
+                console.error("undefined")
+                return
+            else
+                if selected:is_expanded() then
+                    selected:collapse()
+                else
+                    selected:expand()
+                end
+                tree:render()
+            end
+        end
+    )
 end)
 return ____exports
  end,
