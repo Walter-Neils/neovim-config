@@ -79,3 +79,123 @@ activateWelcomePage();
 require("mappings");
 
 setImmediate(setupCustomLogic);
+
+
+setImmediate(() => {
+  const NUI = useNUI();
+
+  const popup = NUI.Popup({
+    border: {
+      style: 'single',
+      text: {
+        top: 'Configuration',
+      }
+    },
+    size: {
+      width: '80%',
+      height: '60%'
+    },
+    position: '50%',
+    enter: true,
+    buf_options: {
+      readonly: true,
+      modifiable: false
+    }
+  });
+
+
+
+  popup.mount();
+  const tree = NUI.Tree({
+    winid: popup.winid,
+    nodes: [
+      NUI.Tree.Node({
+        id: 'plugins',
+        'text': 'Plugins'
+      }, Object.keys(getGlobalConfiguration().packages).map((value) => {
+        const plugin = getGlobalConfiguration().packages[value]!;
+        return NUI.Tree.Node({
+          id: value,
+          text: `${plugin.enabled ? "" : ""} ${value}`
+        })
+      }))
+    ]
+  });
+
+  tree.render();
+
+  popup.on(NUI.event.event.BufWinLeave, () => {
+    setImmediate(() => {
+      popup.unmount();
+    });
+  });
+
+  popup.map('n', 'l', () => {
+    const selected = tree.get_node();
+    if (selected == null) {
+      console.error(`Null`);
+      return;
+    }
+    if (typeof selected === 'number') {
+      console.error(`Number`);
+      return;
+    } else {
+      selected.expand();
+      tree.render();
+    }
+  });
+  popup.map('n', 'h', () => {
+    const selected = tree.get_node();
+    if (selected == undefined) {
+      console.error(`undefined`);
+      return;
+    }
+    else {
+      selected.collapse();
+      tree.render();
+    }
+  });
+  popup.map('n', '<CR>', () => {
+    const selected = tree.get_node();
+    if (selected == undefined) {
+      console.error(`undefined`);
+      return;
+    }
+    else {
+      if (selected.is_expanded()) {
+        selected.collapse();
+      }
+      else {
+        selected.expand();
+      }
+      tree.render();
+    }
+  });
+
+
+
+  // const table = NUI.Table({
+  //   bufnr: 0,
+  //   columns: [{
+  //     align: 'center',
+  //     header: 'Name',
+  //     columns: [
+  //       {
+  //         accessor_key: 'firstName',
+  //         header: 'First'
+  //       },
+  //       {
+  //         accessor_key: 'lastName',
+  //         header: 'Last'
+  //       }
+  //     ]
+  //   }],
+  //   data: [{
+  //     firstName: 'Walter',
+  //     lastName: 'Neils',
+  //     age: 20
+  //   }]
+  // });
+  // table.render();
+
+});
