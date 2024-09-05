@@ -3844,6 +3844,25 @@ function ____exports.applyKeyMapping(map)
 end
 return ____exports
  end,
+["lua.helpers.one-off.index"] = function(...) 
+local ____exports = {}
+local ____fs = require("lua.shims.fs.index")
+local fs = ____fs.fs
+local dataPath = vim.fn.stdpath("data") .. "/winvim/one-off"
+vim.fn.system({"mkdir", "-p", dataPath})
+function ____exports.oneOffFunction(key, only_once, not_first_time)
+    local path = (dataPath .. "/") .. key
+    if fs.existsSync(path) then
+        if not_first_time ~= nil then
+            not_first_time()
+        end
+    else
+        fs.writeFileSync(path, "")
+        only_once()
+    end
+end
+return ____exports
+ end,
 ["lua.plugins.actions-preview"] = function(...) 
 local ____exports = {}
 local ____useModule = require("lua.helpers.module.useModule")
@@ -4006,6 +4025,8 @@ local ____configuration = require("lua.helpers.configuration.index")
 local getGlobalConfiguration = ____configuration.getGlobalConfiguration
 local ____keymap = require("lua.helpers.keymap.index")
 local applyKeyMapping = ____keymap.applyKeyMapping
+local ____one_2Doff = require("lua.helpers.one-off.index")
+local oneOffFunction = ____one_2Doff.oneOffFunction
 local ____actions_2Dpreview = require("lua.plugins.actions-preview")
 local getActionsPreview = ____actions_2Dpreview.getActionsPreview
 local ____nvim_2Ddap_2Dui = require("lua.plugins.nvim-dap-ui")
@@ -4023,77 +4044,108 @@ for direction in pairs(MOVEMENT_DIRECTION_KEYS) do
     applyKeyMapping({mode = "n", inputStroke = ("<C-" .. key.key) .. ">", outputStroke = "<C-w>" .. key.key, options = {desc = "switch window " .. direction}})
 end
 local config = getGlobalConfiguration()
-local ____opt_0 = config.packages.barBar
-if not (____opt_0 and ____opt_0.enabled) then
-    applyKeyMapping({mode = "n", inputStroke = "<leader>x", outputStroke = "<cmd>:bd<CR>:bnext<CR>", options = {desc = "Close current buffer"}})
-    applyKeyMapping({mode = "n", inputStroke = "<A-h>", outputStroke = "<cmd>:bprev <CR>", options = {desc = "previous buffer"}})
-    applyKeyMapping({mode = "n", inputStroke = "<A-l>", outputStroke = "<cmd>:bnext <CR>", options = {desc = "next buffer"}})
-    applyKeyMapping({mode = "n", inputStroke = "<Tab>", outputStroke = "<cmd>:bnext<CR>", options = {desc = "Switch next buffer"}})
-else
-    applyKeyMapping({mode = "n", inputStroke = "<leader>x", outputStroke = "<cmd>BufferClose<CR>", options = {desc = "Close current buffer"}})
-    applyKeyMapping({mode = "n", inputStroke = "<Tab>", outputStroke = "<cmd>BufferNext<CR>", options = {desc = "Switch buffer"}})
-    applyKeyMapping({mode = "n", inputStroke = "<A-h>", outputStroke = "<cmd>:BufferPrevious <CR>", options = {desc = "previous buffer"}})
-    applyKeyMapping({mode = "n", inputStroke = "<A-l>", outputStroke = "<cmd>:BufferNext <CR>", options = {desc = "next buffer"}})
+local function getPackage(key)
+    local target = config.packages[key]
+    if target == nil then
+        return {false, nil}
+    else
+        return {target.enabled, target.config}
+    end
+end
+do
+    local enabled = unpack(getPackage("barBar"))
+    if enabled then
+        applyKeyMapping({mode = "n", inputStroke = "<leader>x", outputStroke = "<cmd>BufferClose<CR>", options = {desc = "Close current buffer"}})
+        applyKeyMapping({mode = "n", inputStroke = "<Tab>", outputStroke = "<cmd>BufferNext<CR>", options = {desc = "Switch buffer"}})
+        applyKeyMapping({mode = "n", inputStroke = "<A-h>", outputStroke = "<cmd>:BufferPrevious <CR>", options = {desc = "previous buffer"}})
+        applyKeyMapping({mode = "n", inputStroke = "<A-l>", outputStroke = "<cmd>:BufferNext <CR>", options = {desc = "next buffer"}})
+    else
+        applyKeyMapping({mode = "n", inputStroke = "<leader>x", outputStroke = "<cmd>:bd<CR>:bnext<CR>", options = {desc = "Close current buffer"}})
+        applyKeyMapping({mode = "n", inputStroke = "<A-h>", outputStroke = "<cmd>:bprev <CR>", options = {desc = "previous buffer"}})
+        applyKeyMapping({mode = "n", inputStroke = "<A-l>", outputStroke = "<cmd>:bnext <CR>", options = {desc = "next buffer"}})
+        applyKeyMapping({mode = "n", inputStroke = "<Tab>", outputStroke = "<cmd>:bnext<CR>", options = {desc = "Switch next buffer"}})
+    end
 end
 applyKeyMapping({mode = "n", inputStroke = "<leader>s", outputStroke = "<cmd>:vsplit<CR>", options = {desc = "vertical split"}})
 applyKeyMapping({mode = "n", inputStroke = "<leader>h", outputStroke = "<cmd>:split<CR>", options = {desc = "horizontal split"}})
 applyKeyMapping({mode = "n", inputStroke = "<Esc>", outputStroke = "<cmd>noh<CR>", options = {desc = "general clear highlights"}})
 applyKeyMapping({mode = "n", inputStroke = "<C-n>", outputStroke = "<cmd>NvimTreeToggle<CR>", options = {desc = "toggle file tree"}})
-for ____, mode in ipairs({"n", "i", "t"}) do
-    applyKeyMapping({mode = mode, inputStroke = "<A-i>", outputStroke = "<cmd>FloatermToggle __builtin_floating<CR>", options = {desc = "toggle floating terminal"}})
+do
+    local enabled = unpack(getPackage("floatTerm"))
+    if enabled then
+        for ____, mode in ipairs({"n", "i", "t"}) do
+            applyKeyMapping({mode = mode, inputStroke = "<A-i>", outputStroke = "<cmd>FloatermToggle __builtin_floating<CR>", options = {desc = "toggle floating terminal"}})
+        end
+        applyKeyMapping({mode = "t", inputStroke = "<A-h>", outputStroke = "<cmd>FloatermPrev<CR>", options = {desc = "terminal previous terminal"}})
+        applyKeyMapping({mode = "t", inputStroke = "<A-l>", outputStroke = "<cmd>FloatermNext<CR>", options = {desc = "terminal next terminal"}})
+        applyKeyMapping({mode = "t", inputStroke = "<A-n>", outputStroke = "<cmd>FloatermNew<CR>", options = {desc = "terminal new terminal"}})
+        applyKeyMapping({mode = "t", inputStroke = "<A-k>", outputStroke = "<cmd>FloatermKill<CR>", options = {desc = "terminal new terminal"}})
+    end
 end
-applyKeyMapping({mode = "t", inputStroke = "<A-h>", outputStroke = "<cmd>FloatermPrev<CR>", options = {desc = "terminal previous terminal"}})
-applyKeyMapping({mode = "t", inputStroke = "<A-l>", outputStroke = "<cmd>FloatermNext<CR>", options = {desc = "terminal next terminal"}})
-applyKeyMapping({mode = "t", inputStroke = "<A-n>", outputStroke = "<cmd>FloatermNew<CR>", options = {desc = "terminal new terminal"}})
-applyKeyMapping({mode = "t", inputStroke = "<A-k>", outputStroke = "<cmd>FloatermKill<CR>", options = {desc = "terminal new terminal"}})
 applyKeyMapping({mode = "t", inputStroke = "<C-x>", outputStroke = "<C-\\><C-N>", options = {desc = "terminal escape terminal mode"}})
-local ____opt_2 = config.packages.telescope
-if ____opt_2 and ____opt_2.enabled then
-    applyKeyMapping({mode = "n", inputStroke = "<leader>ff", outputStroke = "<cmd>Telescope find_files <CR>", options = {desc = "Find files"}})
-    applyKeyMapping({mode = "n", inputStroke = "<leader>fw", outputStroke = "<cmd>Telescope live_grep <CR>", options = {desc = "Live grep"}})
-    applyKeyMapping({mode = "n", inputStroke = "<leader>fb", outputStroke = "<cmd>Telescope buffers <CR>", options = {desc = "Find buffers"}})
-    applyKeyMapping({mode = "n", inputStroke = "<leader>cm", outputStroke = "<cmd>Telescope git_commits <CR>", options = {desc = "Git commits"}})
-    applyKeyMapping({mode = "n", inputStroke = "<leader>gt", outputStroke = "<cmd>Telescope git_status <CR>", options = {desc = "Git status"}})
-    applyKeyMapping({mode = "n", inputStroke = "<leader>fz", outputStroke = "<cmd>Telescope current_buffer_fuzzy_find <CR>", options = {desc = "Find in current buffer"}})
+do
+    local enabled = unpack(getPackage("telescope"))
+    if enabled then
+        applyKeyMapping({mode = "n", inputStroke = "<leader>ff", outputStroke = "<cmd>Telescope find_files <CR>", options = {desc = "Find files"}})
+        applyKeyMapping({mode = "n", inputStroke = "<leader>fw", outputStroke = "<cmd>Telescope live_grep <CR>", options = {desc = "Live grep"}})
+        applyKeyMapping({mode = "n", inputStroke = "<leader>fb", outputStroke = "<cmd>Telescope buffers <CR>", options = {desc = "Find buffers"}})
+        applyKeyMapping({mode = "n", inputStroke = "<leader>cm", outputStroke = "<cmd>Telescope git_commits <CR>", options = {desc = "Git commits"}})
+        applyKeyMapping({mode = "n", inputStroke = "<leader>gt", outputStroke = "<cmd>Telescope git_status <CR>", options = {desc = "Git status"}})
+        applyKeyMapping({mode = "n", inputStroke = "<leader>fz", outputStroke = "<cmd>Telescope current_buffer_fuzzy_find <CR>", options = {desc = "Find in current buffer"}})
+    end
 end
-applyKeyMapping({
-    mode = "n",
-    inputStroke = "<leader>fm",
-    action = function()
-        vim.lsp.buf.format({async = true})
-    end,
-    options = {desc = "LSP Formatting"}
-})
-applyKeyMapping({
-    mode = "n",
-    inputStroke = "<leader>,",
-    action = function()
-        vim.lsp.buf.signature_help()
-        vim.lsp.buf.hover()
-    end,
-    options = {desc = "Show LSP signature & type info"}
-})
-local ____opt_4 = config.packages.comments
-if ____opt_4 and ____opt_4.enabled then
-    applyKeyMapping({
-        mode = "n",
-        inputStroke = "<leader>/",
-        action = function()
-            vim.cmd("norm gcc")
-        end,
-        options = {desc = "toggle comment"}
-    })
-    applyKeyMapping({
-        mode = "v",
-        inputStroke = "<leader>/",
-        action = function()
-            vim.cmd("norm gcc")
-        end,
-        options = {desc = "toggle comment"}
-    })
+do
+    local enabled = unpack(getPackage("lspConfig"))
+    if enabled then
+        applyKeyMapping({
+            mode = "n",
+            inputStroke = "<leader>fm",
+            action = function()
+                vim.lsp.buf.format({async = true})
+            end,
+            options = {desc = "LSP Formatting"}
+        })
+        applyKeyMapping({
+            mode = "n",
+            inputStroke = "<leader>,",
+            action = function()
+                vim.lsp.buf.signature_help()
+                vim.lsp.buf.hover()
+            end,
+            options = {desc = "Show LSP signature & type info"}
+        })
+    end
 end
-local ____opt_6 = config.packages.trouble
-if ____opt_6 and ____opt_6.enabled then
+do
+    local enabled = unpack(getPackage("comments"))
+    if enabled then
+        applyKeyMapping({
+            mode = "n",
+            inputStroke = "<leader>/",
+            action = function()
+                vim.cmd("norm gcc")
+            end,
+            options = {desc = "toggle comment"}
+        })
+        applyKeyMapping({
+            mode = "v",
+            inputStroke = "<leader>/",
+            action = function()
+                vim.cmd("norm gcc")
+            end,
+            options = {desc = "toggle comment"}
+        })
+    else
+        oneOffFunction(
+            "warn-comments-disabled",
+            function()
+                vim.notify("Comments plugin is disabled", vim.log.levels.WARN)
+            end
+        )
+    end
+end
+local ____opt_0 = config.packages.trouble
+if ____opt_0 and ____opt_0.enabled then
     applyKeyMapping({mode = "n", inputStroke = "<leader>tdd", outputStroke = ":Trouble diagnostics toggle<CR>", options = {silent = true}})
 end
 if true then
@@ -4106,8 +4158,8 @@ if true then
         options = {desc = "rename"}
     })
 end
-local ____opt_8 = config.packages.glance
-if ____opt_8 and ____opt_8.enabled then
+local ____opt_2 = config.packages.glance
+if ____opt_2 and ____opt_2.enabled then
     applyKeyMapping({mode = "n", inputStroke = "<leader>glr", outputStroke = ":Glance references<CR>", options = {desc = "Open references"}})
     applyKeyMapping({mode = "n", inputStroke = "<leader>gld", outputStroke = ":Glance definitions<CR>", options = {desc = "Open definitions"}})
     applyKeyMapping({mode = "n", inputStroke = "<leader>gltd", outputStroke = ":Glance type_definitions<CR>", options = {desc = "Open type definitions"}})
@@ -4144,12 +4196,12 @@ if config.packages.nvimDapUI then
         options = {desc = "Evaluate selected statement"}
     })
 end
-local ____opt_10 = config.packages.copilot
-if ____opt_10 and ____opt_10.enabled then
+local ____opt_4 = config.packages.copilot
+if ____opt_4 and ____opt_4.enabled then
     vim.keymap.set("i", "<C-J>", "copilot#Accept(\"<CR>\")", {expr = true, replace_keycodes = false})
 end
-local ____opt_12 = config.packages.actionsPreview
-if ____opt_12 and ____opt_12.enabled then
+local ____opt_6 = config.packages.actionsPreview
+if ____opt_6 and ____opt_6.enabled then
     applyKeyMapping({
         mode = "n",
         inputStroke = ".",
@@ -4159,8 +4211,8 @@ if ____opt_12 and ____opt_12.enabled then
         options = {desc = "Show code actions"}
     })
 end
-local ____opt_14 = config.packages.lazyGit
-if ____opt_14 and ____opt_14.enabled then
+local ____opt_8 = config.packages.lazyGit
+if ____opt_8 and ____opt_8.enabled then
     applyKeyMapping({mode = "n", inputStroke = "<leader>lg", outputStroke = "<cmd>LazyGit<CR>", options = {desc = "Show code actions"}})
 end
 return ____exports

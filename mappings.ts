@@ -1,5 +1,6 @@
 import { getGlobalConfiguration } from "./lua/helpers/configuration";
 import { applyKeyMapping } from "./lua/helpers/keymap";
+import { oneOffFunction } from "./lua/helpers/one-off";
 import { getActionsPreview } from "./lua/plugins/actions-preview";
 import { getDapUI } from "./lua/plugins/nvim-dap-ui";
 
@@ -55,75 +56,87 @@ for (const direction in MOVEMENT_DIRECTION_KEYS) {
 
 const config = getGlobalConfiguration();
 
-if (!(config.packages["barBar"]?.enabled)) {
-  applyKeyMapping({
-    mode: 'n',
-    inputStroke: '<leader>x',
-    outputStroke: '<cmd>:bd<CR>:bnext<CR>',
-    options: {
-      desc: 'Close current buffer'
-    }
-  });
-  applyKeyMapping({
-    mode: 'n',
-    inputStroke: `<A-h>`,
-    outputStroke: `<cmd>:bprev <CR>`,
-    options: {
-      desc: `previous buffer`
-    }
-  });
-
-  applyKeyMapping({
-    mode: 'n',
-    inputStroke: `<A-l>`,
-    outputStroke: `<cmd>:bnext <CR>`,
-    options: {
-      desc: `next buffer`
-    }
-  });
-  applyKeyMapping({
-    mode: 'n',
-    inputStroke: '<Tab>',
-    outputStroke: "<cmd>:bnext<CR>",
-    options: {
-      desc: 'Switch next buffer'
-    }
-  });
+function getPackage<TConfig = unknown>(key: string) {
+  const target = config.packages[key];
+  if (target === undefined) {
+    return [false, undefined] as const;
+  }
+  else {
+    return [target.enabled, target.config as (TConfig | undefined)] as const;
+  }
 }
-else {
-  applyKeyMapping({
-    mode: 'n',
-    inputStroke: '<leader>x',
-    outputStroke: '<cmd>BufferClose<CR>',
-    options: {
-      desc: 'Close current buffer'
-    }
-  });
-  applyKeyMapping({
-    mode: 'n',
-    inputStroke: '<Tab>',
-    outputStroke: '<cmd>BufferNext<CR>',
-    options: {
-      desc: 'Switch buffer'
-    }
-  });
-  applyKeyMapping({
-    mode: 'n',
-    inputStroke: `<A-h>`,
-    outputStroke: `<cmd>:BufferPrevious <CR>`,
-    options: {
-      desc: `previous buffer`
-    }
-  });
 
-  applyKeyMapping({
-    mode: 'n',
-    inputStroke: `<A-l>`,
-    outputStroke: `<cmd>:BufferNext <CR>`,
-    options: {
-      desc: `next buffer`
-    }
-  });
+{
+  const [enabled] = getPackage('barBar');
+  if (enabled) {
+    applyKeyMapping({
+      mode: 'n',
+      inputStroke: '<leader>x',
+      outputStroke: '<cmd>BufferClose<CR>',
+      options: {
+        desc: 'Close current buffer'
+      }
+    });
+    applyKeyMapping({
+      mode: 'n',
+      inputStroke: '<Tab>',
+      outputStroke: '<cmd>BufferNext<CR>',
+      options: {
+        desc: 'Switch buffer'
+      }
+    });
+    applyKeyMapping({
+      mode: 'n',
+      inputStroke: `<A-h>`,
+      outputStroke: `<cmd>:BufferPrevious <CR>`,
+      options: {
+        desc: `previous buffer`
+      }
+    });
+
+    applyKeyMapping({
+      mode: 'n',
+      inputStroke: `<A-l>`,
+      outputStroke: `<cmd>:BufferNext <CR>`,
+      options: {
+        desc: `next buffer`
+      }
+    });
+  } else {
+    applyKeyMapping({
+      mode: 'n',
+      inputStroke: '<leader>x',
+      outputStroke: '<cmd>:bd<CR>:bnext<CR>',
+      options: {
+        desc: 'Close current buffer'
+      }
+    });
+    applyKeyMapping({
+      mode: 'n',
+      inputStroke: `<A-h>`,
+      outputStroke: `<cmd>:bprev <CR>`,
+      options: {
+        desc: `previous buffer`
+      }
+    });
+
+    applyKeyMapping({
+      mode: 'n',
+      inputStroke: `<A-l>`,
+      outputStroke: `<cmd>:bnext <CR>`,
+      options: {
+        desc: `next buffer`
+      }
+    });
+    applyKeyMapping({
+      mode: 'n',
+      inputStroke: '<Tab>',
+      outputStroke: "<cmd>:bnext<CR>",
+      options: {
+        desc: 'Switch next buffer'
+      }
+    });
+  }
 }
 
 // Open splits
@@ -166,53 +179,58 @@ applyKeyMapping({
   }
 });
 
-// floatterm
-for (const mode of ['n', 'i', 't'] as const) {
-  applyKeyMapping({
-    mode,
-    inputStroke: "<A-i>",
-    outputStroke: "<cmd>FloatermToggle __builtin_floating<CR>",
-    options: {
-      desc: "toggle floating terminal"
+{
+  const [enabled] = getPackage('floatTerm');
+  if (enabled) {
+    for (const mode of ['n', 'i', 't'] as const) {
+      applyKeyMapping({
+        mode,
+        inputStroke: "<A-i>",
+        outputStroke: "<cmd>FloatermToggle __builtin_floating<CR>",
+        options: {
+          desc: "toggle floating terminal"
+        }
+      });
     }
-  });
+    applyKeyMapping({
+      mode: 't',
+      inputStroke: "<A-h>",
+      outputStroke: "<cmd>FloatermPrev<CR>",
+      options: {
+        desc: "terminal previous terminal"
+      }
+    });
+
+    applyKeyMapping({
+      mode: 't',
+      inputStroke: "<A-l>",
+      outputStroke: "<cmd>FloatermNext<CR>",
+      options: {
+        desc: "terminal next terminal"
+      }
+    });
+
+    applyKeyMapping({
+      mode: 't',
+      inputStroke: "<A-n>",
+      outputStroke: "<cmd>FloatermNew<CR>",
+      options: {
+        desc: "terminal new terminal"
+      }
+    });
+
+    applyKeyMapping({
+      mode: 't',
+      inputStroke: "<A-k>",
+      outputStroke: "<cmd>FloatermKill<CR>",
+      options: {
+        desc: "terminal new terminal"
+      }
+    });
+  }
 }
 
-applyKeyMapping({
-  mode: 't',
-  inputStroke: "<A-h>",
-  outputStroke: "<cmd>FloatermPrev<CR>",
-  options: {
-    desc: "terminal previous terminal"
-  }
-});
 
-applyKeyMapping({
-  mode: 't',
-  inputStroke: "<A-l>",
-  outputStroke: "<cmd>FloatermNext<CR>",
-  options: {
-    desc: "terminal next terminal"
-  }
-});
-
-applyKeyMapping({
-  mode: 't',
-  inputStroke: "<A-n>",
-  outputStroke: "<cmd>FloatermNew<CR>",
-  options: {
-    desc: "terminal new terminal"
-  }
-});
-
-applyKeyMapping({
-  mode: 't',
-  inputStroke: "<A-k>",
-  outputStroke: "<cmd>FloatermKill<CR>",
-  options: {
-    desc: "terminal new terminal"
-  }
-});
 
 applyKeyMapping({
   mode: 't',
@@ -224,107 +242,121 @@ applyKeyMapping({
 });
 
 // Telescope
-if (config.packages["telescope"]?.enabled) {
-  applyKeyMapping({
-    mode: 'n',
-    inputStroke: '<leader>ff',
-    outputStroke: '<cmd>Telescope find_files <CR>',
-    options: {
-      desc: 'Find files'
-    }
-  });
-  applyKeyMapping({
-    mode: 'n',
-    inputStroke: "<leader>fw",
-    outputStroke: '<cmd>Telescope live_grep <CR>',
-    options: {
-      desc: 'Live grep'
-    }
-  });
-  applyKeyMapping({
-    mode: 'n',
-    inputStroke: "<leader>fb",
-    outputStroke: '<cmd>Telescope buffers <CR>',
-    options: {
-      desc: 'Find buffers'
-    }
-  });
-  applyKeyMapping({
-    mode: 'n',
-    inputStroke: "<leader>cm",
-    outputStroke: '<cmd>Telescope git_commits <CR>',
-    options: {
-      desc: 'Git commits'
-    }
-  });
-  applyKeyMapping({
-    mode: 'n',
-    inputStroke: "<leader>gt",
-    outputStroke: '<cmd>Telescope git_status <CR>',
-    options: {
-      desc: 'Git status'
-    }
-  });
-  applyKeyMapping({
-    mode: 'n',
-    inputStroke: '<leader>fz',
-    outputStroke: '<cmd>Telescope current_buffer_fuzzy_find <CR>',
-    options: {
-      desc: 'Find in current buffer'
-    }
-  });
+
+{
+  const [enabled] = getPackage('telescope');
+  if (enabled) {
+    applyKeyMapping({
+      mode: 'n',
+      inputStroke: '<leader>ff',
+      outputStroke: '<cmd>Telescope find_files <CR>',
+      options: {
+        desc: 'Find files'
+      }
+    });
+    applyKeyMapping({
+      mode: 'n',
+      inputStroke: "<leader>fw",
+      outputStroke: '<cmd>Telescope live_grep <CR>',
+      options: {
+        desc: 'Live grep'
+      }
+    });
+    applyKeyMapping({
+      mode: 'n',
+      inputStroke: "<leader>fb",
+      outputStroke: '<cmd>Telescope buffers <CR>',
+      options: {
+        desc: 'Find buffers'
+      }
+    });
+    applyKeyMapping({
+      mode: 'n',
+      inputStroke: "<leader>cm",
+      outputStroke: '<cmd>Telescope git_commits <CR>',
+      options: {
+        desc: 'Git commits'
+      }
+    });
+    applyKeyMapping({
+      mode: 'n',
+      inputStroke: "<leader>gt",
+      outputStroke: '<cmd>Telescope git_status <CR>',
+      options: {
+        desc: 'Git status'
+      }
+    });
+    applyKeyMapping({
+      mode: 'n',
+      inputStroke: '<leader>fz',
+      outputStroke: '<cmd>Telescope current_buffer_fuzzy_find <CR>',
+      options: {
+        desc: 'Find in current buffer'
+      }
+    });
+  }
 }
 
 // CMP
 // is managed in it's plugin config
 
+{
+  const [enabled] = getPackage('lspConfig');
+  if (enabled) {
+    applyKeyMapping({
+      mode: 'n',
+      inputStroke: '<leader>fm',
+      action: function(this: void) {
+        vim.lsp.buf.format({ async: true });
+      },
+      options: {
+        desc: 'LSP Formatting'
+      }
+    });
 
-// LSP Functionality
-applyKeyMapping({
-  mode: 'n',
-  inputStroke: '<leader>fm',
-  action: function(this: void) {
-    vim.lsp.buf.format({ async: true });
-  },
-  options: {
-    desc: 'LSP Formatting'
+    applyKeyMapping({
+      mode: 'n',
+      inputStroke: '<leader>,',
+      action: function(this: void) {
+        vim.lsp.buf.signature_help();
+        vim.lsp.buf.hover();
+      },
+      options: {
+        desc: 'Show LSP signature & type info'
+      }
+    })
   }
-});
-
-applyKeyMapping({
-  mode: 'n',
-  inputStroke: '<leader>,',
-  action: function(this: void) {
-    vim.lsp.buf.signature_help();
-    vim.lsp.buf.hover();
-  },
-  options: {
-    desc: 'Show LSP signature & type info'
-  }
-})
+}
 
 // Comments
-if (config.packages["comments"]?.enabled) {
-  applyKeyMapping({
-    mode: 'n',
-    inputStroke: '<leader>/',
-    action: function(this: void) {
-      vim.cmd("norm gcc");
-    },
-    options: {
-      desc: 'toggle comment'
-    }
-  });
-  applyKeyMapping({
-    mode: 'v',
-    inputStroke: '<leader>/',
-    action: function(this: void) {
-      vim.cmd("norm gcc");
-    },
-    options: {
-      desc: 'toggle comment'
-    }
-  });
+{
+  const [enabled] = getPackage('comments');
+  if (enabled) {
+    applyKeyMapping({
+      mode: 'n',
+      inputStroke: '<leader>/',
+      action: function(this: void) {
+        vim.cmd("norm gcc");
+      },
+      options: {
+        desc: 'toggle comment'
+      }
+    });
+    applyKeyMapping({
+      mode: 'v',
+      inputStroke: '<leader>/',
+      action: function(this: void) {
+        vim.cmd("norm gcc");
+      },
+      options: {
+        desc: 'toggle comment'
+      }
+    });
+  } else {
+    oneOffFunction('warn-comments-disabled', () => {
+      vim.notify(`Comments plugin is disabled`, vim.log.levels.WARN);
+    });
+  }
 }
 
 if (config.packages["trouble"]?.enabled) {
