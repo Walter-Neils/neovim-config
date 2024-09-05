@@ -2811,6 +2811,7 @@ ____exports.useNUI = function()
         Layout = useExternalModule("nui.layout"),
         Input = useExternalModule("nui.input"),
         Menu = useExternalModule("nui.menu"),
+        Table = useExternalModule("nui.table"),
         event = useExternalModule("nui.utils.autocmd")
     }
 end
@@ -3764,6 +3765,8 @@ local ____portable_2Dappimage = require("lua.integrations.portable-appimage")
 local enablePortableAppImageLogic = ____portable_2Dappimage.enablePortableAppImageLogic
 local ____init = require("lua.plugins.init")
 local getPlugins = ____init.getPlugins
+local ____nui = require("lua.plugins.nui")
+local useNUI = ____nui.useNUI
 local ____console = require("lua.shims.console.index")
 local insertConsoleShims = ____console.insertConsoleShims
 local ____json = require("lua.shims.json.index")
@@ -3831,6 +3834,11 @@ vim.opt.ruler = false
 activateWelcomePage()
 require("mappings")
 setImmediate(setupCustomLogic)
+setImmediate(function()
+    local NUI = useNUI()
+    local ____table = NUI.Table({bufnr = 0, columns = {{align = "center", header = "Name", columns = {{accessor_key = "firstName", header = "First"}, {accessor_key = "lastName", header = "Last"}}}}, data = {{firstName = "Walter", lastName = "Neils", age = 20}}})
+    ____table:render()
+end)
 return ____exports
  end,
 ["lua.helpers.keymap.index"] = function(...) 

@@ -106,6 +106,38 @@ type NUIMenuItem = {
   text: string
 };
 
+type NUITableElement = {
+  get_cell: (this: NUITableElement, position?: [number, number]) => NUITableCell | undefined,
+  refresh_cell: (this: NUITableElement, cell: NUITableCell) => void,
+  render: (this: NUITableElement, linenr_start?: number) => void
+};
+
+type NUITableCell = {
+
+};
+
+type NUITableColumnDef = ({
+  id: string,
+  accessor_fn: (this: void, row: unknown) => string | number,
+} | {
+  accessor_key: string,
+} | {}) & {
+  align?: 'center' | 'left' | 'right',
+  columns?: NUITableColumnDef[],
+  header: string
+};
+
+type NUITableOptions = {
+  bufnr: number,
+  ns_id?: number | string,
+  columns: NUITableColumnDef[],
+  data: unknown[],
+};
+
+type NUITableModule = {
+
+} & ((this: void, opts: NUITableOptions) => NUITableElement);
+
 export type NUIMenuModule = {
   item: (this: void, value: string, data?: unknown) => NUIMenuItemElement,
   separator: (this: void, text: string, opts: {
@@ -131,6 +163,7 @@ export const useNUI = () => {
     Layout: useExternalModule("nui.layout") as NUILayoutModule,
     Input: useExternalModule("nui.input") as NUIInputModule,
     Menu: useExternalModule("nui.menu") as NUIMenuModule,
+    Table: useExternalModule("nui.table") as NUITableModule,
     event: useExternalModule("nui.utils.autocmd") as {
       event: {
         [key in VimAutocmdEvent]: unknown

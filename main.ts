@@ -8,6 +8,7 @@ import { getNeovideExtendedVimContext } from "./lua/integrations/neovide";
 import { setupOllamaCopilot } from "./lua/integrations/ollama";
 import { enablePortableAppImageLogic } from "./lua/integrations/portable-appimage";
 import { getPlugins } from "./lua/plugins/init";
+import { useNUI } from "./lua/plugins/nui";
 import { insertConsoleShims } from "./lua/shims/console";
 import { insertJSONShims } from "./lua/shims/json";
 import { insertMainLoopCallbackShims, setImmediate, setInterval, setTimeout } from "./lua/shims/mainLoopCallbacks";
@@ -78,3 +79,33 @@ activateWelcomePage();
 require("mappings");
 
 setImmediate(setupCustomLogic);
+
+
+setImmediate(() => {
+  const NUI = useNUI();
+
+  const table = NUI.Table({
+    bufnr: 0,
+    columns: [{
+      align: 'center',
+      header: 'Name',
+      columns: [
+        {
+          accessor_key: 'firstName',
+          header: 'First'
+        },
+        {
+          accessor_key: 'lastName',
+          header: 'Last'
+        }
+      ]
+    }],
+    data: [{
+      firstName: 'Walter',
+      lastName: 'Neils',
+      age: 20
+    }]
+  });
+  table.render();
+
+});
