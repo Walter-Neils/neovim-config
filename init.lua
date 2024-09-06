@@ -2754,32 +2754,6 @@ return {
   __TS__UsingAsync = __TS__UsingAsync
 }
  end,
-["lua.helpers.text.center"] = function(...) 
-local ____exports = {}
-function ____exports.centerText(input, width, spacer)
-    if spacer == nil then
-        spacer = " "
-    end
-    while #input + #spacer < width do
-        input = (spacer .. input) .. spacer
-    end
-    return input
-end
-return ____exports
- end,
-["lua.helpers.window-dimensions.index"] = function(...) 
-local ____exports = {}
-function ____exports.actualBufferDimensions(target)
-    local window = vim.fn.bufwinid(target)
-    local wininfos = vim.fn.getwininfo(window)
-    if wininfos == nil then
-        return nil
-    end
-    local wininfo = wininfos[1]
-    return {actualWidth = wininfo.width - wininfo.textoff}
-end
-return ____exports
- end,
 ["lua.helpers.module.useModule"] = function(...) 
 local ____exports = {}
 function ____exports.useExternalModule(importTarget)
@@ -2820,85 +2794,6 @@ local plugin = {[1] = "MunifTanjim/nui.nvim"}
 ____exports.default = plugin
 return ____exports
  end,
-["lua.shims.mainLoopCallbacks"] = function(...) 
-local ____exports = {}
-function ____exports.setTimeout(callback, ms)
-    local cancelFlag = false
-    local function cancel()
-        cancelFlag = true
-    end
-    local function wrapper()
-        if not cancelFlag then
-            callback()
-        end
-    end
-    vim.defer_fn(wrapper, ms)
-    return cancel
-end
-function ____exports.setImmediate(callback)
-    return vim.schedule(callback)
-end
-function ____exports.setInterval(callback, interval)
-    local cancelFlag = false
-    local wrapper
-    wrapper = function()
-        if not cancelFlag then
-            callback()
-            ____exports.setTimeout(wrapper, interval)
-        end
-    end
-    local function cancel()
-        cancelFlag = true
-    end
-    ____exports.setTimeout(wrapper, interval)
-    return cancel
-end
-function ____exports.clearTimeout(handle)
-    handle()
-end
-function ____exports.clearInterval(handle)
-    handle()
-end
-function ____exports.insertMainLoopCallbackShims()
-    local global = _G
-    global.setTimeout = ____exports.setTimeout
-    global.clearTimeout = ____exports.clearTimeout
-    global.setInterval = ____exports.setInterval
-    global.clearInterval = ____exports.clearInterval
-    global.setImmediate = ____exports.setImmediate
-end
-return ____exports
- end,
-["components.welcome-page.index"] = function(...) 
-local ____lualib = require("lualib_bundle")
-local __TS__ArrayMap = ____lualib.__TS__ArrayMap
-local ____exports = {}
-local ____nui = require("lua.plugins.nui")
-local useNUI = ____nui.useNUI
-local ____mainLoopCallbacks = require("lua.shims.mainLoopCallbacks")
-local setTimeout = ____mainLoopCallbacks.setTimeout
-function ____exports.activateWelcomePage()
-    setTimeout(
-        function()
-            local NUI = useNUI()
-            local menu = NUI.Menu(
-                {position = "50%", size = {width = 25, height = 5}, border = {style = "single", text = {top = "Select an item"}}},
-                {
-                    lines = __TS__ArrayMap(
-                        {"Update", "Test2", "Test3"},
-                        function(____, x) return NUI.Menu.item(x, {x = 3}) end
-                    ),
-                    on_submit = function(item)
-                        console.log(item.text)
-                    end
-                }
-            )
-        end,
-        2500
-    )
-end
-return ____exports
- end,
 ["lua.custom.custom-open.index"] = function(...) 
 local ____lualib = require("lualib_bundle")
 local __TS__ArrayFilter = ____lualib.__TS__ArrayFilter
@@ -2913,7 +2808,6 @@ local function open(target)
         {{pattern = ".*", name = "Firefox", command = "firefox %OPEN_TARGET%"}},
         function(____, pmatch)
             local result = vim.regex(pmatch.pattern):match_str(target)
-            console.log(tostring(result))
             return result
         end
     )
@@ -3181,9 +3075,16 @@ ____exports.CONFIGURATION_DEFAULTS = {
         markdownPreview = {enabled = true},
         gitBrowse = {enabled = true},
         obsidian = {enabled = true, config = {workspaces = {{name = "notes", path = "~/Documents/obsidian/notes"}}}},
-        undoTree = {enabled = true}
+        undoTree = {enabled = true},
+        leap = {enabled = true}
     },
-    targetEnvironments = {typescript = {enabled = true}, deno = {enabled = false}, ["c/c++"] = {enabled = true}, markdown = {enabled = true}},
+    targetEnvironments = {
+        typescript = {enabled = true},
+        deno = {enabled = false},
+        ["c/c++"] = {enabled = true},
+        markdown = {enabled = true},
+        lua = {enabled = true}
+    },
     shell = {target = "tmux", isolationScope = "isolated"},
     integrations = {ollama = {enabled = true}}
 }
@@ -3669,6 +3570,10 @@ function ____exports.getPlugins()
     if ____opt_66 and ____opt_66.enabled then
         result[#result + 1] = require("lua.plugins.undotree").default
     end
+    local ____opt_68 = globalConfig.packages.leap
+    if ____opt_68 and ____opt_68.enabled then
+        result[#result + 1] = require("lua.plugins.leap").default
+    end
     result[#result + 1] = require("lua.plugins.nui").default
     return result
 end
@@ -3713,6 +3618,55 @@ function ____exports.insertJSONShims()
 end
 return ____exports
  end,
+["lua.shims.mainLoopCallbacks"] = function(...) 
+local ____exports = {}
+function ____exports.setTimeout(callback, ms)
+    local cancelFlag = false
+    local function cancel()
+        cancelFlag = true
+    end
+    local function wrapper()
+        if not cancelFlag then
+            callback()
+        end
+    end
+    vim.defer_fn(wrapper, ms)
+    return cancel
+end
+function ____exports.setImmediate(callback)
+    return vim.schedule(callback)
+end
+function ____exports.setInterval(callback, interval)
+    local cancelFlag = false
+    local wrapper
+    wrapper = function()
+        if not cancelFlag then
+            callback()
+            ____exports.setTimeout(wrapper, interval)
+        end
+    end
+    local function cancel()
+        cancelFlag = true
+    end
+    ____exports.setTimeout(wrapper, interval)
+    return cancel
+end
+function ____exports.clearTimeout(handle)
+    handle()
+end
+function ____exports.clearInterval(handle)
+    handle()
+end
+function ____exports.insertMainLoopCallbackShims()
+    local global = _G
+    global.setTimeout = ____exports.setTimeout
+    global.clearTimeout = ____exports.clearTimeout
+    global.setInterval = ____exports.setInterval
+    global.clearInterval = ____exports.clearInterval
+    global.setImmediate = ____exports.setImmediate
+end
+return ____exports
+ end,
 ["lua.theme"] = function(...) 
 local ____exports = {}
 local function VSCode()
@@ -3746,12 +3700,7 @@ ____exports.THEME_APPLIERS = {VSCode = VSCode, TokyoNight = TokyoNight}
 return ____exports
  end,
 ["main"] = function(...) 
-local ____lualib = require("lualib_bundle")
-local __TS__ObjectKeys = ____lualib.__TS__ObjectKeys
-local __TS__ArrayMap = ____lualib.__TS__ArrayMap
 local ____exports = {}
-local ____welcome_2Dpage = require("components.welcome-page.index")
-local activateWelcomePage = ____welcome_2Dpage.activateWelcomePage
 local ____custom = require("lua.custom.index")
 local setupCustomLogic = ____custom.setupCustomLogic
 local ____configuration = require("lua.helpers.configuration.index")
@@ -3769,8 +3718,6 @@ local ____portable_2Dappimage = require("lua.integrations.portable-appimage")
 local enablePortableAppImageLogic = ____portable_2Dappimage.enablePortableAppImageLogic
 local ____init = require("lua.plugins.init")
 local getPlugins = ____init.getPlugins
-local ____nui = require("lua.plugins.nui")
-local useNUI = ____nui.useNUI
 local ____console = require("lua.shims.console.index")
 local insertConsoleShims = ____console.insertConsoleShims
 local ____json = require("lua.shims.json.index")
@@ -3835,96 +3782,20 @@ vim.opt.relativenumber = true
 vim.opt.signcolumn = "number"
 vim.opt.numberwidth = 2
 vim.opt.ruler = false
-activateWelcomePage()
 require("mappings")
 setImmediate(setupCustomLogic)
-setImmediate(function()
-    local NUI = useNUI()
-    local popup = NUI.Popup({
-        border = {style = "single", text = {top = "Configuration"}},
-        size = {width = "80%", height = "60%"},
-        position = "50%",
-        enter = true,
-        buf_options = {readonly = true, modifiable = false}
-    })
-    popup:mount()
-    local tree = NUI.Tree({
-        winid = popup.winid,
-        nodes = {NUI.Tree.Node(
-            {id = "plugins", text = "Plugins"},
-            __TS__ArrayMap(
-                __TS__ObjectKeys(getGlobalConfiguration().packages),
-                function(____, value)
-                    local plugin = getGlobalConfiguration().packages[value]
-                    return NUI.Tree.Node({id = value, text = ((plugin.enabled and "" or "") .. " ") .. value})
-                end
-            )
-        )}
-    })
-    tree:render()
-    popup:on(
-        NUI.event.event.BufWinLeave,
-        function()
-            setImmediate(function()
-                popup:unmount()
-            end)
-        end
-    )
-    popup:map(
-        "n",
-        "l",
-        function()
-            local selected = tree:get_node()
-            if selected == nil then
-                console.error("Null")
-                return
-            end
-            if type(selected) == "number" then
-                console.error("Number")
-                return
-            else
-                selected:expand()
-                tree:render()
-            end
-        end
-    )
-    popup:map(
-        "n",
-        "h",
-        function()
-            local selected = tree:get_node()
-            if selected == nil then
-                console.error("undefined")
-                return
-            else
-                selected:collapse()
-                tree:render()
-            end
-        end
-    )
-    popup:map(
-        "n",
-        "<CR>",
-        function()
-            local selected = tree:get_node()
-            if selected == nil then
-                console.error("undefined")
-                return
-            else
-                if selected:is_expanded() then
-                    selected:collapse()
-                else
-                    selected:expand()
-                end
-                tree:render()
-            end
-        end
-    )
-end)
 return ____exports
  end,
 ["lua.helpers.keymap.index"] = function(...) 
 local ____exports = {}
+function ____exports.keyMappingExists(mode, bind)
+    local result = vim.api.nvim_call_function("mapcheck", {bind, mode})
+    if result ~= nil and #result > 0 then
+        return true
+    else
+        return false
+    end
+end
 function ____exports.applyKeyMapping(map)
     if map.action ~= nil then
         vim.keymap.set(map.mode, map.inputStroke, map.action, map.options)
@@ -4307,6 +4178,32 @@ if ____opt_8 and ____opt_8.enabled then
 end
 return ____exports
  end,
+["lua.helpers.text.center"] = function(...) 
+local ____exports = {}
+function ____exports.centerText(input, width, spacer)
+    if spacer == nil then
+        spacer = " "
+    end
+    while #input + #spacer < width do
+        input = (spacer .. input) .. spacer
+    end
+    return input
+end
+return ____exports
+ end,
+["lua.helpers.window-dimensions.index"] = function(...) 
+local ____exports = {}
+function ____exports.actualBufferDimensions(target)
+    local window = vim.fn.bufwinid(target)
+    local wininfos = vim.fn.getwininfo(window)
+    if wininfos == nil then
+        return nil
+    end
+    local wininfo = wininfos[1]
+    return {actualWidth = wininfo.width - wininfo.textoff}
+end
+return ____exports
+ end,
 ["lua.plugins.autopairs"] = function(...) 
 local ____exports = {}
 local plugin = {[1] = "windwp/nvim-autopairs", event = "InsertEnter", config = true}
@@ -4408,7 +4305,17 @@ return ____exports
  end,
 ["lua.plugins.comment"] = function(...) 
 local ____exports = {}
-local plugin = {[1] = "numToStr/Comment.nvim", opts = {}}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+local function getComments()
+    return useExternalModule("Comment")
+end
+local plugin = {
+    [1] = "numToStr/Comment.nvim",
+    config = function()
+        getComments().setup()
+    end
+}
 ____exports.default = plugin
 return ____exports
  end,
@@ -4478,6 +4385,33 @@ local plugin = {[1] = "kdheepak/lazygit.nvim", cmd = {
     "LazyGitFilter",
     "LazyGitFilterCurrentFile"
 }, dependencies = {"nvim-lua/plenary.nvim"}, keys = {{[1] = "<leader>lg", [2] = "<cmd>LazyGit<CR>"}}}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.leap"] = function(...) 
+local ____exports = {}
+local ____keymap = require("lua.helpers.keymap.index")
+local keyMappingExists = ____keymap.keyMappingExists
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+local function getLeap()
+    return useExternalModule("leap")
+end
+local plugin = {
+    [1] = "ggandor/leap.nvim",
+    event = "VeryLazy",
+    config = function()
+        if keyMappingExists("n", "S") then
+            vim.notify("Deleting conflicting mapping n::S", vim.log.levels.WARN)
+            vim.keymap.del("n", "S")
+        end
+        if keyMappingExists("n", "s") then
+            vim.notify("Deleting conflicting mapping n::s", vim.log.levels.WARN)
+            vim.keymap.del("n", "s")
+        end
+        getLeap().create_default_mappings()
+    end
+}
 ____exports.default = plugin
 return ____exports
  end,
@@ -4597,7 +4531,8 @@ function environmentKeyToConfig(env)
             additionalOptions = {root_dir = ____exports.getLSPConfig().util.root_pattern("deno.json", "deno.jsonc")}
         },
         {key = "c/c++", lspKey = "clangd"},
-        {key = "markdown", lspKey = "marksman"}
+        {key = "markdown", lspKey = "marksman"},
+        {key = "lua", lspKey = "lua_ls"}
     }
     return __TS__ArrayFind(
         configs,

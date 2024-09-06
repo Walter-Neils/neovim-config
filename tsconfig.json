@@ -7,9 +7,6 @@
     "types": [
       "lua-types/jit"
     ],
-    "jsx": "preserve",
-    "jsxFactory": "NUIcreateElement",
-    "jsxFragmentFactory": "NUIcreateFragment",
     "strict": true
   },
   "tstl": {

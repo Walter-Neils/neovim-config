@@ -107,6 +107,9 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (globalConfig.packages.undoTree?.enabled) {
     result.push(require("undotree").default);
   }
+  if (globalConfig.packages.leap?.enabled) {
+    result.push(require("leap").default);
+  }
   result.push(require("nui").default);
   return result;
 }
