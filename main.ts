@@ -8,7 +8,6 @@ import { getNeovideExtendedVimContext } from "./lua/integrations/neovide";
 import { setupOllamaCopilot } from "./lua/integrations/ollama";
 import { enablePortableAppImageLogic } from "./lua/integrations/portable-appimage";
 import { getPlugins } from "./lua/plugins/init";
-import { useNUI } from "./lua/plugins/nui";
 import { insertConsoleShims } from "./lua/shims/console";
 import { insertJSONShims } from "./lua/shims/json";
 import { insertMainLoopCallbackShims, setImmediate, setInterval, setTimeout } from "./lua/shims/mainLoopCallbacks";
@@ -62,7 +61,6 @@ lazy.setup(
 THEME_APPLIERS.TokyoNight();
 
 vim.opt.clipboard = "unnamedplus"; // System-wide copy & paste
-
 vim.opt.expandtab = true;
 vim.opt.shiftwidth = 2;
 vim.opt.smartindent = true;
@@ -73,129 +71,11 @@ vim.opt.relativenumber = true;
 vim.opt.signcolumn = 'number';
 vim.opt.numberwidth = 2;
 vim.opt.ruler = false;
+vim.o.foldlevel = 99;
+vim.o.foldlevelstart = 99;
 
 activateWelcomePage();
 
 require("mappings");
 
 setImmediate(setupCustomLogic);
-
-
-setImmediate(() => {
-  const NUI = useNUI();
-
-  const popup = NUI.Popup({
-    border: {
-      style: 'single',
-      text: {
-        top: 'Configuration',
-      }
-    },
-    size: {
-      width: '80%',
-      height: '60%'
-    },
-    position: '50%',
-    enter: true,
-    buf_options: {
-      readonly: true,
-      modifiable: false
-    }
-  });
-
-
-
-  popup.mount();
-  const tree = NUI.Tree({
-    winid: popup.winid,
-    nodes: [
-      NUI.Tree.Node({
-        id: 'plugins',
-        'text': 'Plugins'
-      }, Object.keys(getGlobalConfiguration().packages).map((value) => {
-        const plugin = getGlobalConfiguration().packages[value]!;
-        return NUI.Tree.Node({
-          id: value,
-          text: `${plugin.enabled ? "" : ""} ${value}`
-        })
-      }))
-    ]
-  });
-
-  tree.render();
-
-  popup.on(NUI.event.event.BufWinLeave, () => {
-    setImmediate(() => {
-      popup.unmount();
-    });
-  });
-
-  popup.map('n', 'l', () => {
-    const selected = tree.get_node();
-    if (selected == null) {
-      console.error(`Null`);
-      return;
-    }
-    if (typeof selected === 'number') {
-      console.error(`Number`);
-      return;
-    } else {
-      selected.expand();
-      tree.render();
-    }
-  });
-  popup.map('n', 'h', () => {
-    const selected = tree.get_node();
-    if (selected == undefined) {
-      console.error(`undefined`);
-      return;
-    }
-    else {
-      selected.collapse();
-      tree.render();
-    }
-  });
-  popup.map('n', '<CR>', () => {
-    const selected = tree.get_node();
-    if (selected == undefined) {
-      console.error(`undefined`);
-      return;
-    }
-    else {
-      if (selected.is_expanded()) {
-        selected.collapse();
-      }
-      else {
-        selected.expand();
-      }
-      tree.render();
-    }
-  });
-
-
-
-  // const table = NUI.Table({
-  //   bufnr: 0,
-  //   columns: [{
-  //     align: 'center',
-  //     header: 'Name',
-  //     columns: [
-  //       {
-  //         accessor_key: 'firstName',
-  //         header: 'First'
-  //       },
-  //       {
-  //         accessor_key: 'lastName',
-  //         header: 'Last'
-  //       }
-  //     ]
-  //   }],
-  //   data: [{
-  //     firstName: 'Walter',
-  //     lastName: 'Neils',
-  //     age: 20
-  //   }]
-  // });
-  // table.render();
-
-});

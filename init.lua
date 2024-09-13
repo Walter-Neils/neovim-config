@@ -3181,7 +3181,8 @@ ____exports.CONFIGURATION_DEFAULTS = {
         markdownPreview = {enabled = true},
         gitBrowse = {enabled = true},
         obsidian = {enabled = true, config = {workspaces = {{name = "notes", path = "~/Documents/obsidian/notes"}}}},
-        undoTree = {enabled = true}
+        undoTree = {enabled = true},
+        octo = {enabled = true}
     },
     targetEnvironments = {typescript = {enabled = true}, deno = {enabled = false}, ["c/c++"] = {enabled = true}, markdown = {enabled = true}},
     shell = {target = "tmux", isolationScope = "isolated"},
@@ -3669,6 +3670,10 @@ function ____exports.getPlugins()
     if ____opt_66 and ____opt_66.enabled then
         result[#result + 1] = require("lua.plugins.undotree").default
     end
+    local ____opt_68 = globalConfig.packages.octo
+    if ____opt_68 and ____opt_68.enabled then
+        result[#result + 1] = require("lua.plugins.octo").default
+    end
     result[#result + 1] = require("lua.plugins.nui").default
     return result
 end
@@ -3746,9 +3751,6 @@ ____exports.THEME_APPLIERS = {VSCode = VSCode, TokyoNight = TokyoNight}
 return ____exports
  end,
 ["main"] = function(...) 
-local ____lualib = require("lualib_bundle")
-local __TS__ObjectKeys = ____lualib.__TS__ObjectKeys
-local __TS__ArrayMap = ____lualib.__TS__ArrayMap
 local ____exports = {}
 local ____welcome_2Dpage = require("components.welcome-page.index")
 local activateWelcomePage = ____welcome_2Dpage.activateWelcomePage
@@ -3769,8 +3771,6 @@ local ____portable_2Dappimage = require("lua.integrations.portable-appimage")
 local enablePortableAppImageLogic = ____portable_2Dappimage.enablePortableAppImageLogic
 local ____init = require("lua.plugins.init")
 local getPlugins = ____init.getPlugins
-local ____nui = require("lua.plugins.nui")
-local useNUI = ____nui.useNUI
 local ____console = require("lua.shims.console.index")
 local insertConsoleShims = ____console.insertConsoleShims
 local ____json = require("lua.shims.json.index")
@@ -3835,92 +3835,11 @@ vim.opt.relativenumber = true
 vim.opt.signcolumn = "number"
 vim.opt.numberwidth = 2
 vim.opt.ruler = false
+vim.o.foldlevel = 99
+vim.o.foldlevelstart = 99
 activateWelcomePage()
 require("mappings")
 setImmediate(setupCustomLogic)
-setImmediate(function()
-    local NUI = useNUI()
-    local popup = NUI.Popup({
-        border = {style = "single", text = {top = "Configuration"}},
-        size = {width = "80%", height = "60%"},
-        position = "50%",
-        enter = true,
-        buf_options = {readonly = true, modifiable = false}
-    })
-    popup:mount()
-    local tree = NUI.Tree({
-        winid = popup.winid,
-        nodes = {NUI.Tree.Node(
-            {id = "plugins", text = "Plugins"},
-            __TS__ArrayMap(
-                __TS__ObjectKeys(getGlobalConfiguration().packages),
-                function(____, value)
-                    local plugin = getGlobalConfiguration().packages[value]
-                    return NUI.Tree.Node({id = value, text = ((plugin.enabled and "" or "") .. " ") .. value})
-                end
-            )
-        )}
-    })
-    tree:render()
-    popup:on(
-        NUI.event.event.BufWinLeave,
-        function()
-            setImmediate(function()
-                popup:unmount()
-            end)
-        end
-    )
-    popup:map(
-        "n",
-        "l",
-        function()
-            local selected = tree:get_node()
-            if selected == nil then
-                console.error("Null")
-                return
-            end
-            if type(selected) == "number" then
-                console.error("Number")
-                return
-            else
-                selected:expand()
-                tree:render()
-            end
-        end
-    )
-    popup:map(
-        "n",
-        "h",
-        function()
-            local selected = tree:get_node()
-            if selected == nil then
-                console.error("undefined")
-                return
-            else
-                selected:collapse()
-                tree:render()
-            end
-        end
-    )
-    popup:map(
-        "n",
-        "<CR>",
-        function()
-            local selected = tree:get_node()
-            if selected == nil then
-                console.error("undefined")
-                return
-            else
-                if selected:is_expanded() then
-                    selected:collapse()
-                else
-                    selected:expand()
-                end
-                tree:render()
-            end
-        end
-    )
-end)
 return ____exports
  end,
 ["lua.helpers.keymap.index"] = function(...) 
@@ -4408,7 +4327,7 @@ return ____exports
  end,
 ["lua.plugins.comment"] = function(...) 
 local ____exports = {}
-local plugin = {[1] = "numToStr/Comment.nvim", opts = {}}
+local plugin = {[1] = "numToStr/Comment.nvim", event = "InsertEnter", opts = {}}
 ____exports.default = plugin
 return ____exports
  end,
@@ -4858,6 +4777,23 @@ local plugin = {
     ft = ____temp_4,
     dependencies = ____temp_5,
     opts = {workspaces = ____opt_0 and ____opt_0.workspaces or ({})}
+}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.octo"] = function(...) 
+local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+local plugin = {
+    event = "VeryLazy",
+    cmd = {"Octo"},
+    [1] = "pwntester/octo.nvim",
+    dependencies = {"nvim-lua/plenary.nvim", "nvim-telescope/telescope.nvim", "nvim-tree/nvim-web-devicons"},
+    config = function()
+        useExternalModule("octo").setup()
+        vim.treesitter.language.register("markdown", "octo")
+    end
 }
 ____exports.default = plugin
 return ____exports

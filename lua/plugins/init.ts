@@ -107,6 +107,9 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (globalConfig.packages.undoTree?.enabled) {
     result.push(require("undotree").default);
   }
+  if (globalConfig.packages.octo?.enabled) {
+    result.push(require("octo").default);
+  }
   result.push(require("nui").default);
   return result;
 }

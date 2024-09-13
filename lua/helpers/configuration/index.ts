@@ -176,6 +176,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     undoTree: {
       enabled: true,
     },
+    octo: {
+      enabled: true
+    }
   },
   targetEnvironments: {
     typescript: {
@@ -233,7 +236,7 @@ vim.api.nvim_create_user_command("Configuration", (_args) => {
   >(_args.fargs);
   if (args.mode === "delete") {
     let parts = args.key.split(".").reverse();
-    const currentTarget = function () {
+    const currentTarget = function() {
       return parts[parts.length - 1];
     };
     let current: any = getGlobalConfiguration();
@@ -256,7 +259,7 @@ vim.api.nvim_create_user_command("Configuration", (_args) => {
     if (args.key === "") {
       parts = [];
     }
-    const currentTarget = function () {
+    const currentTarget = function() {
       return parts[parts.length - 1];
     };
     let current: any = getGlobalConfiguration();
@@ -276,7 +279,7 @@ vim.api.nvim_create_user_command("Configuration", (_args) => {
     }
   } else if (args.mode === "get") {
     let parts = args.key.split(".").reverse();
-    const currentTarget = function () {
+    const currentTarget = function() {
       return parts[parts.length - 1];
     };
     let current: any = getGlobalConfiguration();
@@ -287,7 +290,7 @@ vim.api.nvim_create_user_command("Configuration", (_args) => {
     console.log(`${current[parts[0]]}`);
   } else if (args.mode === "set") {
     let parts = args.key.split(".").reverse();
-    const currentTarget = function () {
+    const currentTarget = function() {
       return parts[parts.length - 1];
     };
     let current: any = getGlobalConfiguration();

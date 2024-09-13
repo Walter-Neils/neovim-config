@@ -45,6 +45,25 @@ type VimLoopSpawnHandle = {
   kill: (this: VimLoopSpawnHandle, signum?: number) => void,
 };
 
+type VimUVTimer = {
+  start: (this: VimUVTimer, initial_delay: number, interval: number, callback: (this: void) => void) => void,
+};
+
+type VimUVTcp = {
+  bind: (this: VimUVTcp, host: string, port: number) => void,
+  listen: (this: VimUVTcp, arg1: number, on_connect: (this: void, err?: unknown) => void) => void,
+  accept: (this: VimUVTcp, socket: VimUVTcp) => void,
+  write: (this: VimUVTcp, chunk: unknown) => void,
+  close: (this: VimUVTcp) => void,
+  getsockname: (this: VimUVTcp) => { port: number };
+  read_start: (this: VimUVTcp, callback: (err?: unknown, chunk?: unknown) => void) => void
+};
+
+type VimUV = {
+  new_timer: (this: void) => VimUVTimer,
+  new_tcp: (this: void) => VimUVTcp,
+};
+
 type NeovimBuffer = unknown;
 type NeovimWindow = unknown;
 
@@ -96,6 +115,12 @@ type NvimLspClient = {
   // :h vim.lsp.client
 };
 
+type NvimTreeSitterObj = {
+  language: {
+    register: (this: void, language: string, buf_type: string) => void
+  }
+};
+
 type NvimBufOption = '';
 
 type VimRegex = {
@@ -124,6 +149,7 @@ type VimFnJobStartOpts = {
 };
 
 type VimAPI = {
+  treesitter: NvimTreeSitterObj,
   cmd: (this: void, params: string) => void,
   notify: (this: void, value: string | [string, string], level?: VimAPI["log"]["levels"][keyof VimAPI["log"]["levels"]]) => void,
   print: (this: void, value: any) => void,
@@ -131,6 +157,7 @@ type VimAPI = {
   defer_fn: (this: void, callback: (this: void) => void, ms: number) => void,
   tbl_deep_extend: <T1, T2>(this: void, behaviour: 'error' | 'keep' | 'force', table1: T1, table2: T2) => T1 & T2,
   regex: (this: void, pattern: string) => VimRegex,
+  uv: VimUV,
   json: {
     encode: (this: void, value: unknown) => string,
     decode: (this: void, value: string) => unknown
