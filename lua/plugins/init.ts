@@ -110,6 +110,9 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (globalConfig.packages.octo?.enabled) {
     result.push(require("octo").default);
   }
+  if (globalConfig.packages.leap?.enabled) {
+    result.push(require("leap").default);
+  }
   result.push(require("nui").default);
   return result;
 }

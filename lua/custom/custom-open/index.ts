@@ -17,7 +17,6 @@ function open(this: void, target: string): {
     command: 'firefox %OPEN_TARGET%'
   }].filter(pmatch => {
     const result = vim.regex(pmatch.pattern).match_str(target);
-    console.log(`${result}`);
     return result;
   });
 

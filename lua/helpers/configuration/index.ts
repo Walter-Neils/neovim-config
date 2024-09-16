@@ -178,6 +178,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     octo: {
       enabled: true
+    },
+    leap: {
+      enabled: true
     }
   },
   targetEnvironments: {
@@ -193,6 +196,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     "markdown": {
       enabled: true,
     },
+    'lua': {
+      enabled: true
+    }
   },
   shell: {
     target: "tmux",

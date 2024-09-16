@@ -176,6 +176,7 @@ type VimAPI = {
     }
   },
   api: {
+    nvim_call_function: (this: void, command: string, args?: unknown[]) => unknown,
     nvim_get_current_line: (this: void) => number,
     nvim_get_all_options_info: (this: void) => { [key: string]: NvimOptionInfo }
     nvim_set_hl: (this: void, arg1: number, arg2: string, params: VimHLColorParams) => void,
@@ -239,6 +240,7 @@ type VimAPI = {
     expand: (this: void, body: unknown) => unknown
   },
   keymap: {
+    del: (this: void, mode: string, bind: string) => boolean,
     set: (this: void, mode: 'i' | 'n' | 'a' | 't' | 'v' | 'x', stroke: string, ...args: any[]) => void
   },
   ui: {

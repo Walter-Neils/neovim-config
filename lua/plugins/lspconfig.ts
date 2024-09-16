@@ -129,6 +129,9 @@ function environmentKeyToConfig(env: string) {
   }, {
     key: "markdown",
     lspKey: "marksman",
+  }, {
+    key: 'lua',
+    lspKey: 'lua_ls'
   }];
 
   return configs.find((x) => x.key === env);

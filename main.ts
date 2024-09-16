@@ -1,5 +1,4 @@
 import { LazyModuleInterface } from "./ambient/lazy";
-import { activateWelcomePage } from "./components/welcome-page";
 import { setupCustomLogic } from "./lua/custom";
 import { getGlobalConfiguration } from "./lua/helpers/configuration";
 import { useExternalModule } from "./lua/helpers/module/useModule";
@@ -10,7 +9,7 @@ import { enablePortableAppImageLogic } from "./lua/integrations/portable-appimag
 import { getPlugins } from "./lua/plugins/init";
 import { insertConsoleShims } from "./lua/shims/console";
 import { insertJSONShims } from "./lua/shims/json";
-import { insertMainLoopCallbackShims, setImmediate, setInterval, setTimeout } from "./lua/shims/mainLoopCallbacks";
+import { insertMainLoopCallbackShims, setImmediate } from "./lua/shims/mainLoopCallbacks";
 import { THEME_APPLIERS } from "./lua/theme";
 
 insertJSONShims();
@@ -73,8 +72,6 @@ vim.opt.numberwidth = 2;
 vim.opt.ruler = false;
 vim.o.foldlevel = 99;
 vim.o.foldlevelstart = 99;
-
-activateWelcomePage();
 
 require("mappings");
 
