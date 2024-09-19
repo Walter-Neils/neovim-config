@@ -3080,7 +3080,7 @@ ____exports.CONFIGURATION_DEFAULTS = {
         leap = {enabled = true},
         cSharp = {enabled = true},
         telescopeUISelect = {enabled = true},
-        masonNvimDap = {enabled = true}
+        masonNvimDap = {enabled = false}
     },
     targetEnvironments = {
         typescript = {enabled = true},

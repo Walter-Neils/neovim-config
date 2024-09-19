@@ -189,7 +189,8 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
       enabled: true
     },
     masonNvimDap: {
-      enabled: true
+      // Prolly gonna remove this
+      enabled: false
     }
   },
   targetEnvironments: {
