@@ -1,5 +1,6 @@
 import { LazyPlugin } from "../../ambient/lazy";
 import { getGlobalConfiguration } from "../helpers/configuration";
+import { setImmediate } from "../shims/mainLoopCallbacks";
 
 export function getPlugins(this: void): LazyPlugin[] {
   const globalConfig = getGlobalConfiguration();
@@ -112,6 +113,17 @@ export function getPlugins(this: void): LazyPlugin[] {
   }
   if (globalConfig.packages.leap?.enabled) {
     result.push(require("leap").default);
+  }
+  if (globalConfig.packages.cSharp?.enabled) {
+    result.push(require("csharp").default);
+  }
+  if (globalConfig.packages.telescopeUISelect?.enabled) {
+    result.push(require("telescope-ui-select").default);
+  }
+  else {
+    setImmediate(() => {
+      console.warn("No select");
+    });
   }
   result.push(require("nui").default);
   return result;

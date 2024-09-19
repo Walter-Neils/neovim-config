@@ -181,6 +181,12 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     leap: {
       enabled: true
+    },
+    cSharp: {
+      enabled: true
+    },
+    telescopeUISelect: {
+      enabled: true
     }
   },
   targetEnvironments: {
@@ -198,7 +204,8 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     'lua': {
       enabled: true
-    }
+    },
+
   },
   shell: {
     target: "tmux",

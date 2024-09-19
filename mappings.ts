@@ -1,8 +1,10 @@
 import { getGlobalConfiguration } from "./lua/helpers/configuration";
 import { applyKeyMapping } from "./lua/helpers/keymap";
+import { useExternalModule } from "./lua/helpers/module/useModule";
 import { oneOffFunction } from "./lua/helpers/one-off";
 import { getActionsPreview } from "./lua/plugins/actions-preview";
-import { getDapUI } from "./lua/plugins/nvim-dap-ui";
+import { getCSharp } from "./lua/plugins/csharp";
+import { getDap, getDapUI } from "./lua/plugins/nvim-dap-ui";
 
 vim.g.mapleader = " "; // Use space key as leader
 
@@ -430,7 +432,22 @@ if (config.packages["nvimDapUI"]) {
   applyKeyMapping({
     mode: 'n',
     inputStroke: '<leader>dr',
-    outputStroke: ':DapContinue<CR>',
+    action: () => {
+      if (getGlobalConfiguration().packages.nvimTree?.enabled) {
+        vim.cmd("NvimTreeClose");
+      }
+      if (vim.bo.filetype === 'cs') {
+        if (getDap().status() === 'Running') {
+          vim.cmd("DapContinue");
+        }
+        else {
+          getCSharp().debug_project();
+        }
+      }
+      else {
+        vim.cmd("DapContinue");
+      }
+    },
     options: {
       desc: 'Start or continue the debugger'
     }
@@ -469,6 +486,16 @@ if (config.packages["nvimDapUI"]) {
       desc: 'Step out'
     }
   });
+  applyKeyMapping({
+    mode: 'n',
+    inputStroke: '<leader>dsc',
+    action: () => {
+      getDap().run_to_cursor();
+    },
+    options: {
+      desc: 'Step to cursor'
+    }
+  })
 
   applyKeyMapping({
     mode: 'v',

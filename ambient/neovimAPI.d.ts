@@ -82,6 +82,11 @@ type NvimOptionInfo = {
   type: 'string' | 'number' | 'boolean',
   commalist: boolean
 };
+
+type VimAuGroup = {
+
+};
+
 type NvimLspClientRPC = {
 
 };
@@ -157,6 +162,9 @@ type VimAPI = {
   defer_fn: (this: void, callback: (this: void) => void, ms: number) => void,
   tbl_deep_extend: <T1, T2>(this: void, behaviour: 'error' | 'keep' | 'force', table1: T1, table2: T2) => T1 & T2,
   regex: (this: void, pattern: string) => VimRegex,
+  bo: {
+    [key: string]: unknown | undefined
+  },
   uv: VimUV,
   json: {
     encode: (this: void, value: unknown) => string,
@@ -185,9 +193,11 @@ type VimAPI = {
       bang?: boolean
     }) => void,
     nvim_create_autocmd: (this: void, eventName: VimAutocmdEvent, config: {
-      group?: string,
+      pattern?: string,
+      group?: string | VimAuGroup,
       callback: (this: void, args?: unknown) => void
     }) => void,
+    nvim_create_augroup: (this: void, name: string, opts: { clear?: boolean }) => VimAuGroup,
     nvim_win_get_cursor: (this: void, arg1: number) => number[],
     nvim_get_current_buf: (this: void) => NeovimBuffer,
     nvim_create_buf: (this: void, listed: boolean, scratch: boolean) => NeovimBuffer,

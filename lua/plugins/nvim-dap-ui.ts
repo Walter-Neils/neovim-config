@@ -36,8 +36,10 @@ type DapConfig = {
   args?: string[],
   runInTerminal?: boolean
 };
-
+type DapStatus = 'Running' | `Closed session: ${number}` | '';
 type DapModule = {
+  status: (this: void) => DapStatus,
+  run_to_cursor: (this: void) => void,
   listeners: {
     before: {
       attach: {
