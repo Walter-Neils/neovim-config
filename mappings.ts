@@ -434,17 +434,24 @@ if (config.packages["nvimDapUI"]) {
     inputStroke: '<leader>dr',
     action: () => {
       if (getGlobalConfiguration().packages.nvimTree?.enabled) {
+        // For some reason, sequential calls to open the debug interface makes `nvim-tree` get larger each time.
+        // Closing it when starting DAP fixes this.
         vim.cmd("NvimTreeClose");
       }
       if (vim.bo.filetype === 'cs' && getGlobalConfiguration().packages.cSharp?.enabled) {
+        // C# is enabled, we're in a C# file.
+        // Apply some unique tweaks to make the experience seamless
         if (getDap().status() === 'Running') {
+          // If we're running, the debugger is already working, so we can just do the usual
           vim.cmd("DapContinue");
         }
         else {
+          // This is the tweak
           getCSharp().debug_project();
         }
       }
       else {
+        // Nothing special, let DAP do it's thing
         vim.cmd("DapContinue");
       }
     },
