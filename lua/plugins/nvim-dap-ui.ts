@@ -43,6 +43,12 @@ type DapStatus = 'Running' | `Closed session: ${number}` | '';
 type DapModule = {
   status: (this: void) => DapStatus,
   run_to_cursor: (this: void) => void,
+  set_exception_breakpoints: (this: void, targets: string[]) => void,
+  defaults: {
+    fallback: {
+      exception_breakpoints: string[]
+    }
+  }
   listeners: {
     before: {
       attach: {
@@ -198,6 +204,7 @@ const plugin: LazyPlugin = {
     getDapUI().setup({});
     bindDapUIEvents();
     configureActiveLanguages();
+    getDap().defaults.fallback.exception_breakpoints = ["uncaught", "raised"]
   }
 };
 export { plugin as default };

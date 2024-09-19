@@ -4038,6 +4038,7 @@ local plugin = {
         ____exports.getDapUI().setup({})
         bindDapUIEvents()
         configureActiveLanguages()
+        ____exports.getDap().defaults.fallback.exception_breakpoints = {"uncaught", "raised"}
     end
 }
 ____exports.default = plugin
