@@ -187,6 +187,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     telescopeUISelect: {
       enabled: true
+    },
+    masonNvimDap: {
+      enabled: true
     }
   },
   targetEnvironments: {

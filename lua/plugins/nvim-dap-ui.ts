@@ -32,9 +32,12 @@ type DapConfig = {
   program: '${file}' | string | ((this: void) => string),
   cwd: '${workspaceFolder}' | string,
   runtimeExecutable?: 'node' | string,
+  runtimeArgs?: string[],
   stopOnEntry?: boolean,
   args?: string[],
   runInTerminal?: boolean
+} & {
+  [key: string]: unknown | undefined
 };
 type DapStatus = 'Running' | `Closed session: ${number}` | '';
 type DapModule = {
@@ -161,16 +164,27 @@ function configureActiveLanguages(this: void) {
         command: 'js-debug-adapter'
       }
     };
+    dap.adapters["node2"] = {
+      name: 'NodeJS Debug',
+      type: 'executable',
+      command: 'node-debug2-adapter'
+    };
 
     for (const language of ['javascript', 'typescript'] as const) {
       if (config.targetEnvironments[language]?.enabled) {
         dap.configurations[language] = [{
-          type: 'pwa-node',
+          type: 'node2',
           request: 'launch',
           name: 'Launch file',
           program: '${file}',
           cwd: '${workspaceFolder}',
-          runtimeExecutable: 'node'
+          runtimeExecutable: 'node',
+          outDir: 'dist',
+          args: ["${file}"],
+          sourceMap: true,
+          skipFiles: ["<node_internals>/**", "node_modules/**"],
+          protocol: 'inspector',
+          outFiles: ['${workspaceFolder}/dist/*.js']
         }];
       }
     }

@@ -120,6 +120,9 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (globalConfig.packages.telescopeUISelect?.enabled) {
     result.push(require("telescope-ui-select").default);
   }
+  if (globalConfig.packages.masonNvimDap?.enabled) {
+    result.push(require("mason-nvim-dap").default);
+  }
   result.push(require("nui").default);
   return result;
 }

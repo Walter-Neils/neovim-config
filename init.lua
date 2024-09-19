@@ -3079,7 +3079,8 @@ ____exports.CONFIGURATION_DEFAULTS = {
         octo = {enabled = true},
         leap = {enabled = true},
         cSharp = {enabled = true},
-        telescopeUISelect = {enabled = true}
+        telescopeUISelect = {enabled = true},
+        masonNvimDap = {enabled = true}
     },
     targetEnvironments = {
         typescript = {enabled = true},
@@ -3638,6 +3639,10 @@ function ____exports.getPlugins()
     if ____opt_74 and ____opt_74.enabled then
         result[#result + 1] = require("lua.plugins.telescope-ui-select").default
     end
+    local ____opt_76 = globalConfig.packages.masonNvimDap
+    if ____opt_76 and ____opt_76.enabled then
+        result[#result + 1] = require("lua.plugins.mason-nvim-dap").default
+    end
     result[#result + 1] = require("lua.plugins.nui").default
     return result
 end
@@ -4004,16 +4009,23 @@ local function configureActiveLanguages()
         end
     ) then
         dap.adapters["pwa-node"] = {type = "server", host = "::1", port = 8123, executable = {command = "js-debug-adapter"}}
+        dap.adapters.node2 = {name = "NodeJS Debug", type = "executable", command = "node-debug2-adapter"}
         for ____, language in ipairs({"javascript", "typescript"}) do
             local ____opt_7 = config.targetEnvironments[language]
             if ____opt_7 and ____opt_7.enabled then
                 dap.configurations[language] = {{
-                    type = "pwa-node",
+                    type = "node2",
                     request = "launch",
                     name = "Launch file",
                     program = "${file}",
                     cwd = "${workspaceFolder}",
-                    runtimeExecutable = "node"
+                    runtimeExecutable = "node",
+                    outDir = "dist",
+                    args = {"${file}"},
+                    sourceMap = true,
+                    skipFiles = {"<node_internals>/**", "node_modules/**"},
+                    protocol = "inspector",
+                    outFiles = {"${workspaceFolder}/dist/*.js"}
                 }}
             end
         end
@@ -4734,6 +4746,30 @@ local plugin = {
     config = function()
         local target = "marks"
         useExternalModule(target).setup()
+    end
+}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.mason-nvim-dap"] = function(...) 
+local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+function ____exports.getMasonNvimDap()
+    return useExternalModule("mason-nvim-dap")
+end
+local plugin = {
+    [1] = "jay-babu/mason-nvim-dap.nvim",
+    event = "InsertEnter",
+    dependencies = {"williamboman/mason.nvim", "mfussenegger/nvim-dap"},
+    config = function()
+        ____exports.getMasonNvimDap().setup({ensure_installed = {
+            "node2",
+            "firefox",
+            "cppdbg",
+            "js",
+            "codelldb"
+        }})
     end
 }
 ____exports.default = plugin
