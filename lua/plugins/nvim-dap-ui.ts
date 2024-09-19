@@ -170,6 +170,8 @@ function configureActiveLanguages(this: void) {
         command: 'js-debug-adapter'
       }
     };
+
+    // TODO: Check if commands are installed before registering them
     dap.adapters["node2"] = {
       name: 'NodeJS Debug',
       type: 'executable',
@@ -178,6 +180,7 @@ function configureActiveLanguages(this: void) {
 
     for (const language of ['javascript', 'typescript'] as const) {
       if (config.targetEnvironments[language]?.enabled) {
+        // Dunno what half this does, but by god it works
         dap.configurations[language] = [{
           type: 'node2',
           request: 'launch',

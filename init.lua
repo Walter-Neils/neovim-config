@@ -3294,6 +3294,29 @@ function ____exports.setupCustomLogic()
 end
 return ____exports
  end,
+["lua.integrations.neovide"] = function(...) 
+local ____exports = {}
+function ____exports.isNeovideSession()
+    return vim.g.neovide ~= nil
+end
+function ____exports.getNeovideExtendedVimContext()
+    return vim
+end
+return ____exports
+ end,
+["lua.helpers.font.index"] = function(...) 
+local ____exports = {}
+local ____neovide = require("lua.integrations.neovide")
+local getNeovideExtendedVimContext = ____neovide.getNeovideExtendedVimContext
+local isNeovideSession = ____neovide.isNeovideSession
+function ____exports.setGUIFont(fontName, fontSize)
+    if isNeovideSession() then
+        local opts = getNeovideExtendedVimContext()
+        opts.o.guifont = (fontName .. ":h") .. tostring(fontSize)
+    end
+end
+return ____exports
+ end,
 ["lua.integrations.hyprland"] = function(...) 
 local ____lualib = require("lualib_bundle")
 local __TS__StringTrim = ____lualib.__TS__StringTrim
@@ -3335,16 +3358,6 @@ local function getRefreshRates()
     )
 end
 ____exports.Hyprland = {getRefreshRates = getRefreshRates}
-return ____exports
- end,
-["lua.integrations.neovide"] = function(...) 
-local ____exports = {}
-function ____exports.isNeovideSession()
-    return vim.g.neovide ~= nil
-end
-function ____exports.getNeovideExtendedVimContext()
-    return vim
-end
 return ____exports
  end,
 ["lua.plugins.copilot"] = function(...) 
@@ -3725,6 +3738,8 @@ local ____custom = require("lua.custom.index")
 local setupCustomLogic = ____custom.setupCustomLogic
 local ____configuration = require("lua.helpers.configuration.index")
 local getGlobalConfiguration = ____configuration.getGlobalConfiguration
+local ____font = require("lua.helpers.font.index")
+local setGUIFont = ____font.setGUIFont
 local ____useModule = require("lua.helpers.module.useModule")
 local useExternalModule = ____useModule.useExternalModule
 local ____hyprland = require("lua.integrations.hyprland")
@@ -3754,12 +3769,13 @@ enablePortableAppImageLogic()
 local function setupNeovide()
     local vim = getNeovideExtendedVimContext()
     if vim.g.neovide then
-        vim.g.neovide_scale_factor = 0.75
+        vim.g.neovide_scale_factor = 1
         vim.g.neovide_detach_on_quit = "always_detach"
         if isDesktopHyprland() then
             local targetRefresh = math.max(unpack(Hyprland.getRefreshRates()))
             vim.g.neovide_refresh_rate = targetRefresh
         end
+        setGUIFont("VictorMono_Nerd_Font_Mono", 14)
     end
 end
 local function setupLazy()

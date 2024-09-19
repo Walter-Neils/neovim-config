@@ -1,6 +1,7 @@
 import { LazyModuleInterface } from "./ambient/lazy";
 import { setupCustomLogic } from "./lua/custom";
 import { getGlobalConfiguration } from "./lua/helpers/configuration";
+import { setGUIFont } from "./lua/helpers/font";
 import { useExternalModule } from "./lua/helpers/module/useModule";
 import { Hyprland, isDesktopHyprland } from "./lua/integrations/hyprland";
 import { getNeovideExtendedVimContext } from "./lua/integrations/neovide";
@@ -20,7 +21,7 @@ enablePortableAppImageLogic();
 function setupNeovide() {
   const vim = getNeovideExtendedVimContext();
   if (vim.g.neovide) {
-    vim.g.neovide_scale_factor = 0.75;
+    vim.g.neovide_scale_factor = 1;
     // Doesn't appear to be doing anything, but should leave remote nvim server instances intact when closing
     vim.g.neovide_detach_on_quit = 'always_detach';
 
@@ -29,6 +30,9 @@ function setupNeovide() {
       const targetRefresh = Math.max(...Hyprland.getRefreshRates());
       vim.g.neovide_refresh_rate = targetRefresh;
     }
+    // If you want to get a list of available fonts, run `set guifont=*`
+    // setGUIFont("Source Code Pro", 14);
+    setGUIFont("VictorMono_Nerd_Font_Mono", 14);
   }
 }
 
