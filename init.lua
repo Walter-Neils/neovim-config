@@ -3482,8 +3482,6 @@ return ____exports
 local ____exports = {}
 local ____configuration = require("lua.helpers.configuration.index")
 local getGlobalConfiguration = ____configuration.getGlobalConfiguration
-local ____mainLoopCallbacks = require("lua.shims.mainLoopCallbacks")
-local setImmediate = ____mainLoopCallbacks.setImmediate
 function ____exports.getPlugins()
     local globalConfig = getGlobalConfiguration()
     local result = {}
@@ -3639,10 +3637,6 @@ function ____exports.getPlugins()
     local ____opt_74 = globalConfig.packages.telescopeUISelect
     if ____opt_74 and ____opt_74.enabled then
         result[#result + 1] = require("lua.plugins.telescope-ui-select").default
-    else
-        setImmediate(function()
-            console.warn("No select")
-        end)
     end
     result[#result + 1] = require("lua.plugins.nui").default
     return result
@@ -4196,7 +4190,12 @@ if config.packages.nvimDapUI then
             if ____opt_4 and ____opt_4.enabled then
                 vim.cmd("NvimTreeClose")
             end
-            if vim.bo.filetype == "cs" then
+            local ____temp_8 = vim.bo.filetype == "cs"
+            if ____temp_8 then
+                local ____opt_6 = getGlobalConfiguration().packages.cSharp
+                ____temp_8 = ____opt_6 and ____opt_6.enabled
+            end
+            if ____temp_8 then
                 if getDap().status() == "Running" then
                     vim.cmd("DapContinue")
                 else
@@ -4244,12 +4243,12 @@ if config.packages.nvimDapUI then
         options = {desc = "Evaluate selected statement"}
     })
 end
-local ____opt_6 = config.packages.copilot
-if ____opt_6 and ____opt_6.enabled then
+local ____opt_9 = config.packages.copilot
+if ____opt_9 and ____opt_9.enabled then
     vim.keymap.set("i", "<C-J>", "copilot#Accept(\"<CR>\")", {expr = true, replace_keycodes = false})
 end
-local ____opt_8 = config.packages.actionsPreview
-if ____opt_8 and ____opt_8.enabled then
+local ____opt_11 = config.packages.actionsPreview
+if ____opt_11 and ____opt_11.enabled then
     applyKeyMapping({
         mode = "n",
         inputStroke = ".",
@@ -4259,8 +4258,8 @@ if ____opt_8 and ____opt_8.enabled then
         options = {desc = "Show code actions"}
     })
 end
-local ____opt_10 = config.packages.lazyGit
-if ____opt_10 and ____opt_10.enabled then
+local ____opt_13 = config.packages.lazyGit
+if ____opt_13 and ____opt_13.enabled then
     applyKeyMapping({mode = "n", inputStroke = "<leader>lg", outputStroke = "<cmd>LazyGit<CR>", options = {desc = "Show code actions"}})
 end
 return ____exports

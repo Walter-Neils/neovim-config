@@ -436,7 +436,7 @@ if (config.packages["nvimDapUI"]) {
       if (getGlobalConfiguration().packages.nvimTree?.enabled) {
         vim.cmd("NvimTreeClose");
       }
-      if (vim.bo.filetype === 'cs') {
+      if (vim.bo.filetype === 'cs' && getGlobalConfiguration().packages.cSharp?.enabled) {
         if (getDap().status() === 'Running') {
           vim.cmd("DapContinue");
         }

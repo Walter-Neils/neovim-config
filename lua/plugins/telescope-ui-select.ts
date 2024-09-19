@@ -1,5 +1,4 @@
 import { LazyPlugin } from "../../ambient/lazy";
-import { useExternalModule } from "../helpers/module/useModule";
 import { getTelescope } from "./telescope";
 
 const plugin: LazyPlugin = {

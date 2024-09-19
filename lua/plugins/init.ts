@@ -120,11 +120,6 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (globalConfig.packages.telescopeUISelect?.enabled) {
     result.push(require("telescope-ui-select").default);
   }
-  else {
-    setImmediate(() => {
-      console.warn("No select");
-    });
-  }
   result.push(require("nui").default);
   return result;
 }
