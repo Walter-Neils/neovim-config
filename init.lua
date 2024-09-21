@@ -3103,7 +3103,7 @@ local function showEnvSourceDialog()
                 return
             end
             vim.ui.select(
-                {true, false},
+                {false, true},
                 {
                     prompt = __TS__StringReplace(
                         choice,

@@ -67,7 +67,7 @@ function showEnvSourceDialog(this: void) {
     if (choice === undefined) {
       return;
     }
-    vim.ui.select([true, false], {
+    vim.ui.select([false, true], {
       prompt: `${choice.replace(vim.fn.getcwd() + "/", "")}: Override Duplicates?`,
       format_item: item => {
         return item ? "Yes" : "No";
