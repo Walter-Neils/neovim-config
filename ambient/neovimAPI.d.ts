@@ -118,7 +118,7 @@ type NvimLspClientCommands = Record<string, (command: LspCommand, ctx: unknown) 
 type VimUISelectFunction = <TOptionType>(this: void, options: TOptionType[], cfg: {
   prompt: string,
   format_item?: (this: void, item: TOptionType) => string,
-}, on_choice: (this: void, choice: TOptionType) => void) => void
+}, on_choice: (this: void, choice: TOptionType | undefined) => void) => void
 
 type NvimLspClient = {
   id: number,

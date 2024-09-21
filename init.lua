@@ -3086,15 +3086,25 @@ local function showEnvSourceDialog()
             end
         },
         function(choice)
+            if choice == nil then
+                return
+            end
             vim.ui.select(
                 {true, false},
                 {
-                    prompt = "Override Duplicates?",
+                    prompt = __TS__StringReplace(
+                        choice,
+                        vim.fn.getcwd() .. "/",
+                        ""
+                    ) .. ": Override Duplicates?",
                     format_item = function(item)
                         return item and "Yes" or "No"
                     end
                 },
                 function(override)
+                    if override == nil then
+                        return
+                    end
                     loadEnvFromFile(choice, override)
                 end
             )

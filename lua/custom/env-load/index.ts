@@ -50,12 +50,18 @@ function showEnvSourceDialog(this: void) {
       return item.replace(vim.fn.getcwd() + "/", "");
     }
   }, choice => {
+    if (choice === undefined) {
+      return;
+    }
     vim.ui.select([true, false], {
-      prompt: 'Override Duplicates?',
+      prompt: `${choice.replace(vim.fn.getcwd() + "/", "")}: Override Duplicates?`,
       format_item: item => {
         return item ? "Yes" : "No";
       }
     }, override => {
+      if (override === undefined) {
+        return;
+      }
       loadEnvFromFile(choice, override);
     });
   });
