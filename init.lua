@@ -3033,7 +3033,17 @@ local function loadEnvFromFile(targetFile, overwrite)
         ::__continue3::
     end
 end
+local _locatedEnvFiles = nil
+vim.api.nvim_create_autocmd(
+    "DirChanged",
+    {callback = function()
+        _locatedEnvFiles = nil
+    end}
+)
 local function locateEnvFiles()
+    if _locatedEnvFiles ~= nil then
+        return _locatedEnvFiles
+    end
     local cwd = vim.fn.getcwd()
     local envFiles = {}
     local crawl
@@ -3047,14 +3057,16 @@ local function locateEnvFiles()
                     end
                 elseif entry.type == "directory" then
                     if entry.path == ".." then
-                        goto __continue9
+                        goto __continue11
                     end
                     if entry.path == "." then
-                        goto __continue9
+                        goto __continue11
                     end
                     do
                         local function ____catch()
-                            vim.notify(((("Failed to crawl directory '" .. path) .. "/") .. entry.path) .. "'")
+                            if vim.g.debug_env_load then
+                                vim.notify(((("Failed to crawl directory '" .. path) .. "/") .. entry.path) .. "'")
+                            end
                         end
                         local ____try = pcall(function()
                             crawl((path .. "/") .. entry.path)
@@ -3065,10 +3077,11 @@ local function locateEnvFiles()
                     end
                 end
             end
-            ::__continue9::
+            ::__continue11::
         end
     end
     crawl(cwd)
+    _locatedEnvFiles = envFiles
     return envFiles
 end
 local function showEnvSourceDialog()

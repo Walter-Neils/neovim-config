@@ -16,7 +16,18 @@ function loadEnvFromFile(this: void, targetFile: string, overwrite: boolean) {
   }
 }
 
+let _locatedEnvFiles: string[] | undefined = undefined;
+
+vim.api.nvim_create_autocmd('DirChanged', {
+  callback: () => {
+    _locatedEnvFiles = undefined;
+  }
+});
+
 function locateEnvFiles(this: void) {
+  if (_locatedEnvFiles !== undefined) {
+    return _locatedEnvFiles;
+  }
   const cwd = vim.fn.getcwd();
   const envFiles: string[] = [];
   const crawl = (path: string) => {
@@ -33,12 +44,15 @@ function locateEnvFiles(this: void) {
         try {
           crawl(`${path}/${entry.path}`);
         } catch {
-          vim.notify(`Failed to crawl directory '${path}/${entry.path}'`);
+          if ((vim.g as any).debug_env_load) {
+            vim.notify(`Failed to crawl directory '${path}/${entry.path}'`);
+          }
         }
       }
     }
   };
   crawl(cwd);
+  _locatedEnvFiles = envFiles;
   return envFiles;
 }
 
