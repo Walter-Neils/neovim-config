@@ -1,4 +1,4 @@
-export function parseArgs<ArgType extends { [key: string]: string | boolean }>(this: void, args: string[]): ArgType {
+export function parseArgs<ArgType extends { [key: string]: string | boolean | undefined }>(this: void, args: string[]): ArgType {
   let result: { [key: string]: any } = {};
   let primedKey: string | undefined = undefined;
 

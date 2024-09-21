@@ -24,6 +24,20 @@ function writeFileSync(this: void, path: string, content: string) {
   file.close();
 }
 
+function readdirSync(this: void, path: string) {
+  const files: { path: string, type: 'file' | 'directory' }[] = [];
+  const handle = vim.uv.fs_scandir(path);
+  if (handle === undefined) {
+    throw new Error(`Cannot open directory ${path}`);
+  }
+  while (true) {
+    const [name, type] = vim.uv.fs_scandir_next(handle);
+    if (name === undefined) break;
+    files.push({ path: name, type });
+  }
+  return files;
+}
+
 function existsSync(this: void, target: string) {
   const [file] = io.open(target, "r");
   if (file !== undefined) {
@@ -38,5 +52,6 @@ function existsSync(this: void, target: string) {
 export const fs = {
   readFileSync,
   existsSync,
-  writeFileSync
+  writeFileSync,
+  readdirSync
 };

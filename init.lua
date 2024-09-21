@@ -2837,101 +2837,38 @@ function ____exports.initCustomOpen()
 end
 return ____exports
  end,
-["lua.shims.fs.index"] = function(...) 
+["lua.helpers.env-parser.index"] = function(...) 
 local ____lualib = require("lualib_bundle")
-local Error = ____lualib.Error
-local RangeError = ____lualib.RangeError
-local ReferenceError = ____lualib.ReferenceError
-local SyntaxError = ____lualib.SyntaxError
-local TypeError = ____lualib.TypeError
-local URIError = ____lualib.URIError
-local __TS__New = ____lualib.__TS__New
+local __TS__StringStartsWith = ____lualib.__TS__StringStartsWith
+local __TS__StringTrim = ____lualib.__TS__StringTrim
+local __TS__StringSplit = ____lualib.__TS__StringSplit
+local __TS__ArrayMap = ____lualib.__TS__ArrayMap
+local __TS__ArrayFilter = ____lualib.__TS__ArrayFilter
+local __TS__ArraySlice = ____lualib.__TS__ArraySlice
 local ____exports = {}
-local function readFileSync(target)
-    local file = io.open(target, "r")
-    if file == nil then
-        error(
-            __TS__New(Error, "Failed to open file for read"),
-            0
-        )
+function ____exports.parseEnvFileContent(content)
+    local result = {}
+    local lines = __TS__ArrayFilter(
+        __TS__ArrayFilter(
+            __TS__ArrayMap(
+                __TS__StringSplit(content, "\n"),
+                function(____, x) return __TS__StringTrim(x) end
+            ),
+            function(____, x) return #x > 0 end
+        ),
+        function(____, x) return not __TS__StringStartsWith(x, "#") end
+    )
+    for ____, line in ipairs(lines) do
+        local ____TS__StringSplit_result_0 = __TS__StringSplit(line, "=")
+        local key = ____TS__StringSplit_result_0[1]
+        local valuePossibleSplit = __TS__ArraySlice(____TS__StringSplit_result_0, 1)
+        local valueWithPossibleComment = table.concat(valuePossibleSplit, "=")
+        local value, comment = unpack(__TS__ArrayMap(
+            __TS__StringSplit(valueWithPossibleComment, "#"),
+            function(____, x) return __TS__StringTrim(x) end
+        ))
+        result[key] = value
     end
-    local content = file:read("*a")
-    file:close()
-    if content == nil then
-        error(
-            __TS__New(Error, "Failed to read file"),
-            0
-        )
-    end
-    return content
-end
-local function writeFileSync(path, content)
-    local file = io.open(path, "w")
-    if file == nil then
-        error(
-            __TS__New(Error, "Failed to open file for writing"),
-            0
-        )
-    end
-    file:write(content)
-    file:close()
-end
-local function existsSync(target)
-    local file = io.open(target, "r")
-    if file ~= nil then
-        file:close()
-        return true
-    else
-        return false
-    end
-end
-____exports.fs = {readFileSync = readFileSync, existsSync = existsSync, writeFileSync = writeFileSync}
-return ____exports
- end,
-["lua.custom.nixos.index"] = function(...) 
-local ____exports = {}
-local ____fs = require("lua.shims.fs.index")
-local fs = ____fs.fs
-function ____exports.isRunningUnderNixOS()
-    return fs.existsSync("/etc/NIXOS")
-end
-return ____exports
- end,
-["lua.helpers.persistent-data.index"] = function(...) 
-local ____exports = {}
-local ____fs = require("lua.shims.fs.index")
-local fs = ____fs.fs
-local persistValueInstances = {}
-local dataPath = vim.fn.stdpath("data") .. "/winvim"
-vim.fn.system({"mkdir", "-p", dataPath})
-function ____exports.getWinvimLocalDataDirectory()
-    return dataPath
-end
-function ____exports.usePersistentValue(key, defaultValue)
-    do
-        local target = persistValueInstances[key]
-        if target ~= nil then
-            return target
-        end
-    end
-    local filePath = (dataPath .. "/") .. key
-    local currentValue = defaultValue
-    if fs.existsSync(filePath) then
-        currentValue = vim.json.decode(fs.readFileSync(filePath))
-    end
-    local function get()
-        return currentValue
-    end
-    local function set(newValue)
-        currentValue = newValue
-        fs.writeFileSync(
-            filePath,
-            vim.json.encode(newValue)
-        )
-        return currentValue
-    end
-    local result = {get, set}
-    persistValueInstances[key] = result
     return result
 end
 return ____exports
@@ -2996,6 +2933,243 @@ function ____exports.parseArgs(args)
     if primedKey ~= nil then
         result[primedKey] = true
     end
+    return result
+end
+return ____exports
+ end,
+["lua.shims.fs.index"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local Error = ____lualib.Error
+local RangeError = ____lualib.RangeError
+local ReferenceError = ____lualib.ReferenceError
+local SyntaxError = ____lualib.SyntaxError
+local TypeError = ____lualib.TypeError
+local URIError = ____lualib.URIError
+local __TS__New = ____lualib.__TS__New
+local ____exports = {}
+local function readFileSync(target)
+    local file = io.open(target, "r")
+    if file == nil then
+        error(
+            __TS__New(Error, "Failed to open file for read"),
+            0
+        )
+    end
+    local content = file:read("*a")
+    file:close()
+    if content == nil then
+        error(
+            __TS__New(Error, "Failed to read file"),
+            0
+        )
+    end
+    return content
+end
+local function writeFileSync(path, content)
+    local file = io.open(path, "w")
+    if file == nil then
+        error(
+            __TS__New(Error, "Failed to open file for writing"),
+            0
+        )
+    end
+    file:write(content)
+    file:close()
+end
+local function readdirSync(path)
+    local files = {}
+    local handle = vim.uv.fs_scandir(path)
+    if handle == nil then
+        error(
+            __TS__New(Error, "Cannot open directory " .. path),
+            0
+        )
+    end
+    while true do
+        local name, ____type = vim.uv.fs_scandir_next(handle)
+        if name == nil then
+            break
+        end
+        files[#files + 1] = {path = name, type = ____type}
+    end
+    return files
+end
+local function existsSync(target)
+    local file = io.open(target, "r")
+    if file ~= nil then
+        file:close()
+        return true
+    else
+        return false
+    end
+end
+____exports.fs = {readFileSync = readFileSync, existsSync = existsSync, writeFileSync = writeFileSync, readdirSync = readdirSync}
+return ____exports
+ end,
+["lua.custom.env-load.index"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local __TS__StringEndsWith = ____lualib.__TS__StringEndsWith
+local __TS__StringReplace = ____lualib.__TS__StringReplace
+local ____exports = {}
+local ____env_2Dparser = require("lua.helpers.env-parser.index")
+local parseEnvFileContent = ____env_2Dparser.parseEnvFileContent
+local ____argparser = require("lua.helpers.user_command.argparser")
+local parseArgs = ____argparser.parseArgs
+local ____fs = require("lua.shims.fs.index")
+local fs = ____fs.fs
+local function loadEnvFromFile(targetFile, overwrite)
+    local fileContent = fs.readFileSync(targetFile)
+    local variables = parseEnvFileContent(fileContent)
+    for key in pairs(variables) do
+        do
+            if vim.env[key] ~= nil then
+                if not overwrite then
+                    vim.notify(("Skipping environment variable '" .. key) .. "' because it's already set, and '--overwrite' was not specified", vim.log.levels.WARN)
+                    goto __continue3
+                end
+            end
+            vim.env[key] = variables[key]
+        end
+        ::__continue3::
+    end
+end
+local function locateEnvFiles()
+    local cwd = vim.fn.getcwd()
+    local envFiles = {}
+    local crawl
+    crawl = function(path)
+        local entries = fs.readdirSync(path)
+        for ____, entry in ipairs(entries) do
+            do
+                if entry.type == "file" then
+                    if __TS__StringEndsWith(entry.path, ".env") then
+                        envFiles[#envFiles + 1] = (path .. "/") .. entry.path
+                    end
+                elseif entry.type == "directory" then
+                    if entry.path == ".." then
+                        goto __continue9
+                    end
+                    if entry.path == "." then
+                        goto __continue9
+                    end
+                    do
+                        local function ____catch()
+                            vim.notify(((("Failed to crawl directory '" .. path) .. "/") .. entry.path) .. "'")
+                        end
+                        local ____try = pcall(function()
+                            crawl((path .. "/") .. entry.path)
+                        end)
+                        if not ____try then
+                            ____catch()
+                        end
+                    end
+                end
+            end
+            ::__continue9::
+        end
+    end
+    crawl(cwd)
+    return envFiles
+end
+local function showEnvSourceDialog()
+    local files = locateEnvFiles()
+    vim.ui.select(
+        files,
+        {
+            prompt = "Select a file to load",
+            format_item = function(item)
+                return __TS__StringReplace(
+                    item,
+                    vim.fn.getcwd() .. "/",
+                    ""
+                )
+            end
+        },
+        function(choice)
+            vim.ui.select(
+                {true, false},
+                {
+                    prompt = "Override Duplicates?",
+                    format_item = function(item)
+                        return item and "Yes" or "No"
+                    end
+                },
+                function(override)
+                    loadEnvFromFile(choice, override)
+                end
+            )
+        end
+    )
+end
+function ____exports.initCustomEnvLoader()
+    vim.api.nvim_create_user_command(
+        "Env",
+        function(_args)
+            local args = parseArgs(_args.fargs)
+            if args["from-file"] ~= nil then
+                if args["from-file"] ~= nil then
+                    loadEnvFromFile(args["from-file"], not not args.overwrite)
+                end
+            end
+            if args.scan ~= nil then
+                local files = locateEnvFiles()
+                for ____, file in ipairs(files) do
+                    vim.notify(file)
+                end
+            end
+            if args.pick ~= nil then
+                showEnvSourceDialog()
+            end
+        end,
+        {nargs = "*"}
+    )
+end
+return ____exports
+ end,
+["lua.custom.nixos.index"] = function(...) 
+local ____exports = {}
+local ____fs = require("lua.shims.fs.index")
+local fs = ____fs.fs
+function ____exports.isRunningUnderNixOS()
+    return fs.existsSync("/etc/NIXOS")
+end
+return ____exports
+ end,
+["lua.helpers.persistent-data.index"] = function(...) 
+local ____exports = {}
+local ____fs = require("lua.shims.fs.index")
+local fs = ____fs.fs
+local persistValueInstances = {}
+local dataPath = vim.fn.stdpath("data") .. "/winvim"
+vim.fn.system({"mkdir", "-p", dataPath})
+function ____exports.getWinvimLocalDataDirectory()
+    return dataPath
+end
+function ____exports.usePersistentValue(key, defaultValue)
+    do
+        local target = persistValueInstances[key]
+        if target ~= nil then
+            return target
+        end
+    end
+    local filePath = (dataPath .. "/") .. key
+    local currentValue = defaultValue
+    if fs.existsSync(filePath) then
+        currentValue = vim.json.decode(fs.readFileSync(filePath))
+    end
+    local function get()
+        return currentValue
+    end
+    local function set(newValue)
+        currentValue = newValue
+        fs.writeFileSync(
+            filePath,
+            vim.json.encode(newValue)
+        )
+        return currentValue
+    end
+    local result = {get, set}
+    persistValueInstances[key] = result
     return result
 end
 return ____exports
@@ -3286,11 +3460,14 @@ return ____exports
 local ____exports = {}
 local ____custom_2Dopen = require("lua.custom.custom-open.index")
 local initCustomOpen = ____custom_2Dopen.initCustomOpen
+local ____env_2Dload = require("lua.custom.env-load.index")
+local initCustomEnvLoader = ____env_2Dload.initCustomEnvLoader
 local ____tmux = require("lua.custom.tmux.index")
 local initCustomTmux = ____tmux.initCustomTmux
 function ____exports.setupCustomLogic()
     initCustomTmux()
     initCustomOpen()
+    initCustomEnvLoader()
 end
 return ____exports
  end,
@@ -3769,7 +3946,7 @@ enablePortableAppImageLogic()
 local function setupNeovide()
     local vim = getNeovideExtendedVimContext()
     if vim.g.neovide then
-        vim.g.neovide_scale_factor = 1
+        vim.g.neovide_scale_factor = 0.85
         vim.g.neovide_detach_on_quit = "always_detach"
         if isDesktopHyprland() then
             local targetRefresh = math.max(unpack(Hyprland.getRefreshRates()))

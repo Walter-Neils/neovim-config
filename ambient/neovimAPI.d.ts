@@ -59,9 +59,16 @@ type VimUVTcp = {
   read_start: (this: VimUVTcp, callback: (err?: unknown, chunk?: unknown) => void) => void
 };
 
+type VimUVScanDirResult = {
+
+};
+type VimUVScanDirNextResult = LuaMultiReturn<[name: undefined, type: undefined] | [name: string, type: 'file' | 'directory']>;
+
 type VimUV = {
   new_timer: (this: void) => VimUVTimer,
   new_tcp: (this: void) => VimUVTcp,
+  fs_scandir: (this: void, directory: string) => VimUVScanDirResult | undefined,
+  fs_scandir_next: (this: void, handle: VimUVScanDirResult) => VimUVScanDirNextResult,
 };
 
 type NeovimBuffer = unknown;
@@ -107,6 +114,11 @@ type NvimLspClientAttachedBuffers = Record<string, true>;
 type LspCommand = unknown;
 
 type NvimLspClientCommands = Record<string, (command: LspCommand, ctx: unknown) => void>
+
+type VimUISelectFunction = <TOptionType>(this: void, options: TOptionType[], cfg: {
+  prompt: string,
+  format_item?: (this: void, item: TOptionType) => string,
+}, on_choice: (this: void, choice: TOptionType) => void) => void
 
 type NvimLspClient = {
   id: number,
@@ -162,6 +174,7 @@ type VimAPI = {
   defer_fn: (this: void, callback: (this: void) => void, ms: number) => void,
   tbl_deep_extend: <T1, T2>(this: void, behaviour: 'error' | 'keep' | 'force', table1: T1, table2: T2) => T1 & T2,
   regex: (this: void, pattern: string) => VimRegex,
+  env: { [key: string]: string | undefined },
   bo: {
     [key: string]: unknown | undefined
   },
@@ -258,6 +271,7 @@ type VimAPI = {
     open: (this: void, path: string) => {
       wait: (this: unknown) => void
     },
+    select: VimUISelectFunction,
   },
   o: {
     cmdheight: number,
