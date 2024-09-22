@@ -1,5 +1,6 @@
 import { getGlobalConfiguration } from "../../helpers/configuration";
 import { useNUI } from "../../plugins/nui";
+import { fs } from "../../shims/fs";
 
 function setTmuxScope(this: void, isolationScope: string) {
   const globalConfig = getGlobalConfiguration();
@@ -46,6 +47,44 @@ function changeTmuxScope() {
   menu.mount();
 }
 
+function pruneDeadTmuxSockets(this: void) {
+  const SOCKET_DIR = vim.env["TMUX_TMPDIR"] ?? "/tmp";
+  const userID = vim.loop.getuid();
+  // Sending SIGUSR1 to a tmux instance causes it to recreate it's socket if it's missing
+  // So we delete all sockets, and then make tmux recreate them if that specific instance is still alive
+  const socketsDirectory = `${SOCKET_DIR}/tmux-${userID}`;
+  vim.fn.system(['bash', '-c', `rm -f ${socketsDirectory}/*`]);
+  vim.fn.system(['pkill', '-USR1', 'tmux']);
+}
+
+function selectCustomTmuxScope(this: void) {
+  pruneDeadTmuxSockets();
+  const SOCKET_DIR = vim.env["TMUX_TMPDIR"] ?? "/tmp";
+  const userID = vim.loop.getuid();
+  const socketsDirectory = `${SOCKET_DIR}/tmux-${userID}`;
+  const entries = fs.readdirSync(socketsDirectory);
+  vim.ui.select(entries, {
+    prompt: 'Select a session',
+    format_item: item => {
+      const label = item.path.replace(socketsDirectory + "/", "");
+      if (item.path.includes(vim.fn.getpid().toString())) {
+        return `${label} -- Instance Pair`;
+      }
+      else {
+        return label;
+      }
+    }
+  }, choice => {
+    if (choice === undefined) return;
+    const id = choice.path.replace(socketsDirectory + "/", "");
+    vim.g.terminal_emulator = `tmux -L ${id}`;
+    if (getGlobalConfiguration().packages.floatTerm?.enabled) {
+      vim.cmd("FloatermKill!");
+    }
+    console.log(vim.g.terminal_emulator);
+  });
+}
+
 export function initCustomTmux() {
   const shellConfig = getGlobalConfiguration().shell;
   if (shellConfig.target === 'tmux') {
@@ -71,4 +110,7 @@ export function initCustomTmux() {
     }
   }
   vim.api.nvim_create_user_command('ChangeTmuxScope', changeTmuxScope, {});
+  vim.api.nvim_create_user_command('SelectTmuxScope', selectCustomTmuxScope, {});
+  vim.api.nvim_create_user_command('PruneTmuxInstanceSockets', pruneDeadTmuxSockets, {});
+
 }

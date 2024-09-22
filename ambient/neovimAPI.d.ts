@@ -331,7 +331,8 @@ type VimAPI = {
       // If true, the child process will be detached from the parent process.
       // This makes it possible for the child process to continue running after the parent exits.
       detached?: boolean,
-    }, processExitCallback: (this: void, code: number, signal: number) => void) => VimLoopSpawnHandle
+    }, processExitCallback: (this: void, code: number, signal: number) => void) => VimLoopSpawnHandle,
+    getuid: (this: void) => number,
   },
   opt: {
     // Run-time path

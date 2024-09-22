@@ -123,6 +123,12 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (globalConfig.packages.masonNvimDap?.enabled) {
     result.push(require("mason-nvim-dap").default);
   }
+  if (globalConfig.packages.timeTracker?.enabled) {
+    result.push(require("time-tracker").default);
+  }
+  if (globalConfig.packages.wakaTime?.enabled) {
+    result.push(require("wakatime").default);
+  }
   result.push(require("nui").default);
   return result;
 }

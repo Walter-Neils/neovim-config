@@ -191,6 +191,12 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     masonNvimDap: {
       // Prolly gonna remove this
       enabled: false
+    },
+    timeTracker: {
+      enabled: false
+    },
+    wakaTime: {
+      enabled: true
     }
   },
   targetEnvironments: {

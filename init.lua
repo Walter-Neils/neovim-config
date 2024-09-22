@@ -3277,7 +3277,9 @@ ____exports.CONFIGURATION_DEFAULTS = {
         leap = {enabled = true},
         cSharp = {enabled = true},
         telescopeUISelect = {enabled = true},
-        masonNvimDap = {enabled = false}
+        masonNvimDap = {enabled = false},
+        timeTracker = {enabled = false},
+        wakaTime = {enabled = true}
     },
     targetEnvironments = {
         typescript = {enabled = true},
@@ -3413,12 +3415,15 @@ local SyntaxError = ____lualib.SyntaxError
 local TypeError = ____lualib.TypeError
 local URIError = ____lualib.URIError
 local __TS__New = ____lualib.__TS__New
+local __TS__StringReplace = ____lualib.__TS__StringReplace
 local __TS__StringIncludes = ____lualib.__TS__StringIncludes
 local ____exports = {}
 local ____configuration = require("lua.helpers.configuration.index")
 local getGlobalConfiguration = ____configuration.getGlobalConfiguration
 local ____nui = require("lua.plugins.nui")
 local useNUI = ____nui.useNUI
+local ____fs = require("lua.shims.fs.index")
+local fs = ____fs.fs
 local function setTmuxScope(isolationScope)
     local globalConfig = getGlobalConfiguration()
     if isolationScope == "global" then
@@ -3455,6 +3460,49 @@ local function changeTmuxScope()
     )
     menu:mount()
 end
+local function pruneDeadTmuxSockets()
+    local SOCKET_DIR = vim.env.TMUX_TMPDIR or "/tmp"
+    local userID = vim.loop.getuid()
+    local socketsDirectory = (SOCKET_DIR .. "/tmux-") .. tostring(userID)
+    vim.fn.system({"bash", "-c", ("rm -f " .. socketsDirectory) .. "/*"})
+    vim.fn.system({"pkill", "-USR1", "tmux"})
+end
+local function selectCustomTmuxScope()
+    pruneDeadTmuxSockets()
+    local SOCKET_DIR = vim.env.TMUX_TMPDIR or "/tmp"
+    local userID = vim.loop.getuid()
+    local socketsDirectory = (SOCKET_DIR .. "/tmux-") .. tostring(userID)
+    local entries = fs.readdirSync(socketsDirectory)
+    vim.ui.select(
+        entries,
+        {
+            prompt = "Select a session",
+            format_item = function(item)
+                local label = __TS__StringReplace(item.path, socketsDirectory .. "/", "")
+                if __TS__StringIncludes(
+                    item.path,
+                    tostring(vim.fn.getpid())
+                ) then
+                    return label .. " -- Instance Pair"
+                else
+                    return label
+                end
+            end
+        },
+        function(choice)
+            if choice == nil then
+                return
+            end
+            local id = __TS__StringReplace(choice.path, socketsDirectory .. "/", "")
+            vim.g.terminal_emulator = "tmux -L " .. id
+            local ____opt_0 = getGlobalConfiguration().packages.floatTerm
+            if ____opt_0 and ____opt_0.enabled then
+                vim.cmd("FloatermKill!")
+            end
+            console.log(vim.g.terminal_emulator)
+        end
+    )
+end
 function ____exports.initCustomTmux()
     local shellConfig = getGlobalConfiguration().shell
     if shellConfig.target == "tmux" then
@@ -3476,6 +3524,8 @@ function ____exports.initCustomTmux()
         end
     end
     vim.api.nvim_create_user_command("ChangeTmuxScope", changeTmuxScope, {})
+    vim.api.nvim_create_user_command("SelectTmuxScope", selectCustomTmuxScope, {})
+    vim.api.nvim_create_user_command("PruneTmuxInstanceSockets", pruneDeadTmuxSockets, {})
 end
 return ____exports
  end,
@@ -3855,6 +3905,14 @@ function ____exports.getPlugins()
     local ____opt_76 = globalConfig.packages.masonNvimDap
     if ____opt_76 and ____opt_76.enabled then
         result[#result + 1] = require("lua.plugins.mason-nvim-dap").default
+    end
+    local ____opt_78 = globalConfig.packages.timeTracker
+    if ____opt_78 and ____opt_78.enabled then
+        result[#result + 1] = require("lua.plugins.time-tracker").default
+    end
+    local ____opt_80 = globalConfig.packages.wakaTime
+    if ____opt_80 and ____opt_80.enabled then
+        result[#result + 1] = require("lua.plugins.wakatime").default
     end
     result[#result + 1] = require("lua.plugins.nui").default
     return result
@@ -4934,7 +4992,29 @@ local plugin = {
     dependencies = {"nvim-tree/nvim-web-devicons"},
     config = function()
         local module = useExternalModule("lualine")
-        module.setup({options = {theme = "material"}})
+        local function createStandardComponent(____type)
+            local result = {}
+            result[1] = ____type
+            return ____type
+        end
+        local function createCustomComponent(func)
+            local result = {}
+            result.fmt = function(input) return input end
+            result[1] = func
+            return result
+        end
+        local config = {
+            options = {theme = "material"},
+            sections = {
+                lualine_b = {
+                    createStandardComponent("branch"),
+                    createStandardComponent("diff"),
+                    createStandardComponent("diagnostics")
+                },
+                lualine_c = {createCustomComponent(function() return "PID: " .. tostring(vim.fn.getpid()) end)}
+            }
+        }
+        module.setup(config)
     end
 }
 ____exports.default = plugin
@@ -5215,6 +5295,32 @@ local plugin = {
 ____exports.default = plugin
 return ____exports
  end,
+["lua.plugins.time-tracker"] = function(...) 
+local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+local plugin = {
+    [1] = "3rd/time-tracker.nvim",
+    dependencies = {"3rd/sqlite.nvim"},
+    event = "VeryLazy",
+    cmd = {"TimeTracker"},
+    config = function()
+        useExternalModule("time-tracker").setup({
+            data_file = vim.fn.stdpath("data") .. "/time-tracker.db",
+            tracking_events = {
+                "BufEnter",
+                "BufWinEnter",
+                "CursorMoved",
+                "CursorMovedI",
+                "WinScrolled"
+            },
+            tracking_timeout_seconds = 5 * 1000
+        })
+    end
+}
+____exports.default = plugin
+return ____exports
+ end,
 ["lua.plugins.tokyonight"] = function(...) 
 local ____exports = {}
 local plugin = {[1] = "folke/tokyonight.nvim", lazy = false, priority = 1000, opts = {}}
@@ -5296,6 +5402,12 @@ local plugin = {
     end,
     dependencies = {"nvim-lua/plenary.nvim"}
 }
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.wakatime"] = function(...) 
+local ____exports = {}
+local plugin = {[1] = "wakatime/vim-wakatime", lazy = false}
 ____exports.default = plugin
 return ____exports
  end,
