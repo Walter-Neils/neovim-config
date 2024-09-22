@@ -3468,6 +3468,14 @@ local function pruneDeadTmuxSockets()
     vim.fn.system({"pkill", "-USR1", "tmux"})
 end
 local function selectCustomTmuxScope()
+    local ____opt_0 = getGlobalConfiguration().packages.floatTerm
+    if ____opt_0 and ____opt_0.enabled then
+        do
+            pcall(function()
+                vim.cmd("FloatermKill!")
+            end)
+        end
+    end
     pruneDeadTmuxSockets()
     local SOCKET_DIR = vim.env.TMUX_TMPDIR or "/tmp"
     local userID = vim.loop.getuid()
@@ -3495,9 +3503,14 @@ local function selectCustomTmuxScope()
             end
             local id = __TS__StringReplace(choice.path, socketsDirectory .. "/", "")
             vim.g.terminal_emulator = "tmux -L " .. id
-            local ____opt_0 = getGlobalConfiguration().packages.floatTerm
-            if ____opt_0 and ____opt_0.enabled then
-                vim.cmd("FloatermKill!")
+            local ____opt_2 = getGlobalConfiguration().packages.floatTerm
+            if ____opt_2 and ____opt_2.enabled then
+                do
+                    pcall(function()
+                        vim.cmd("FloatermKill!")
+                        vim.g.floaterm_title = "tmux " .. id
+                    end)
+                end
             end
             console.log(vim.g.terminal_emulator)
         end

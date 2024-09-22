@@ -58,6 +58,11 @@ function pruneDeadTmuxSockets(this: void) {
 }
 
 function selectCustomTmuxScope(this: void) {
+  if (getGlobalConfiguration().packages.floatTerm?.enabled) {
+    try {
+      vim.cmd("FloatermKill!");
+    } catch { }
+  }
   pruneDeadTmuxSockets();
   const SOCKET_DIR = vim.env["TMUX_TMPDIR"] ?? "/tmp";
   const userID = vim.loop.getuid();
@@ -79,7 +84,10 @@ function selectCustomTmuxScope(this: void) {
     const id = choice.path.replace(socketsDirectory + "/", "");
     vim.g.terminal_emulator = `tmux -L ${id}`;
     if (getGlobalConfiguration().packages.floatTerm?.enabled) {
-      vim.cmd("FloatermKill!");
+      try {
+        vim.cmd("FloatermKill!");
+        (vim.g as unknown as {floaterm_title: string}).floaterm_title = `tmux ${id}`;
+      } catch { }
     }
     console.log(vim.g.terminal_emulator);
   });
