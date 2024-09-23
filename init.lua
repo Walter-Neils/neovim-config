@@ -3283,7 +3283,8 @@ ____exports.CONFIGURATION_DEFAULTS = {
         surround = {enabled = false},
         tsAutoTag = {enabled = true},
         ultimateAutoPair = {enabled = true},
-        rainbowDelimiters = {enabled = false}
+        rainbowDelimiters = {enabled = false},
+        markview = {enabled = true}
     },
     targetEnvironments = {
         typescript = {enabled = true},
@@ -3959,6 +3960,10 @@ function ____exports.getPlugins()
     local ____opt_88 = globalConfig.packages.rainbowDelimiters
     if ____opt_88 and ____opt_88.enabled then
         result[#result + 1] = require("lua.plugins.rainbow-delimiters").default
+    end
+    local ____opt_90 = globalConfig.packages.markview
+    if ____opt_90 and ____opt_90.enabled then
+        result[#result + 1] = require("lua.plugins.markview").default
     end
     result[#result + 1] = require("lua.plugins.nui").default
     return result
@@ -5112,6 +5117,12 @@ local plugin = {
         useExternalModule(target).setup()
     end
 }
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.markview"] = function(...) 
+local ____exports = {}
+local plugin = {[1] = "OXY2DEV/markview.nvim", lazy = false, dependencies = {"nvim-treesitter/nvim-treesitter", "nvim-tree/nvim-web-devicons"}}
 ____exports.default = plugin
 return ____exports
  end,

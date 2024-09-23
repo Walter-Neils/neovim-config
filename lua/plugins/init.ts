@@ -141,6 +141,10 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (globalConfig.packages.rainbowDelimiters?.enabled) {
     result.push(require("rainbow-delimiters").default);
   }
+  if (globalConfig.packages.markview?.enabled) {
+    result.push(require("markview").default);
+  }
+
 
   result.push(require("nui").default);
   return result;

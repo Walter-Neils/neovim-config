@@ -209,6 +209,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     rainbowDelimiters: {
       enabled: false
+    },
+    markview: {
+      enabled: true
     }
   },
   targetEnvironments: {
