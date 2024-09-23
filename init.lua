@@ -3149,6 +3149,19 @@ function ____exports.initCustomEnvLoader()
 end
 return ____exports
  end,
+["lua.custom.jumplist.index"] = function(...) 
+local ____exports = {}
+function ____exports.initCustomJumplist()
+    vim.api.nvim_create_user_command(
+        "JumpListClear",
+        function()
+            vim.cmd("tabdo windo clearjumps | tabnext")
+        end,
+        {}
+    )
+end
+return ____exports
+ end,
 ["lua.custom.nixos.index"] = function(...) 
 local ____exports = {}
 local ____fs = require("lua.shims.fs.index")
@@ -3564,12 +3577,15 @@ local ____custom_2Dopen = require("lua.custom.custom-open.index")
 local initCustomOpen = ____custom_2Dopen.initCustomOpen
 local ____env_2Dload = require("lua.custom.env-load.index")
 local initCustomEnvLoader = ____env_2Dload.initCustomEnvLoader
+local ____jumplist = require("lua.custom.jumplist.index")
+local initCustomJumplist = ____jumplist.initCustomJumplist
 local ____tmux = require("lua.custom.tmux.index")
 local initCustomTmux = ____tmux.initCustomTmux
 function ____exports.setupCustomLogic()
     initCustomTmux()
     initCustomOpen()
     initCustomEnvLoader()
+    initCustomJumplist()
 end
 return ____exports
  end,
@@ -5359,6 +5375,20 @@ return ____exports
 ["lua.plugins.surround"] = function(...) 
 local ____exports = {}
 local plugin = {[1] = "tpope/vim-surround"}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.symbol-usage"] = function(...) 
+local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+local plugin = {
+    [1] = "Wansmer/symbol-usage.nvim",
+    event = "LspAttach",
+    config = function()
+        useExternalModule("symbol-usage").setup()
+    end
+}
 ____exports.default = plugin
 return ____exports
  end,
