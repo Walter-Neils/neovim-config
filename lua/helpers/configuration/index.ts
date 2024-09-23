@@ -212,6 +212,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     markview: {
       enabled: true
+    },
+    symbolUsage: {
+      enabled: true
     }
   },
   targetEnvironments: {

@@ -144,6 +144,9 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (globalConfig.packages.markview?.enabled) {
     result.push(require("markview").default);
   }
+  if (globalConfig.packages.symbolUsage?.enabled) {
+    result.push(require("symbol-usage").default);
+  }
 
 
   result.push(require("nui").default);

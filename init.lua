@@ -3297,7 +3297,8 @@ ____exports.CONFIGURATION_DEFAULTS = {
         tsAutoTag = {enabled = true},
         ultimateAutoPair = {enabled = true},
         rainbowDelimiters = {enabled = false},
-        markview = {enabled = true}
+        markview = {enabled = true},
+        symbolUsage = {enabled = true}
     },
     targetEnvironments = {
         typescript = {enabled = true},
@@ -3980,6 +3981,10 @@ function ____exports.getPlugins()
     local ____opt_90 = globalConfig.packages.markview
     if ____opt_90 and ____opt_90.enabled then
         result[#result + 1] = require("lua.plugins.markview").default
+    end
+    local ____opt_92 = globalConfig.packages.symbolUsage
+    if ____opt_92 and ____opt_92.enabled then
+        result[#result + 1] = require("lua.plugins.symbol-usage").default
     end
     result[#result + 1] = require("lua.plugins.nui").default
     return result
@@ -5382,11 +5387,109 @@ return ____exports
 local ____exports = {}
 local ____useModule = require("lua.helpers.module.useModule")
 local useExternalModule = ____useModule.useExternalModule
+local function h(name)
+    return vim.api.nvim_get_hl(0, {name = name})
+end
+vim.api.nvim_set_hl(
+    0,
+    "SymbolUsageRounding",
+    {
+        fg = h("CursorLine").bg,
+        italic = true
+    }
+)
+vim.api.nvim_set_hl(
+    0,
+    "SymbolUsageContent",
+    {
+        bg = h("CursorLine").bg,
+        fg = h("Comment").fg,
+        italic = true
+    }
+)
+vim.api.nvim_set_hl(
+    0,
+    "SymbolUsageRef",
+    {
+        fg = h("Function").fg,
+        bg = h("CursorLine").bg,
+        italic = true
+    }
+)
+vim.api.nvim_set_hl(
+    0,
+    "SymbolUsageDef",
+    {
+        fg = h("Type").fg,
+        bg = h("CursorLine").bg,
+        italic = true
+    }
+)
+vim.api.nvim_set_hl(
+    0,
+    "SymbolUsageImpl",
+    {
+        fg = h("@keyword").fg,
+        bg = h("CursorLine").bg,
+        italic = true
+    }
+)
+local function textFormat(symbol)
+    local result = {}
+    local roundStart = {"", "SymbolUsageRounding"}
+    local roundEnd = {"", "SymbolUsageRounding"}
+    local stackedFunctionsContent = symbol.stacked_count > 0 and tostring(symbol.stacked_count) or ""
+    if symbol.references ~= nil then
+        local usage = symbol.references <= 1 and "usage" or "usages"
+        local num = symbol.references == 0 and "no" or symbol.references
+        result[#result + 1] = roundStart
+        result[#result + 1] = {"󰌹 ", "SymbolUsageRef"}
+        result[#result + 1] = {
+            (tostring(num) .. " ") .. usage,
+            "SymbolUsageContent"
+        }
+        result[#result + 1] = roundEnd
+    end
+    if symbol.definition then
+        if #result > 0 then
+            result[#result + 1] = {" ", "NonText"}
+        end
+        result[#result + 1] = roundStart
+        result[#result + 1] = {"󰳽 ", "SymbolUsageDef"}
+        result[#result + 1] = {
+            tostring(symbol.definition) .. " defs",
+            "SymbolUsageContent"
+        }
+        result[#result + 1] = roundEnd
+    end
+    if symbol.implementation then
+        if #result > 0 then
+            result[#result + 1] = {" ", "NonText"}
+        end
+        result[#result + 1] = roundStart
+        result[#result + 1] = {"󰡱 ", "SymbolUsageImpl"}
+        result[#result + 1] = {
+            tostring(symbol.implementation) .. " impls",
+            "SymbolUsageContent"
+        }
+        result[#result + 1] = roundEnd
+    end
+    if #stackedFunctionsContent > 0 then
+        if #result > 0 then
+            result[#result + 1] = {" ", "NonText"}
+        end
+        result[#result + 1] = roundStart
+        result[#result + 1] = {" ", "SymbolUsageImpl"}
+        result[#result + 1] = {stackedFunctionsContent, "SymbolUsageContent"}
+        result[#result + 1] = roundEnd
+    end
+    return result
+end
 local plugin = {
     [1] = "Wansmer/symbol-usage.nvim",
     event = "LspAttach",
     config = function()
-        useExternalModule("symbol-usage").setup()
+        useExternalModule("symbol-usage").setup({text_format = textFormat})
     end
 }
 ____exports.default = plugin

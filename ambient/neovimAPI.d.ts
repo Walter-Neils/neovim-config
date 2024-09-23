@@ -90,6 +90,11 @@ type NvimOptionInfo = {
   commalist: boolean
 };
 
+type NeovimHighlightGroup = {
+  fg: unknown,
+  bg: unknown
+};
+
 type VimAuGroup = {
 
 };
@@ -197,6 +202,7 @@ type VimAPI = {
     }
   },
   api: {
+    nvim_get_hl: (this: void, arg1: number, arg2: { name: string }) => NeovimHighlightGroup,
     nvim_call_function: (this: void, command: string, args?: unknown[]) => unknown,
     nvim_get_current_line: (this: void) => number,
     nvim_get_all_options_info: (this: void) => { [key: string]: NvimOptionInfo }
