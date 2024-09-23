@@ -326,7 +326,17 @@ applyKeyMapping({
       options: {
         desc: 'Show LSP signature & type info'
       }
-    })
+    });
+    applyKeyMapping({
+      mode: 'n',
+      inputStroke: '<leader><c-,>',
+      action: function(this: void) {
+        vim.diagnostic.open_float({ border: 'rounded' });
+      },
+      options: {
+        desc: 'Show LSP signature & type info'
+      }
+    });
   }
 }
 

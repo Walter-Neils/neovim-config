@@ -206,6 +206,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     ultimateAutoPair: {
       enabled: true
+    },
+    rainbowDelimiters: {
+      enabled: false
     }
   },
   targetEnvironments: {

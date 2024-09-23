@@ -132,21 +132,14 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (globalConfig.packages.surround?.enabled) {
     result.push(require("surround").default);
   }
-
-  {
-    const CONFLICTS = ["ultimateAutoPair", "surround"];
-    const errors = Object.keys(getGlobalConfiguration().packages).filter(x => getGlobalConfiguration().packages[x]?.enabled).filter(x => CONFLICTS.includes(x));
-    if (errors.length > 1) {
-      vim.notify(`Conflicting packages have been enabled: ${errors.join(", ")}`, vim.log.levels.ERROR);
-    }
-    else {
-      if (globalConfig.packages.tsAutoTag?.enabled) {
-        result.push(require("ts-autotag").default);
-      }
-      if (globalConfig.packages.ultimateAutoPair?.enabled) {
-        result.push(require("ultimate-autopair").default);
-      }
-    }
+  if (globalConfig.packages.tsAutoTag?.enabled) {
+    result.push(require("ts-autotag").default);
+  }
+  if (globalConfig.packages.ultimateAutoPair?.enabled) {
+    result.push(require("ultimate-autopair").default);
+  }
+  if (globalConfig.packages.rainbowDelimiters?.enabled) {
+    result.push(require("rainbow-delimiters").default);
   }
 
   result.push(require("nui").default);

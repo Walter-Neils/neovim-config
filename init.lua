@@ -3282,7 +3282,8 @@ ____exports.CONFIGURATION_DEFAULTS = {
         wakaTime = {enabled = true},
         surround = {enabled = false},
         tsAutoTag = {enabled = true},
-        ultimateAutoPair = {enabled = true}
+        ultimateAutoPair = {enabled = true},
+        rainbowDelimiters = {enabled = false}
     },
     targetEnvironments = {
         typescript = {enabled = true},
@@ -3761,10 +3762,6 @@ end
 return ____exports
  end,
 ["lua.plugins.init"] = function(...) 
-local ____lualib = require("lualib_bundle")
-local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
-local __TS__ObjectKeys = ____lualib.__TS__ObjectKeys
-local __TS__ArrayFilter = ____lualib.__TS__ArrayFilter
 local ____exports = {}
 local ____configuration = require("lua.helpers.configuration.index")
 local getGlobalConfiguration = ____configuration.getGlobalConfiguration
@@ -3940,33 +3937,17 @@ function ____exports.getPlugins()
     if ____opt_82 and ____opt_82.enabled then
         result[#result + 1] = require("lua.plugins.surround").default
     end
-    do
-        local CONFLICTS = {"ultimateAutoPair", "surround"}
-        local errors = __TS__ArrayFilter(
-            __TS__ArrayFilter(
-                __TS__ObjectKeys(getGlobalConfiguration().packages),
-                function(____, x)
-                    local ____opt_84 = getGlobalConfiguration().packages[x]
-                    return ____opt_84 and ____opt_84.enabled
-                end
-            ),
-            function(____, x) return __TS__ArrayIncludes(CONFLICTS, x) end
-        )
-        if #errors > 1 then
-            vim.notify(
-                "Conflicting packages have been enabled: " .. table.concat(errors, ", "),
-                vim.log.levels.ERROR
-            )
-        else
-            local ____opt_86 = globalConfig.packages.tsAutoTag
-            if ____opt_86 and ____opt_86.enabled then
-                result[#result + 1] = require("lua.plugins.ts-autotag").default
-            end
-            local ____opt_88 = globalConfig.packages.ultimateAutoPair
-            if ____opt_88 and ____opt_88.enabled then
-                result[#result + 1] = require("lua.plugins.ultimate-autopair").default
-            end
-        end
+    local ____opt_84 = globalConfig.packages.tsAutoTag
+    if ____opt_84 and ____opt_84.enabled then
+        result[#result + 1] = require("lua.plugins.ts-autotag").default
+    end
+    local ____opt_86 = globalConfig.packages.ultimateAutoPair
+    if ____opt_86 and ____opt_86.enabled then
+        result[#result + 1] = require("lua.plugins.ultimate-autopair").default
+    end
+    local ____opt_88 = globalConfig.packages.rainbowDelimiters
+    if ____opt_88 and ____opt_88.enabled then
+        result[#result + 1] = require("lua.plugins.rainbow-delimiters").default
     end
     result[#result + 1] = require("lua.plugins.nui").default
     return result
@@ -4467,6 +4448,14 @@ do
             action = function()
                 vim.lsp.buf.signature_help()
                 vim.lsp.buf.hover()
+            end,
+            options = {desc = "Show LSP signature & type info"}
+        })
+        applyKeyMapping({
+            mode = "n",
+            inputStroke = "<leader><c-,>",
+            action = function()
+                vim.diagnostic.open_float({border = "rounded"})
             end,
             options = {desc = "Show LSP signature & type info"}
         })
@@ -5296,6 +5285,20 @@ local plugin = {
     cmd = {"Outline", "OutlineOpen"},
     keys = {{[1] = "<leader>o", [2] = "<cmd>Outline<CR>", desc = "Toggle outline"}},
     opts = {symbol_folding = {}, preview_window = {auto_preview = true, live = true}, outline_items = {show_symbol_lineno = true}}
+}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.rainbow-delimiters"] = function(...) 
+local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+local plugin = {
+    [1] = "HiPhish/rainbow-delimiters.nvim",
+    event = "VeryLazy",
+    config = function()
+        useExternalModule("rainbow-delimiters.setup").setup({})
+    end
 }
 ____exports.default = plugin
 return ____exports
