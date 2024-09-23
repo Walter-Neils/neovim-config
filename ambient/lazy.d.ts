@@ -14,7 +14,7 @@ export type LazyPlugin = {
   config?: ((this: void, arg1: unknown, opts: unknown) => void) | boolean,
   opts?: ((this: void) => any) | any,
   dependencies?: string[],
-  event?: 'InsertEnter' | string,
+  event?: 'InsertEnter' | string | string[],
   version?: string,
   // file type (?)
   ft?: string[],

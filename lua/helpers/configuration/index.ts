@@ -180,7 +180,7 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
       enabled: true
     },
     leap: {
-      enabled: true
+      enabled: false
     },
     cSharp: {
       enabled: true
@@ -196,6 +196,15 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
       enabled: false
     },
     wakaTime: {
+      enabled: true
+    },
+    surround: {
+      enabled: false
+    },
+    tsAutoTag: {
+      enabled: true
+    },
+    ultimateAutoPair: {
       enabled: true
     }
   },

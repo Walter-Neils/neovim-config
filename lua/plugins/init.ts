@@ -129,6 +129,26 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (globalConfig.packages.wakaTime?.enabled) {
     result.push(require("wakatime").default);
   }
+  if (globalConfig.packages.surround?.enabled) {
+    result.push(require("surround").default);
+  }
+
+  {
+    const CONFLICTS = ["ultimateAutoPair", "surround"];
+    const errors = Object.keys(getGlobalConfiguration().packages).filter(x => getGlobalConfiguration().packages[x]?.enabled).filter(x => CONFLICTS.includes(x));
+    if (errors.length > 1) {
+      vim.notify(`Conflicting packages have been enabled: ${errors.join(", ")}`, vim.log.levels.ERROR);
+    }
+    else {
+      if (globalConfig.packages.tsAutoTag?.enabled) {
+        result.push(require("ts-autotag").default);
+      }
+      if (globalConfig.packages.ultimateAutoPair?.enabled) {
+        result.push(require("ultimate-autopair").default);
+      }
+    }
+  }
+
   result.push(require("nui").default);
   return result;
 }

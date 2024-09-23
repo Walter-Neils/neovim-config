@@ -3274,12 +3274,15 @@ ____exports.CONFIGURATION_DEFAULTS = {
         obsidian = {enabled = true, config = {workspaces = {{name = "notes", path = "~/Documents/obsidian/notes"}}}},
         undoTree = {enabled = true},
         octo = {enabled = true},
-        leap = {enabled = true},
+        leap = {enabled = false},
         cSharp = {enabled = true},
         telescopeUISelect = {enabled = true},
         masonNvimDap = {enabled = false},
         timeTracker = {enabled = false},
-        wakaTime = {enabled = true}
+        wakaTime = {enabled = true},
+        surround = {enabled = false},
+        tsAutoTag = {enabled = true},
+        ultimateAutoPair = {enabled = true}
     },
     targetEnvironments = {
         typescript = {enabled = true},
@@ -3576,6 +3579,8 @@ function ____exports.setGUIFont(fontName, fontSize)
     if isNeovideSession() then
         local opts = getNeovideExtendedVimContext()
         opts.o.guifont = (fontName .. ":h") .. tostring(fontSize)
+    else
+        vim.notify("Cannot update GUI font: feature is only available in a Neovide context", vim.log.levels.ERROR)
     end
 end
 return ____exports
@@ -3756,6 +3761,10 @@ end
 return ____exports
  end,
 ["lua.plugins.init"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
+local __TS__ObjectKeys = ____lualib.__TS__ObjectKeys
+local __TS__ArrayFilter = ____lualib.__TS__ArrayFilter
 local ____exports = {}
 local ____configuration = require("lua.helpers.configuration.index")
 local getGlobalConfiguration = ____configuration.getGlobalConfiguration
@@ -3926,6 +3935,38 @@ function ____exports.getPlugins()
     local ____opt_80 = globalConfig.packages.wakaTime
     if ____opt_80 and ____opt_80.enabled then
         result[#result + 1] = require("lua.plugins.wakatime").default
+    end
+    local ____opt_82 = globalConfig.packages.surround
+    if ____opt_82 and ____opt_82.enabled then
+        result[#result + 1] = require("lua.plugins.surround").default
+    end
+    do
+        local CONFLICTS = {"ultimateAutoPair", "surround"}
+        local errors = __TS__ArrayFilter(
+            __TS__ArrayFilter(
+                __TS__ObjectKeys(getGlobalConfiguration().packages),
+                function(____, x)
+                    local ____opt_84 = getGlobalConfiguration().packages[x]
+                    return ____opt_84 and ____opt_84.enabled
+                end
+            ),
+            function(____, x) return __TS__ArrayIncludes(CONFLICTS, x) end
+        )
+        if #errors > 1 then
+            vim.notify(
+                "Conflicting packages have been enabled: " .. table.concat(errors, ", "),
+                vim.log.levels.ERROR
+            )
+        else
+            local ____opt_86 = globalConfig.packages.tsAutoTag
+            if ____opt_86 and ____opt_86.enabled then
+                result[#result + 1] = require("lua.plugins.ts-autotag").default
+            end
+            local ____opt_88 = globalConfig.packages.ultimateAutoPair
+            if ____opt_88 and ____opt_88.enabled then
+                result[#result + 1] = require("lua.plugins.ultimate-autopair").default
+            end
+        end
     end
     result[#result + 1] = require("lua.plugins.nui").default
     return result
@@ -5277,6 +5318,12 @@ local plugin = {
 ____exports.default = plugin
 return ____exports
  end,
+["lua.plugins.surround"] = function(...) 
+local ____exports = {}
+local plugin = {[1] = "tpope/vim-surround"}
+____exports.default = plugin
+return ____exports
+ end,
 ["lua.plugins.telescope"] = function(...) 
 local ____exports = {}
 local ____useModule = require("lua.helpers.module.useModule")
@@ -5342,13 +5389,36 @@ return ____exports
  end,
 ["lua.plugins.treesitter"] = function(...) 
 local ____exports = {}
-local plugin = {[1] = "nvim-treesitter/nvim-treesitter"}
+local ____configuration = require("lua.helpers.configuration.index")
+local getGlobalConfiguration = ____configuration.getGlobalConfiguration
+local ____getGlobalConfiguration_result_packages_tsAutoTag_enabled_2
+local ____opt_0 = getGlobalConfiguration().packages.tsAutoTag
+if ____opt_0 and ____opt_0.enabled then
+    ____getGlobalConfiguration_result_packages_tsAutoTag_enabled_2 = true
+else
+    ____getGlobalConfiguration_result_packages_tsAutoTag_enabled_2 = nil
+end
+local plugin = {[1] = "nvim-treesitter/nvim-treesitter", opts = {autotag = {enable = ____getGlobalConfiguration_result_packages_tsAutoTag_enabled_2}}}
 ____exports.default = plugin
 return ____exports
  end,
 ["lua.plugins.trouble"] = function(...) 
 local ____exports = {}
 local plugin = {[1] = "folke/trouble.nvim", cmd = {"Trouble"}, opts = {}}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.ts-autotag"] = function(...) 
+local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+local plugin = {
+    [1] = "windwp/nvim-ts-autotag",
+    event = "VimEnter",
+    config = function()
+        useExternalModule("nvim-ts-autotag").setup({})
+    end
+}
 ____exports.default = plugin
 return ____exports
  end,
@@ -5377,6 +5447,12 @@ local plugin = {
         useExternalModule("ufo").setup({})
     end
 }
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.ultimate-autopair"] = function(...) 
+local ____exports = {}
+local plugin = {[1] = "altermo/ultimate-autopair.nvim", event = {"InsertEnter", "CmdlineEnter"}, opts = {bs = {space = "balance"}, cr = {autoclose = true}}}
 ____exports.default = plugin
 return ____exports
  end,
