@@ -1,6 +1,6 @@
+import { isRunningInsideTmux, selectCustomTmuxScope } from "./lua/custom/tmux";
 import { getGlobalConfiguration } from "./lua/helpers/configuration";
 import { applyKeyMapping } from "./lua/helpers/keymap";
-import { useExternalModule } from "./lua/helpers/module/useModule";
 import { oneOffFunction } from "./lua/helpers/one-off";
 import { getActionsPreview } from "./lua/plugins/actions-preview";
 import { getCSharp } from "./lua/plugins/csharp";
@@ -202,6 +202,19 @@ applyKeyMapping({
         desc: "terminal previous terminal"
       }
     });
+
+    if (!isRunningInsideTmux()) {
+      applyKeyMapping({
+        mode: 'n',
+        inputStroke: '<c-b>s',
+        action: () => {
+          selectCustomTmuxScope();
+        },
+        options: {
+          desc: "Select custom tmux scope"
+        }
+      })
+    }
 
     applyKeyMapping({
       mode: 't',

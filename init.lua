@@ -3471,7 +3471,7 @@ local function pruneDeadTmuxSockets()
     vim.fn.system({"bash", "-c", ("rm -f " .. socketsDirectory) .. "/*"})
     vim.fn.system({"pkill", "-USR1", "tmux"})
 end
-local function selectCustomTmuxScope()
+function ____exports.selectCustomTmuxScope()
     local ____opt_0 = getGlobalConfiguration().packages.floatTerm
     if ____opt_0 and ____opt_0.enabled then
         do
@@ -3520,6 +3520,17 @@ local function selectCustomTmuxScope()
         end
     )
 end
+function ____exports.isRunningInsideTmux()
+    local ____opt_4 = os.getenv("TERM")
+    if ____opt_4 and __TS__StringIncludes(
+        os.getenv("TERM"),
+        "tmux"
+    ) then
+        return true
+    else
+        return false
+    end
+end
 function ____exports.initCustomTmux()
     local shellConfig = getGlobalConfiguration().shell
     if shellConfig.target == "tmux" then
@@ -3541,7 +3552,7 @@ function ____exports.initCustomTmux()
         end
     end
     vim.api.nvim_create_user_command("ChangeTmuxScope", changeTmuxScope, {})
-    vim.api.nvim_create_user_command("SelectTmuxScope", selectCustomTmuxScope, {})
+    vim.api.nvim_create_user_command("SelectTmuxScope", ____exports.selectCustomTmuxScope, {})
     vim.api.nvim_create_user_command("PruneTmuxInstanceSockets", pruneDeadTmuxSockets, {})
 end
 return ____exports
@@ -4355,6 +4366,9 @@ return ____exports
  end,
 ["mappings"] = function(...) 
 local ____exports = {}
+local ____tmux = require("lua.custom.tmux.index")
+local isRunningInsideTmux = ____tmux.isRunningInsideTmux
+local selectCustomTmuxScope = ____tmux.selectCustomTmuxScope
 local ____configuration = require("lua.helpers.configuration.index")
 local getGlobalConfiguration = ____configuration.getGlobalConfiguration
 local ____keymap = require("lua.helpers.keymap.index")
@@ -4414,6 +4428,16 @@ do
             applyKeyMapping({mode = mode, inputStroke = "<A-i>", outputStroke = "<cmd>FloatermToggle __builtin_floating<CR>", options = {desc = "toggle floating terminal"}})
         end
         applyKeyMapping({mode = "t", inputStroke = "<A-h>", outputStroke = "<cmd>FloatermPrev<CR>", options = {desc = "terminal previous terminal"}})
+        if not isRunningInsideTmux() then
+            applyKeyMapping({
+                mode = "n",
+                inputStroke = "<c-b>s",
+                action = function()
+                    selectCustomTmuxScope()
+                end,
+                options = {desc = "Select custom tmux scope"}
+            })
+        end
         applyKeyMapping({mode = "t", inputStroke = "<A-l>", outputStroke = "<cmd>FloatermNext<CR>", options = {desc = "terminal next terminal"}})
         applyKeyMapping({mode = "t", inputStroke = "<A-n>", outputStroke = "<cmd>FloatermNew<CR>", options = {desc = "terminal new terminal"}})
         applyKeyMapping({mode = "t", inputStroke = "<A-k>", outputStroke = "<cmd>FloatermKill<CR>", options = {desc = "terminal new terminal"}})

@@ -57,7 +57,7 @@ function pruneDeadTmuxSockets(this: void) {
   vim.fn.system(['pkill', '-USR1', 'tmux']);
 }
 
-function selectCustomTmuxScope(this: void) {
+export function selectCustomTmuxScope(this: void) {
   if (getGlobalConfiguration().packages.floatTerm?.enabled) {
     try {
       vim.cmd("FloatermKill!");
@@ -86,11 +86,20 @@ function selectCustomTmuxScope(this: void) {
     if (getGlobalConfiguration().packages.floatTerm?.enabled) {
       try {
         vim.cmd("FloatermKill!");
-        (vim.g as unknown as {floaterm_title: string}).floaterm_title = `tmux ${id}`;
+        (vim.g as unknown as { floaterm_title: string }).floaterm_title = `tmux ${id}`;
       } catch { }
     }
     console.log(vim.g.terminal_emulator);
   });
+}
+
+export function isRunningInsideTmux() {
+  if (os.getenv("TERM")?.includes("tmux")) {
+    return true;
+  }
+  else {
+    return false;
+  }
 }
 
 export function initCustomTmux() {
