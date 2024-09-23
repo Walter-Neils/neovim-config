@@ -2837,6 +2837,19 @@ function ____exports.initCustomOpen()
 end
 return ____exports
  end,
+["lua.custom.jumplist.index"] = function(...) 
+local ____exports = {}
+function ____exports.initCustomJumplist()
+    vim.api.nvim_create_user_command(
+        "JumpListClear",
+        function()
+            vim.cmd("tabdo windo clearjumps | tabnext")
+        end,
+        {}
+    )
+end
+return ____exports
+ end,
 ["lua.shims.fs.index"] = function(...) 
 local ____lualib = require("lualib_bundle")
 local Error = ____lualib.Error
@@ -3286,11 +3299,14 @@ return ____exports
 local ____exports = {}
 local ____custom_2Dopen = require("lua.custom.custom-open.index")
 local initCustomOpen = ____custom_2Dopen.initCustomOpen
+local ____jumplist = require("lua.custom.jumplist.index")
+local initCustomJumplist = ____jumplist.initCustomJumplist
 local ____tmux = require("lua.custom.tmux.index")
 local initCustomTmux = ____tmux.initCustomTmux
 function ____exports.setupCustomLogic()
     initCustomTmux()
     initCustomOpen()
+    initCustomJumplist()
 end
 return ____exports
  end,
@@ -4979,6 +4995,20 @@ local plugin = {
     config = function()
         local vim = ____exports.getRustaceonVimExtendedVIMApi()
         vim.g.rustaceanvim = {tools = {hover_actions = {auto_focus = false, replace_builtin_hover = false}}}
+    end
+}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.symbol-usage"] = function(...) 
+local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+local plugin = {
+    [1] = "Wansmer/symbol-usage.nvim",
+    event = "LspAttach",
+    config = function()
+        useExternalModule("symbol-usage").setup()
     end
 }
 ____exports.default = plugin
