@@ -147,6 +147,9 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (globalConfig.packages.symbolUsage?.enabled) {
     result.push(require("symbol-usage").default);
   }
+  if (globalConfig.packages.neotest?.enabled) {
+    result.push(require("neotest").default);
+  }
 
 
   result.push(require("nui").default);

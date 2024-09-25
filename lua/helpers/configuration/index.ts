@@ -215,13 +215,15 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     symbolUsage: {
       enabled: true
-    }
+    },
+    neotest: { enabled: true }
   },
   targetEnvironments: {
     typescript: {
       enabled: true,
     },
     deno: {
+      // TODO: Make this play nice with TypeScript
       enabled: false,
     },
     "c/c++": {

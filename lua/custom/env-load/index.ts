@@ -91,12 +91,17 @@ export function initCustomEnvLoader(this: void) {
     } | {
       'pick': boolean
     }>(_args.fargs);
+    if (Object.keys(args).length < 1) {
+      vim.notify(`Use --from-file, --scan, or --pick`);
+      return;
+    }
+    let resolved = false;
     if ('from-file' in args) {
-      if (args["from-file"] !== undefined) {
-        loadEnvFromFile(args["from-file"], !!args.overwrite);
-      }
+      resolved = true;
+      loadEnvFromFile(args["from-file"], !!args.overwrite);
     }
     if ('scan' in args) {
+      resolved = true;
       const files = locateEnvFiles();
       for (const file of files) {
         vim.notify(file);
@@ -104,9 +109,13 @@ export function initCustomEnvLoader(this: void) {
     }
 
     if ('pick' in args) {
+      resolved = true;
       showEnvSourceDialog();
     }
 
+    if (!resolved) {
+      vim.notify(`Cannot handle keys ${Object.keys(args).join(",")}`, vim.log.levels.ERROR);
+    }
   }, {
     nargs: '*'
   });

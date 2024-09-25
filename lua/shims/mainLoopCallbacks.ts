@@ -32,9 +32,7 @@ export function setInterval(callback: (this: void) => void, interval: number) {
   const cancel = () => {
     cancelFlag = true;
   };
-
   setTimeout(wrapper, interval);
-
   return cancel;
 }
 
