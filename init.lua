@@ -3165,6 +3165,51 @@ function ____exports.initCustomEnvLoader()
 end
 return ____exports
  end,
+["lua.helpers.keymap.index"] = function(...) 
+local ____exports = {}
+function ____exports.keyMappingExists(mode, bind)
+    local result = vim.api.nvim_call_function("mapcheck", {bind, mode})
+    if result ~= nil and #result > 0 then
+        return true
+    else
+        return false
+    end
+end
+function ____exports.applyKeyMapping(map)
+    if map.action ~= nil then
+        vim.keymap.set(map.mode, map.inputStroke, map.action, map.options)
+    else
+        vim.keymap.set(map.mode, map.inputStroke, map.outputStroke, map.options)
+    end
+end
+return ____exports
+ end,
+["lua.custom.git.index"] = function(...) 
+local ____exports = {}
+local ____keymap = require("lua.helpers.keymap.index")
+local applyKeyMapping = ____keymap.applyKeyMapping
+function ____exports.initCustomGit()
+    applyKeyMapping({
+        mode = "n",
+        inputStroke = "<c-c>",
+        action = function()
+            vim.ui.input(
+                {prompt = "Commit Message: "},
+                function(message)
+                    if message == nil or #message < 1 then
+                        return
+                    else
+                        vim.fn.system({"git", "add", "-a"})
+                        vim.fn.system({"git", "commit", "-m", message})
+                    end
+                end
+            )
+        end,
+        options = {desc = "Commit"}
+    })
+end
+return ____exports
+ end,
 ["lua.custom.jumplist.index"] = function(...) 
 local ____exports = {}
 function ____exports.initCustomJumplist()
@@ -3597,6 +3642,8 @@ local ____custom_2Dopen = require("lua.custom.custom-open.index")
 local initCustomOpen = ____custom_2Dopen.initCustomOpen
 local ____env_2Dload = require("lua.custom.env-load.index")
 local initCustomEnvLoader = ____env_2Dload.initCustomEnvLoader
+local ____git = require("lua.custom.git.index")
+local initCustomGit = ____git.initCustomGit
 local ____jumplist = require("lua.custom.jumplist.index")
 local initCustomJumplist = ____jumplist.initCustomJumplist
 local ____tmux = require("lua.custom.tmux.index")
@@ -3606,6 +3653,7 @@ function ____exports.setupCustomLogic()
     initCustomOpen()
     initCustomEnvLoader()
     initCustomJumplist()
+    initCustomGit()
 end
 return ____exports
  end,
@@ -4172,25 +4220,6 @@ vim.o.foldlevel = 99
 vim.o.foldlevelstart = 99
 require("mappings")
 setImmediate(setupCustomLogic)
-return ____exports
- end,
-["lua.helpers.keymap.index"] = function(...) 
-local ____exports = {}
-function ____exports.keyMappingExists(mode, bind)
-    local result = vim.api.nvim_call_function("mapcheck", {bind, mode})
-    if result ~= nil and #result > 0 then
-        return true
-    else
-        return false
-    end
-end
-function ____exports.applyKeyMapping(map)
-    if map.action ~= nil then
-        vim.keymap.set(map.mode, map.inputStroke, map.action, map.options)
-    else
-        vim.keymap.set(map.mode, map.inputStroke, map.outputStroke, map.options)
-    end
-end
 return ____exports
  end,
 ["lua.helpers.one-off.index"] = function(...) 
@@ -5206,14 +5235,8 @@ return ____exports
  end,
 ["lua.plugins.neotest"] = function(...) 
 local ____exports = {}
-local ____configuration = require("lua.helpers.configuration.index")
-local getGlobalConfiguration = ____configuration.getGlobalConfiguration
 local ____useModule = require("lua.helpers.module.useModule")
 local useExternalModule = ____useModule.useExternalModule
-local function getNeotestConfig()
-    local ____opt_0 = getGlobalConfiguration().packages.neotest
-    return ____opt_0 and ____opt_0.config
-end
 function ____exports.useNeotest()
     return useExternalModule("neotest")
 end

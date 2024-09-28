@@ -273,7 +273,7 @@ type VimAPI = {
     set: (this: void, mode: 'i' | 'n' | 'a' | 't' | 'v' | 'x', stroke: string, ...args: any[]) => void
   },
   ui: {
-    input: (this: void, config: { prompt: string }, callback: (this: void, input: string) => void) => void,
+    input: (this: void, config: { prompt: string }, callback: (this: void, input?: string) => void) => void,
     open: (this: void, path: string) => {
       wait: (this: unknown) => void
     },
