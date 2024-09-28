@@ -3010,6 +3010,7 @@ return ____exports
 local ____lualib = require("lualib_bundle")
 local __TS__StringEndsWith = ____lualib.__TS__StringEndsWith
 local __TS__StringReplace = ____lualib.__TS__StringReplace
+local __TS__ObjectKeys = ____lualib.__TS__ObjectKeys
 local ____exports = {}
 local ____env_2Dparser = require("lua.helpers.env-parser.index")
 local parseEnvFileContent = ____env_2Dparser.parseEnvFileContent
@@ -3129,19 +3130,34 @@ function ____exports.initCustomEnvLoader()
         "Env",
         function(_args)
             local args = parseArgs(_args.fargs)
+            if #__TS__ObjectKeys(args) < 1 then
+                vim.notify("Use --from-file, --scan, or --pick")
+                return
+            end
+            local resolved = false
             if args["from-file"] ~= nil then
-                if args["from-file"] ~= nil then
-                    loadEnvFromFile(args["from-file"], not not args.overwrite)
-                end
+                resolved = true
+                loadEnvFromFile(args["from-file"], not not args.overwrite)
             end
             if args.scan ~= nil then
+                resolved = true
                 local files = locateEnvFiles()
                 for ____, file in ipairs(files) do
                     vim.notify(file)
                 end
             end
             if args.pick ~= nil then
+                resolved = true
                 showEnvSourceDialog()
+            end
+            if not resolved then
+                vim.notify(
+                    "Cannot handle keys " .. table.concat(
+                        __TS__ObjectKeys(args),
+                        ","
+                    ),
+                    vim.log.levels.ERROR
+                )
             end
         end,
         {nargs = "*"}
@@ -3298,7 +3314,8 @@ ____exports.CONFIGURATION_DEFAULTS = {
         ultimateAutoPair = {enabled = true},
         rainbowDelimiters = {enabled = false},
         markview = {enabled = true},
-        symbolUsage = {enabled = true}
+        symbolUsage = {enabled = true},
+        neotest = {enabled = true}
     },
     targetEnvironments = {
         typescript = {enabled = true},
@@ -3309,7 +3326,9 @@ ____exports.CONFIGURATION_DEFAULTS = {
     },
     shell = {target = "tmux", isolationScope = "isolated"},
     integrations = {ollama = {enabled = true}}
-}
+};
+(function()
+end)()
 function ____exports.getGlobalConfiguration()
     if configuration == nil then
         reloadConfiguration()
@@ -3986,6 +4005,10 @@ function ____exports.getPlugins()
     if ____opt_92 and ____opt_92.enabled then
         result[#result + 1] = require("lua.plugins.symbol-usage").default
     end
+    local ____opt_94 = globalConfig.packages.neotest
+    if ____opt_94 and ____opt_94.enabled then
+        result[#result + 1] = require("lua.plugins.neotest").default
+    end
     result[#result + 1] = require("lua.plugins.nui").default
     return result
 end
@@ -4077,8 +4100,6 @@ local Hyprland = ____hyprland.Hyprland
 local isDesktopHyprland = ____hyprland.isDesktopHyprland
 local ____neovide = require("lua.integrations.neovide")
 local getNeovideExtendedVimContext = ____neovide.getNeovideExtendedVimContext
-local ____ollama = require("lua.integrations.ollama")
-local setupOllamaCopilot = ____ollama.setupOllamaCopilot
 local ____portable_2Dappimage = require("lua.integrations.portable-appimage")
 local enablePortableAppImageLogic = ____portable_2Dappimage.enablePortableAppImageLogic
 local ____init = require("lua.plugins.init")
@@ -4124,7 +4145,6 @@ local function setupLazy()
     vim.opt.rtp:prepend(lazyPath)
 end
 setupNeovide()
-setupOllamaCopilot()
 local ____opt_0 = getGlobalConfiguration().packages.copilot
 local ____temp_2 = ____opt_0 and ____opt_0.enabled
 if ____temp_2 == nil then
@@ -5181,6 +5201,23 @@ local plugin = {
         useExternalModule("mason").setup()
     end
 }
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.neotest"] = function(...) 
+local ____exports = {}
+local ____configuration = require("lua.helpers.configuration.index")
+local getGlobalConfiguration = ____configuration.getGlobalConfiguration
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+local function getNeotestConfig()
+    local ____opt_0 = getGlobalConfiguration().packages.neotest
+    return ____opt_0 and ____opt_0.config
+end
+function ____exports.useNeotest()
+    return useExternalModule("neotest")
+end
+local plugin = {[1] = "nvim-neotest/neotest", dependencies = {"nvim-neotest/nvim-nio", "nvim-lua/plenary.nvim", "antoinemadec/FixCursorHold.nvim", "nvim-treesitter/nvim-treesitter"}}
 ____exports.default = plugin
 return ____exports
  end,

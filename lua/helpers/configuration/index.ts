@@ -216,7 +216,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     symbolUsage: {
       enabled: true
     },
-    neotest: { enabled: true }
+    neotest: {
+      enabled: true,
+    }
   },
   targetEnvironments: {
     typescript: {
@@ -247,6 +249,11 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
   },
 };
+
+// Finalize setup of configuration
+(() => {
+
+})();
 
 export function getGlobalConfiguration() {
   if (configuration === undefined) {
