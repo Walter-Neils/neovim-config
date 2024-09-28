@@ -3199,8 +3199,8 @@ function ____exports.initCustomGit()
                     if message == nil or #message < 1 then
                         return
                     else
-                        vim.fn.system({"git", "add", "-a"})
-                        vim.fn.system({"git", "commit", "-m", message})
+                        vim.notify(vim.fn.system({"git", "add", "--all"}))
+                        vim.notify(vim.fn.system({"git", "commit", "-m", message}))
                     end
                 end
             )

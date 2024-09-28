@@ -10,8 +10,8 @@ export function initCustomGit() {
           return;
         }
         else {
-          vim.fn.system(["git", "add", "--all"]);
-          vim.fn.system(["git", "commit", "-m", message]);
+          vim.notify(vim.fn.system(["git", "add", "--all"]));
+          vim.notify(vim.fn.system(["git", "commit", "-m", message]));
         }
       });
     },
