@@ -12,7 +12,6 @@ import { insertConsoleShims } from "./lua/shims/console";
 import { insertJSONShims } from "./lua/shims/json";
 import { insertMainLoopCallbackShims, setImmediate } from "./lua/shims/mainLoopCallbacks";
 import { THEME_APPLIERS } from "./lua/theme";
-
 insertJSONShims();
 insertConsoleShims();
 insertMainLoopCallbackShims();

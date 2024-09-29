@@ -3370,7 +3370,8 @@ ____exports.CONFIGURATION_DEFAULTS = {
         dbee = {enabled = true},
         lightbulb = {enabled = false},
         neogen = {enabled = true},
-        tsContextCommentString = {enabled = true}
+        tsContextCommentString = {enabled = true},
+        nvimDapVirtualText = {enabled = true}
     },
     targetEnvironments = {
         typescript = {enabled = true},
@@ -4106,6 +4107,10 @@ function ____exports.getPlugins()
     local ____opt_114 = globalConfig.packages.tsContextCommentString
     if ____opt_114 and ____opt_114.enabled then
         result[#result + 1] = require("lua.plugins.ts-context-commentstring").default
+    end
+    local ____opt_116 = globalConfig.packages.nvimDapVirtualText
+    if ____opt_116 and ____opt_116.enabled then
+        result[#result + 1] = require("lua.plugins.dap-virtual-text").default
     end
     result[#result + 1] = require("lua.plugins.nui").default
     return result
@@ -4928,6 +4933,23 @@ local plugin = {
     event = {"BufRead Cargo.toml"},
     config = function()
         getCrates().setup()
+    end
+}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.dap-virtual-text"] = function(...) 
+local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+local function useNvimDapVirtualText()
+    return useExternalModule("nvim-dap-virtual-text")
+end
+local plugin = {
+    [1] = "theHamsta/nvim-dap-virtual-text",
+    event = "LspAttach",
+    config = function()
+        useNvimDapVirtualText().setup()
     end
 }
 ____exports.default = plugin

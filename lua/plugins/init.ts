@@ -180,6 +180,9 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (globalConfig.packages.tsContextCommentString?.enabled) {
     result.push(require("ts-context-commentstring").default);
   }
+  if (globalConfig.packages.nvimDapVirtualText?.enabled) {
+    result.push(require("dap-virtual-text").default);
+  }
   result.push(require("nui").default);
   return result;
 }

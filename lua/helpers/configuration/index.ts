@@ -251,6 +251,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     tsContextCommentString: {
       enabled: true
+    },
+    nvimDapVirtualText: {
+      enabled: true
     }
   },
   targetEnvironments: {
