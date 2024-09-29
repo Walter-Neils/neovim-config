@@ -3890,6 +3890,8 @@ function ____exports.getPlugins()
     local globalConfig = getGlobalConfiguration()
     local result = {}
     result[#result + 1] = require("lua.plugins.tokyonight").default
+    result[#result + 1] = require("lua.plugins.catppuccin").default
+    result[#result + 1] = require("lua.plugins.theme-flow").default
     local ____opt_0 = globalConfig.packages.treeSitter
     if ____opt_0 and ____opt_0.enabled then
         result[#result + 1] = require("lua.plugins.treesitter").default
@@ -4172,6 +4174,23 @@ return ____exports
  end,
 ["lua.theme"] = function(...) 
 local ____exports = {}
+local function h(name)
+    return vim.api.nvim_get_hl(0, {name = name})
+end
+local themeType = "dark"
+local callbacks = {}
+function ____exports.onThemeChange(callback)
+    callbacks[#callbacks + 1] = callback
+end
+local function updateThemeType(____type)
+    themeType = ____type
+    for ____, callback in ipairs(callbacks) do
+        callback(____type)
+    end
+end
+function ____exports.globalThemeType()
+    return themeType
+end
 local function VSCode()
     vim.api.nvim_set_hl(0, "CmpItemAbbrDeprecated", {bg = "NONE", strikethrough = true, fg = "#808080"})
     vim.api.nvim_set_hl(0, "CmpItemAbbrDeprecated", {bg = "NONE", strikethrough = true, fg = "#808080"})
@@ -4185,9 +4204,11 @@ local function VSCode()
     vim.api.nvim_set_hl(0, "CmpItemKindKeyword", {bg = "NONE", fg = "#D4D4D4"})
     vim.api.nvim_set_hl(0, "CmpItemKindProperty", {link = "CmpItemKindKeyword"})
     vim.api.nvim_set_hl(0, "CmpItemKindUnit", {link = "CmpItemKindKeyword"})
+    updateThemeType("dark")
 end
 local function TokyoNight()
-    vim.cmd("colorscheme tokyonight")
+    vim.cmd("colorscheme tokyonight-storm")
+    updateThemeType("dark")
     vim.api.nvim_set_hl(0, "DapBreakpoint", {ctermbg = 0, fg = "#993939", bg = "#31353f"})
     vim.api.nvim_set_hl(0, "DapLogPoint", {ctermbg = 0, fg = "#61afef", bg = "#31353f"})
     vim.api.nvim_set_hl(0, "DapStopped", {ctermbg = 0, fg = "#98c379", bg = "#31353f"})
@@ -4196,10 +4217,58 @@ local function TokyoNight()
     vim.fn.sign_define("DapBreakpointRejected", {text = "", texthl = "DapBreakpoint", linehl = "DapBreakpoint", numhl = "DapBreakpoint"})
     vim.fn.sign_define("DapLogPoint", {text = "", texthl = "DapLogPoint", linehl = "DapLogPoint", numhl = "DapLogPoint"})
     vim.fn.sign_define("DapStopped", {text = "", texthl = "DapStopped", linehl = "DapStopped", numhl = "DapStopped"})
+    vim.api.nvim_set_hl(
+        0,
+        "SymbolUsageRounding",
+        {
+            fg = h("CursorLine").bg,
+            italic = true
+        }
+    )
+    vim.api.nvim_set_hl(
+        0,
+        "SymbolUsageContent",
+        {
+            bg = h("CursorLine").bg,
+            fg = h("Comment").fg,
+            italic = true
+        }
+    )
+    vim.api.nvim_set_hl(
+        0,
+        "SymbolUsageRef",
+        {
+            fg = h("Function").fg,
+            bg = h("CursorLine").bg,
+            italic = true
+        }
+    )
+    vim.api.nvim_set_hl(
+        0,
+        "SymbolUsageDef",
+        {
+            fg = h("Type").fg,
+            bg = h("CursorLine").bg,
+            italic = true
+        }
+    )
+    vim.api.nvim_set_hl(
+        0,
+        "SymbolUsageImpl",
+        {
+            fg = h("@keyword").fg,
+            bg = h("CursorLine").bg,
+            italic = true
+        }
+    )
     vim.o.fillchars = "eob: ,fold: ,foldopen:,foldsep: ,foldclose:"
-    vim.o.foldcolumn = "2"
 end
-____exports.THEME_APPLIERS = {VSCode = VSCode, TokyoNight = TokyoNight}
+local function Catppuccin()
+    vim.cmd("colorscheme catppuccin")
+    vim.o.fillchars = "eob: ,fold: ,foldopen:,foldsep: ,foldclose:"
+    updateThemeType("dark")
+end
+____exports.THEME_APPLIERS = {VSCode = VSCode, TokyoNight = TokyoNight, Catppuccin = Catppuccin}
 return ____exports
  end,
 ["main"] = function(...) 
@@ -4810,6 +4879,12 @@ local plugin = {
 ____exports.default = plugin
 return ____exports
  end,
+["lua.plugins.catppuccin"] = function(...) 
+local ____exports = {}
+local plugin = {[1] = "catppuccin/nvim", priority = 1000, name = "catppuccin"}
+____exports.default = plugin
+return ____exports
+ end,
 ["lua.plugins.cmp"] = function(...) 
 local ____exports = {}
 local ____useModule = require("lua.helpers.module.useModule")
@@ -5383,6 +5458,9 @@ return ____exports
 local ____exports = {}
 local ____useModule = require("lua.helpers.module.useModule")
 local useExternalModule = ____useModule.useExternalModule
+local ____theme = require("lua.theme")
+local globalThemeType = ____theme.globalThemeType
+local onThemeChange = ____theme.onThemeChange
 local ____navic = require("lua.plugins.navic")
 local getNavic = ____navic.getNavic
 local plugin = {
@@ -5401,32 +5479,38 @@ local plugin = {
             result[1] = func
             return result
         end
-        local config = {
-            options = {theme = "material"},
-            sections = {
-                lualine_b = {
-                    createStandardComponent("branch"),
-                    createStandardComponent("diff"),
-                    createStandardComponent("diagnostics")
-                },
-                lualine_c = {
-                    createCustomComponent(function() return "PID: " .. tostring(vim.fn.getpid()) end),
-                    createCustomComponent(function()
-                        local navic = getNavic()
-                        if navic == nil then
-                            return " Navic Disabled"
-                        else
-                            if navic.is_available() then
-                                return navic.get_location()
+        local function genConfig()
+            local config = {
+                options = {theme = globalThemeType() == "dark" and "material" or "ayu_light"},
+                sections = {
+                    lualine_b = {
+                        createStandardComponent("branch"),
+                        createStandardComponent("diff"),
+                        createStandardComponent("diagnostics")
+                    },
+                    lualine_c = {
+                        createCustomComponent(function() return "PID: " .. tostring(vim.fn.getpid()) end),
+                        createCustomComponent(function()
+                            local navic = getNavic()
+                            if navic == nil then
+                                return " Navic Disabled"
                             else
-                                return "󱈸 Scope Info Unavailable"
+                                if navic.is_available() then
+                                    return navic.get_location()
+                                else
+                                    return "󱈸 Scope Info Unavailable"
+                                end
                             end
-                        end
-                    end)
+                        end)
+                    }
                 }
             }
-        }
-        module.setup(config)
+            return config
+        end
+        onThemeChange(function(____type)
+            module.setup(genConfig())
+        end)
+        module.setup(genConfig())
     end
 }
 ____exports.default = plugin
@@ -5723,53 +5807,6 @@ return ____exports
 local ____exports = {}
 local ____useModule = require("lua.helpers.module.useModule")
 local useExternalModule = ____useModule.useExternalModule
-local function h(name)
-    return vim.api.nvim_get_hl(0, {name = name})
-end
-vim.api.nvim_set_hl(
-    0,
-    "SymbolUsageRounding",
-    {
-        fg = h("CursorLine").bg,
-        italic = true
-    }
-)
-vim.api.nvim_set_hl(
-    0,
-    "SymbolUsageContent",
-    {
-        bg = h("CursorLine").bg,
-        fg = h("Comment").fg,
-        italic = true
-    }
-)
-vim.api.nvim_set_hl(
-    0,
-    "SymbolUsageRef",
-    {
-        fg = h("Function").fg,
-        bg = h("CursorLine").bg,
-        italic = true
-    }
-)
-vim.api.nvim_set_hl(
-    0,
-    "SymbolUsageDef",
-    {
-        fg = h("Type").fg,
-        bg = h("CursorLine").bg,
-        italic = true
-    }
-)
-vim.api.nvim_set_hl(
-    0,
-    "SymbolUsageImpl",
-    {
-        fg = h("@keyword").fg,
-        bg = h("CursorLine").bg,
-        italic = true
-    }
-)
 local function textFormat(symbol)
     local result = {}
     local roundStart = {"", "SymbolUsageRounding"}
@@ -5863,6 +5900,29 @@ local plugin = {
     event = "VimEnter",
     config = function()
         getTelescope().load_extension("ui-select")
+    end
+}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.theme-flow"] = function(...) 
+local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+local plugin = {
+    [1] = "0xstepit/flow.nvim",
+    lazy = false,
+    priority = 1000,
+    opts = {},
+    config = function()
+        useExternalModule("flow").setup({
+            dark_theme = true,
+            high_contrast = false,
+            transparent = true,
+            fluo_color = "pink",
+            mode = "base",
+            aggressive_spell = false
+        })
     end
 }
 ____exports.default = plugin

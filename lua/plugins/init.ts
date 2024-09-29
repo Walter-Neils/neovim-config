@@ -6,6 +6,8 @@ export function getPlugins(this: void): LazyPlugin[] {
   const globalConfig = getGlobalConfiguration();
   const result: LazyPlugin[] = [];
   result.push(require("tokyonight").default);
+  result.push(require("catppuccin").default);
+  result.push(require("theme-flow").default);
   if (globalConfig.packages.treeSitter?.enabled) {
     result.push(require("treesitter").default);
   }

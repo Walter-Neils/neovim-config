@@ -59,6 +59,7 @@ lazy.setup(
 );
 
 THEME_APPLIERS.TokyoNight();
+// THEME_APPLIERS.Catppuccin();
 
 vim.opt.clipboard = "unnamedplus"; // System-wide copy & paste
 vim.opt.expandtab = true;

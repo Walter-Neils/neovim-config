@@ -1,5 +1,6 @@
 import { LazyPlugin } from "../../ambient/lazy";
 import { useExternalModule } from "../helpers/module/useModule";
+import { globalThemeType, onThemeChange } from "../theme";
 import { getNavic } from "./navic";
 
 const plugin: LazyPlugin = {
@@ -30,33 +31,41 @@ const plugin: LazyPlugin = {
       result[0] = func;
       return result;
     };
-    const config: LuaLineConfig = {
-      options: {
-        theme: 'material'
-      },
-      sections: {
-        lualine_b: [createStandardComponent('branch'), createStandardComponent('diff'), createStandardComponent('diagnostics')],
-        lualine_c: [
-          createCustomComponent(() => `PID: ${vim.fn.getpid().toString()}`),
-          createCustomComponent(() => {
-            const navic = getNavic();
-            if (navic === undefined) {
-              return ` Navic Disabled`;
-            }
-            else {
-              if (navic.is_available()) {
-                return navic.get_location();
+
+
+    const genConfig = () => {
+      const config: LuaLineConfig = {
+        options: {
+          theme: globalThemeType() === 'dark' ? 'material' : 'ayu_light'
+        },
+        sections: {
+          lualine_b: [createStandardComponent('branch'), createStandardComponent('diff'), createStandardComponent('diagnostics')],
+          lualine_c: [
+            createCustomComponent(() => `PID: ${vim.fn.getpid().toString()}`),
+            createCustomComponent(() => {
+              const navic = getNavic();
+              if (navic === undefined) {
+                return ` Navic Disabled`;
               }
               else {
-                return `󱈸 Scope Info Unavailable`;
+                if (navic.is_available()) {
+                  return navic.get_location();
+                }
+                else {
+                  return `󱈸 Scope Info Unavailable`;
+                }
               }
-            }
-          })
-        ]
-      }
-    };
+            })
+          ]
+        }
+      };
+      return config;
+    }
 
-    module.setup(config);
+    onThemeChange(type => {
+      module.setup(genConfig());
+    });
+    module.setup(genConfig());
   }
 };
 export { plugin as default };

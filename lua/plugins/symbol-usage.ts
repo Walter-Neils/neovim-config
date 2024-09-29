@@ -7,15 +7,6 @@ type SUSymbol = {
   implementation?: number
 };
 
-function h(this: void, name: string) {
-  return vim.api.nvim_get_hl(0, { name: name });
-}
-
-vim.api.nvim_set_hl(0, 'SymbolUsageRounding', { fg: h('CursorLine').bg, italic: true } as any)
-vim.api.nvim_set_hl(0, 'SymbolUsageContent', { bg: h('CursorLine').bg, fg: h('Comment').fg, italic: true } as any);
-vim.api.nvim_set_hl(0, 'SymbolUsageRef', { fg: h('Function').fg, bg: h('CursorLine').bg, italic: true } as any);
-vim.api.nvim_set_hl(0, 'SymbolUsageDef', { fg: h('Type').fg, bg: h('CursorLine').bg, italic: true } as any);
-vim.api.nvim_set_hl(0, 'SymbolUsageImpl', { fg: h('@keyword').fg, bg: h('CursorLine').bg, italic: true } as any);
 
 function textFormat(this: void, symbol: SUSymbol) {
   const result: any[] & { [key: string]: any | undefined } = [];
