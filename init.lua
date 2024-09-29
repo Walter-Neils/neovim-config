@@ -3365,7 +3365,8 @@ ____exports.CONFIGURATION_DEFAULTS = {
         illuminate = {enabled = true},
         treesj = {enabled = true},
         iconPicker = {enabled = true},
-        todoComments = {enabled = true}
+        todoComments = {enabled = true},
+        crates = {enabled = true, config = {bleedingEdge = false}}
     },
     targetEnvironments = {
         typescript = {enabled = true},
@@ -4081,6 +4082,10 @@ function ____exports.getPlugins()
     local ____opt_104 = globalConfig.packages.todoComments
     if ____opt_104 and ____opt_104.enabled then
         result[#result + 1] = require("lua.plugins.todo-comments").default
+    end
+    local ____opt_106 = globalConfig.packages.crates
+    if ____opt_106 and ____opt_106.enabled then
+        result[#result + 1] = require("lua.plugins.crates").default
     end
     result[#result + 1] = require("lua.plugins.nui").default
     return result
@@ -4855,6 +4860,34 @@ local plugin = {
     event = "InsertEnter",
     config = function()
         getComments().setup()
+    end
+}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.crates"] = function(...) 
+local ____exports = {}
+local ____configuration = require("lua.helpers.configuration.index")
+local getGlobalConfiguration = ____configuration.getGlobalConfiguration
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+local function getCrates()
+    return useExternalModule("crates")
+end
+local ____table_bleedingEdge_4
+local ____opt_2 = getGlobalConfiguration().packages.crates
+local ____opt_0 = ____opt_2 and ____opt_2.config
+if ____opt_0 and ____opt_0.bleedingEdge then
+    ____table_bleedingEdge_4 = nil
+else
+    ____table_bleedingEdge_4 = "stable"
+end
+local plugin = {
+    [1] = "saecki/crates.nvim",
+    tag = ____table_bleedingEdge_4,
+    event = {"BufRead Cargo.toml"},
+    config = function()
+        getCrates().setup()
     end
 }
 ____exports.default = plugin

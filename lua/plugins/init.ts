@@ -165,6 +165,9 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (globalConfig.packages.todoComments?.enabled) {
     result.push(require("todo-comments").default);
   }
+  if (globalConfig.packages.crates?.enabled) {
+    result.push(require("crates").default);
+  }
   result.push(require("nui").default);
   return result;
 }

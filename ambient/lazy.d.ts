@@ -8,6 +8,7 @@ export type LazyPlugin = {
   lazy?: boolean,
   build?: string
   branch?: string,
+  tag?: string,
   import?: string,
   cmd?: string[],
   keys?: LazyKey[] | string[],

@@ -233,6 +233,12 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     todoComments: {
       enabled: true
+    },
+    crates: {
+      enabled: true,
+      config: {
+        bleedingEdge: false
+      }
     }
   },
   targetEnvironments: {
