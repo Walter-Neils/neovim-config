@@ -242,6 +242,15 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     dbee: {
       enabled: true
+    },
+    lightbulb: {
+      enabled: false
+    },
+    neogen: {
+      enabled: true,
+    },
+    tsContextCommentString: {
+      enabled: true
     }
   },
   targetEnvironments: {

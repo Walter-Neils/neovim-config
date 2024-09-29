@@ -171,6 +171,15 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (globalConfig.packages.dbee?.enabled) {
     result.push(require("dbee").default);
   }
+  if (globalConfig.packages.lightbulb?.enabled) {
+    result.push(require("lightbulb").default);
+  }
+  if (globalConfig.packages.neogen?.enabled) {
+    result.push(require("neogen").default);
+  }
+  if (globalConfig.packages.tsContextCommentString?.enabled) {
+    result.push(require("ts-context-commentstring").default);
+  }
   result.push(require("nui").default);
   return result;
 }

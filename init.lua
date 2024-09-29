@@ -3367,7 +3367,10 @@ ____exports.CONFIGURATION_DEFAULTS = {
         iconPicker = {enabled = true},
         todoComments = {enabled = true},
         crates = {enabled = true, config = {bleedingEdge = false}},
-        dbee = {enabled = true}
+        dbee = {enabled = true},
+        lightbulb = {enabled = false},
+        neogen = {enabled = true},
+        tsContextCommentString = {enabled = true}
     },
     targetEnvironments = {
         typescript = {enabled = true},
@@ -4091,6 +4094,18 @@ function ____exports.getPlugins()
     local ____opt_108 = globalConfig.packages.dbee
     if ____opt_108 and ____opt_108.enabled then
         result[#result + 1] = require("lua.plugins.dbee").default
+    end
+    local ____opt_110 = globalConfig.packages.lightbulb
+    if ____opt_110 and ____opt_110.enabled then
+        result[#result + 1] = require("lua.plugins.lightbulb").default
+    end
+    local ____opt_112 = globalConfig.packages.neogen
+    if ____opt_112 and ____opt_112.enabled then
+        result[#result + 1] = require("lua.plugins.neogen").default
+    end
+    local ____opt_114 = globalConfig.packages.tsContextCommentString
+    if ____opt_114 and ____opt_114.enabled then
+        result[#result + 1] = require("lua.plugins.ts-context-commentstring").default
     end
     result[#result + 1] = require("lua.plugins.nui").default
     return result
@@ -4853,6 +4868,23 @@ local plugin = {
 ____exports.default = plugin
 return ____exports
  end,
+["lua.plugins.ts-context-commentstring"] = function(...) 
+local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+function ____exports.useTSContextCommentString()
+    return useExternalModule("ts_context_commentstring")
+end
+local plugin = {
+    [1] = "JoosepAlviste/nvim-ts-context-commentstring",
+    event = "InsertEnter",
+    config = function()
+        ____exports.useTSContextCommentString().setup({enable_autocmd = false})
+    end
+}
+____exports.default = plugin
+return ____exports
+ end,
 ["lua.plugins.comment"] = function(...) 
 local ____exports = {}
 local ____useModule = require("lua.helpers.module.useModule")
@@ -4864,7 +4896,7 @@ local plugin = {
     [1] = "numToStr/Comment.nvim",
     event = "InsertEnter",
     config = function()
-        getComments().setup()
+        getComments().setup({pre_hook = useExternalModule("ts_context_commentstring.integrations.comment_nvim").create_pre_hook()})
     end
 }
 ____exports.default = plugin
@@ -5043,6 +5075,23 @@ local plugin = {
             vim.keymap.del("n", "s")
         end
         getLeap().create_default_mappings()
+    end
+}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.lightbulb"] = function(...) 
+local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+local function getLightbulb()
+    return useExternalModule("nvim-lightbulb")
+end
+local plugin = {
+    [1] = "kosayoda/nvim-lightbulb",
+    event = "BufRead",
+    config = function()
+        getLightbulb().setup({autocmd = {enabled = true}})
     end
 }
 ____exports.default = plugin
@@ -5412,6 +5461,12 @@ local plugin = {
         useExternalModule("mason").setup()
     end
 }
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.neogen"] = function(...) 
+local ____exports = {}
+local plugin = {[1] = "danymat/neogen", config = true}
 ____exports.default = plugin
 return ____exports
  end,
