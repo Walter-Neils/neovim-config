@@ -4198,6 +4198,8 @@ local Hyprland = ____hyprland.Hyprland
 local isDesktopHyprland = ____hyprland.isDesktopHyprland
 local ____neovide = require("lua.integrations.neovide")
 local getNeovideExtendedVimContext = ____neovide.getNeovideExtendedVimContext
+local ____ollama = require("lua.integrations.ollama")
+local setupOllamaCopilot = ____ollama.setupOllamaCopilot
 local ____portable_2Dappimage = require("lua.integrations.portable-appimage")
 local enablePortableAppImageLogic = ____portable_2Dappimage.enablePortableAppImageLogic
 local ____init = require("lua.plugins.init")
@@ -4243,6 +4245,7 @@ local function setupLazy()
     vim.opt.rtp:prepend(lazyPath)
 end
 setupNeovide()
+setupOllamaCopilot()
 local ____opt_0 = getGlobalConfiguration().packages.copilot
 local ____temp_2 = ____opt_0 and ____opt_0.enabled
 if ____temp_2 == nil then

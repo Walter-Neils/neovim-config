@@ -45,7 +45,7 @@ function setupLazy(this: void) {
 }
 
 setupNeovide();
-// setupOllamaCopilot();
+setupOllamaCopilot();
 
 if (!(getGlobalConfiguration().packages["copilot"]?.enabled ?? false)) {
   // Once installed by Lazy, Copilot can't be prevented from loading without uninstalling it, so we've gotta do a little hack
