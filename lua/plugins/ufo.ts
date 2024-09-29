@@ -7,7 +7,7 @@ const plugin: LazyPlugin = {
   dependencies: ['kevinhwang91/promise-async'],
   event: 'VeryLazy',
   config: function(this: void) {
-    vim.o.foldcolumn = '1';
+    vim.o.foldcolumn = '0';
     vim.o.foldlevel = 99;
     vim.o.foldlevelstart = 99;
     vim.o.foldenable = true;

@@ -5112,9 +5112,7 @@ local plugin = {
     [1] = "SmiteshP/nvim-navic",
     event = "InsertEnter",
     config = function()
-        ____exports.getNavic().setup({format_text = function(text)
-            return "Testing: " .. text
-        end})
+        ____exports.getNavic().setup({})
     end
 }
 ____exports.default = plugin
@@ -5328,12 +5326,12 @@ local plugin = {
                     createCustomComponent(function()
                         local navic = getNavic()
                         if navic == nil then
-                            return "Navic Disabled"
+                            return " Navic Disabled"
                         else
                             if navic.is_available() then
                                 return navic.get_location()
                             else
-                                return "Scope unavailable"
+                                return "󱈸 Scope Info Unavailable"
                             end
                         end
                     end)
@@ -5878,7 +5876,7 @@ local plugin = {
     dependencies = {"kevinhwang91/promise-async"},
     event = "VeryLazy",
     config = function()
-        vim.o.foldcolumn = "1"
+        vim.o.foldcolumn = "0"
         vim.o.foldlevel = 99
         vim.o.foldlevelstart = 99
         vim.o.foldenable = true

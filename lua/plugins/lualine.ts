@@ -41,14 +41,14 @@ const plugin: LazyPlugin = {
           createCustomComponent(() => {
             const navic = getNavic();
             if (navic === undefined) {
-              return `Navic Disabled`;
+              return ` Navic Disabled`;
             }
             else {
               if (navic.is_available()) {
                 return navic.get_location();
               }
               else {
-                return `Scope unavailable`;
+                return `󱈸 Scope Info Unavailable`;
               }
             }
           })

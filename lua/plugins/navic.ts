@@ -21,11 +21,7 @@ const plugin: LazyPlugin = {
   1: 'SmiteshP/nvim-navic',
   event: "InsertEnter",
   config: () => {
-    getNavic()!.setup({
-      format_text: function(this: void, text: string) {
-        return `Testing: ${text}`;
-      }
-    });
+    getNavic()!.setup({});
   }
 };
 export { plugin as default };
