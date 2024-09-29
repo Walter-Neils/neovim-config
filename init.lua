@@ -3363,7 +3363,8 @@ ____exports.CONFIGURATION_DEFAULTS = {
         neotest = {enabled = true},
         navic = {enabled = true},
         illuminate = {enabled = true},
-        treesj = {enabled = true}
+        treesj = {enabled = true},
+        iconPicker = {enabled = true}
     },
     targetEnvironments = {
         typescript = {enabled = true},
@@ -4071,6 +4072,10 @@ function ____exports.getPlugins()
     local ____opt_100 = globalConfig.packages.treesj
     if ____opt_100 and ____opt_100.enabled then
         result[#result + 1] = require("lua.plugins.treesj").default
+    end
+    local ____opt_102 = globalConfig.packages.iconPicker
+    if ____opt_102 and ____opt_102.enabled then
+        result[#result + 1] = require("lua.plugins.icon-picker").default
     end
     result[#result + 1] = require("lua.plugins.nui").default
     return result
@@ -4887,6 +4892,23 @@ local plugin = {
     [1] = "dnlhc/glance.nvim",
     config = function()
         useExternalModule("glance").setup({})
+    end
+}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.icon-picker"] = function(...) 
+local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+local function getIconPicker()
+    return useExternalModule("icon-picker")
+end
+local plugin = {
+    [1] = "ziontee113/icon-picker.nvim",
+    event = "VeryLazy",
+    config = function()
+        getIconPicker().setup({disable_legacy_commands = true})
     end
 }
 ____exports.default = plugin

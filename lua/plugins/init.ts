@@ -159,6 +159,9 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (globalConfig.packages.treesj?.enabled) {
     result.push(require("treesj").default);
   }
+  if (globalConfig.packages.iconPicker?.enabled) {
+    result.push(require("icon-picker").default);
+  }
   result.push(require("nui").default);
   return result;
 }

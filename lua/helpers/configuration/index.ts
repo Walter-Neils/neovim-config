@@ -227,6 +227,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     treesj: {
       enabled: true
+    },
+    iconPicker: {
+      enabled: true
     }
   },
   targetEnvironments: {
