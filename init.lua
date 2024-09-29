@@ -4877,7 +4877,7 @@ function ____exports.useTSContextCommentString()
 end
 local plugin = {
     [1] = "JoosepAlviste/nvim-ts-context-commentstring",
-    event = "InsertEnter",
+    event = "BufRead",
     config = function()
         ____exports.useTSContextCommentString().setup({enable_autocmd = false})
     end
@@ -4894,7 +4894,7 @@ local function getComments()
 end
 local plugin = {
     [1] = "numToStr/Comment.nvim",
-    event = "InsertEnter",
+    event = "BufRead",
     config = function()
         getComments().setup({pre_hook = useExternalModule("ts_context_commentstring.integrations.comment_nvim").create_pre_hook()})
     end

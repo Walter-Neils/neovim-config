@@ -12,7 +12,7 @@ export function useTSContextCommentString() {
 
 const plugin: LazyPlugin = {
   1: 'JoosepAlviste/nvim-ts-context-commentstring',
-  event: 'InsertEnter',
+  event: 'BufRead',
   config: () => {
     useTSContextCommentString().setup({
       enable_autocmd: false
