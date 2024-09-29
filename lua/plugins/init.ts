@@ -168,6 +168,9 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (globalConfig.packages.crates?.enabled) {
     result.push(require("crates").default);
   }
+  if (globalConfig.packages.dbee?.enabled) {
+    result.push(require("dbee").default);
+  }
   result.push(require("nui").default);
   return result;
 }

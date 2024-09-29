@@ -3366,7 +3366,8 @@ ____exports.CONFIGURATION_DEFAULTS = {
         treesj = {enabled = true},
         iconPicker = {enabled = true},
         todoComments = {enabled = true},
-        crates = {enabled = true, config = {bleedingEdge = false}}
+        crates = {enabled = true, config = {bleedingEdge = false}},
+        dbee = {enabled = true}
     },
     targetEnvironments = {
         typescript = {enabled = true},
@@ -4086,6 +4087,10 @@ function ____exports.getPlugins()
     local ____opt_106 = globalConfig.packages.crates
     if ____opt_106 and ____opt_106.enabled then
         result[#result + 1] = require("lua.plugins.crates").default
+    end
+    local ____opt_108 = globalConfig.packages.dbee
+    if ____opt_108 and ____opt_108.enabled then
+        result[#result + 1] = require("lua.plugins.dbee").default
     end
     result[#result + 1] = require("lua.plugins.nui").default
     return result
@@ -4888,6 +4893,26 @@ local plugin = {
     event = {"BufRead Cargo.toml"},
     config = function()
         getCrates().setup()
+    end
+}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.dbee"] = function(...) 
+local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+local function getDbee()
+    return useExternalModule("dbee")
+end
+local plugin = {
+    [1] = "kndndrj/nvim-dbee",
+    dependencies = {"MunifTanjim/nui.nvim"},
+    build = function()
+        return getDbee().install()
+    end,
+    config = function()
+        return getDbee().setup()
     end
 }
 ____exports.default = plugin

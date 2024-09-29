@@ -6,7 +6,7 @@ type LazyKey = {
 export type LazyPlugin = {
   1?: string,
   lazy?: boolean,
-  build?: string
+  build?: string | ((this: void) => void),
   branch?: string,
   tag?: string,
   import?: string,

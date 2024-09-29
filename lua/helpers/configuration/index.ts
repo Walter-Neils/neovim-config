@@ -239,6 +239,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
       config: {
         bleedingEdge: false,
       },
+    },
+    dbee: {
+      enabled: true
     }
   },
   targetEnvironments: {
