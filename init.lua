@@ -4963,7 +4963,7 @@ local plugin = {
     [1] = "RRethy/vim-illuminate",
     event = "BufEnter",
     config = function()
-        getIlluminate().configure({delay = 10})
+        getIlluminate().configure({delay = 100})
     end
 }
 ____exports.default = plugin

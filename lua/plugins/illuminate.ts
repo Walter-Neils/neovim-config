@@ -14,7 +14,7 @@ const plugin: LazyPlugin = {
   event: "BufEnter",
   config: () => {
     getIlluminate().configure({
-      delay: 10
+      delay: 100
     });
   }
 };

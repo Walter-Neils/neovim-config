@@ -223,22 +223,22 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
       enabled: true
     },
     illuminate: {
-      enabled: true
+      enabled: true,
     },
     treesj: {
-      enabled: true
+      enabled: true,
     },
     iconPicker: {
-      enabled: true
+      enabled: true,
     },
     todoComments: {
-      enabled: true
+      enabled: true,
     },
     crates: {
       enabled: true,
       config: {
-        bleedingEdge: false
-      }
+        bleedingEdge: false,
+      },
     }
   },
   targetEnvironments: {
