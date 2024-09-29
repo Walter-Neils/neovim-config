@@ -12,7 +12,7 @@ export function setupOllamaCopilot(this: void) {
 
   vim.g.copilot_proxy = "http://localhost:11435";
   vim.g.copilot_proxy_strict_ssl = false;
-  if (vim.fn.executable("go")) {
+  if (!vim.fn.executable("go")) {
     vim.notify("Cannot configure copilot ollama proxy: the `go` binary is not installed", vim.log.levels.ERROR);
     return;
   }
