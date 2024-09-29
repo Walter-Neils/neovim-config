@@ -2846,15 +2846,8 @@ local __TS__ArrayMap = ____lualib.__TS__ArrayMap
 local __TS__ArrayFilter = ____lualib.__TS__ArrayFilter
 local __TS__ArraySlice = ____lualib.__TS__ArraySlice
 local __TS__ArrayFind = ____lualib.__TS__ArrayFind
-local Error = ____lualib.Error
-local RangeError = ____lualib.RangeError
-local ReferenceError = ____lualib.ReferenceError
-local SyntaxError = ____lualib.SyntaxError
-local TypeError = ____lualib.TypeError
-local URIError = ____lualib.URIError
-local __TS__New = ____lualib.__TS__New
-local __TS__StringSlice = ____lualib.__TS__StringSlice
 local __TS__StringReplaceAll = ____lualib.__TS__StringReplaceAll
+local __TS__StringSlice = ____lualib.__TS__StringSlice
 local ____exports = {}
 function ____exports.parseEnvFileContent(content)
     local result = {}
@@ -2884,17 +2877,8 @@ function ____exports.parseEnvFileContent(content)
         )
         local finalValue = value
         if delimiter ~= nil then
-            local start = (string.find(finalValue, delimiter, nil, true) or 0) - 1 + 1
-            local ____end = finalValue:lastIndexOf(delimiter)
-            if ____end == -1 then
-                error(
-                    __TS__New(Error, "No closing string delimiter"),
-                    0
-                )
-            end
-            ____end = ____end - 1
-            finalValue = __TS__StringSlice(finalValue, start, ____end)
             finalValue = __TS__StringReplaceAll(finalValue, "\\" .. delimiter, delimiter)
+            finalValue = __TS__StringSlice(finalValue, 1, #finalValue - 1)
             finalValue = __TS__StringReplaceAll(finalValue, "\\n", "\n")
         end
         result[key] = finalValue

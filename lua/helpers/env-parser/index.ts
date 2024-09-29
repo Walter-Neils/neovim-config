@@ -9,15 +9,8 @@ export function parseEnvFileContent(this: void, content: string): { [key: string
     const delimiter = STRING_DELIMS.find(x => value.startsWith(x));
     let finalValue = value;
     if (delimiter !== undefined) {
-      const start = finalValue.indexOf(delimiter) + 1;
-      // It's delimited
-      let end = finalValue.lastIndexOf(delimiter);
-      if (end === -1) {
-        throw new Error(`No closing string delimiter`);
-      }
-      end--;
-      finalValue = finalValue.slice(start, end);
       finalValue = finalValue.replaceAll(`\\${delimiter}`, `${delimiter}`);
+      finalValue = finalValue.slice(1, finalValue.length - 1);
       finalValue = finalValue.replaceAll(`\\n`, '\n');
     }
     result[key] = finalValue;
