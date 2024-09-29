@@ -185,6 +185,9 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (globalConfig.packages.nvimDapVirtualText?.enabled) {
     result.push(require("dap-virtual-text").default);
   }
+  if (globalConfig.packages.overseer?.enabled) {
+    result.push(require("overseer").default);
+  }
   result.push(require("nui").default);
   return result;
 }

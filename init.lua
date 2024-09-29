@@ -3385,7 +3385,8 @@ ____exports.CONFIGURATION_DEFAULTS = {
         lightbulb = {enabled = false},
         neogen = {enabled = true},
         tsContextCommentString = {enabled = true},
-        nvimDapVirtualText = {enabled = true}
+        nvimDapVirtualText = {enabled = true},
+        overseer = {enabled = true}
     },
     targetEnvironments = {
         typescript = {enabled = true},
@@ -4127,6 +4128,10 @@ function ____exports.getPlugins()
     local ____opt_116 = globalConfig.packages.nvimDapVirtualText
     if ____opt_116 and ____opt_116.enabled then
         result[#result + 1] = require("lua.plugins.dap-virtual-text").default
+    end
+    local ____opt_118 = globalConfig.packages.overseer
+    if ____opt_118 and ____opt_118.enabled then
+        result[#result + 1] = require("lua.plugins.overseer").default
     end
     result[#result + 1] = require("lua.plugins.nui").default
     return result
@@ -5761,6 +5766,23 @@ local plugin = {
     cmd = {"Outline", "OutlineOpen"},
     keys = {{[1] = "<leader>o", [2] = "<cmd>Outline<CR>", desc = "Toggle outline"}},
     opts = {symbol_folding = {}, preview_window = {auto_preview = true, live = true}, outline_items = {show_symbol_lineno = true}}
+}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.overseer"] = function(...) 
+local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+local function useOverseer()
+    return useExternalModule("overseer")
+end
+local plugin = {
+    [1] = "stevearc/overseer.nvim",
+    opts = {},
+    config = function()
+        useOverseer().setup()
+    end
 }
 ____exports.default = plugin
 return ____exports

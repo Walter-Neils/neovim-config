@@ -254,6 +254,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     nvimDapVirtualText: {
       enabled: true
+    },
+    overseer: {
+      enabled: true
     }
   },
   targetEnvironments: {
