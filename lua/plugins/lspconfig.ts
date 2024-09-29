@@ -66,19 +66,19 @@ export function registerLSPConfigurationHook(this: void, hook: LSPConfigurationM
 
 function on_attach(this: void, client: LSPClient, bufnr: number) {
   const lspConfig = getConfig();
+  // TODO: Move plugin-specific logic to an attach hook
   {
     const navic = getNavic();
     if (navic !== undefined) {
       if (client.server_capabilities.documentSymbolProvider) {
-        vim.notify("Attaching navic");
         navic.attach(client, bufnr);
       }
       else {
-        vim.notify("Unsupported navic");
+        // Navic isn't supported
       }
     }
     else {
-      vim.notify("Null navic");
+      // Navic isn't installed
     }
   }
   if (lspConfig.inlayHints.enabled) {

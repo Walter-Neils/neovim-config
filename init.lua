@@ -5144,13 +5144,10 @@ function on_attach(client, bufnr)
         local navic = getNavic()
         if navic ~= nil then
             if client.server_capabilities.documentSymbolProvider then
-                vim.notify("Attaching navic")
                 navic.attach(client, bufnr)
             else
-                vim.notify("Unsupported navic")
             end
         else
-            vim.notify("Null navic")
         end
     end
     if lspConfig.inlayHints.enabled then
