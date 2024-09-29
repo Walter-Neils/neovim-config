@@ -230,6 +230,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     iconPicker: {
       enabled: true
+    },
+    todoComments: {
+      enabled: true
     }
   },
   targetEnvironments: {

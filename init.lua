@@ -3364,7 +3364,8 @@ ____exports.CONFIGURATION_DEFAULTS = {
         navic = {enabled = true},
         illuminate = {enabled = true},
         treesj = {enabled = true},
-        iconPicker = {enabled = true}
+        iconPicker = {enabled = true},
+        todoComments = {enabled = true}
     },
     targetEnvironments = {
         typescript = {enabled = true},
@@ -4076,6 +4077,10 @@ function ____exports.getPlugins()
     local ____opt_102 = globalConfig.packages.iconPicker
     if ____opt_102 and ____opt_102.enabled then
         result[#result + 1] = require("lua.plugins.icon-picker").default
+    end
+    local ____opt_104 = globalConfig.packages.todoComments
+    if ____opt_104 and ____opt_104.enabled then
+        result[#result + 1] = require("lua.plugins.todo-comments").default
     end
     result[#result + 1] = require("lua.plugins.nui").default
     return result
@@ -5679,6 +5684,12 @@ local plugin = {
 ____exports.default = plugin
 return ____exports
  end,
+["lua.plugins.telescope-import"] = function(...) 
+local ____exports = {}
+local plugin = {[1] = "piersolenski/telescope-import.nvim", dependencies = {"nvim-telescope/telescope.nvim"}}
+____exports.default = plugin
+return ____exports
+ end,
 ["lua.plugins.telescope"] = function(...) 
 local ____exports = {}
 local ____useModule = require("lua.helpers.module.useModule")
@@ -5733,6 +5744,12 @@ local plugin = {
         })
     end
 }
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.todo-comments"] = function(...) 
+local ____exports = {}
+local plugin = {[1] = "folke/todo-comments.nvim", dependencies = {"nvim-lua/plenary.nvim"}, opts = {}}
 ____exports.default = plugin
 return ____exports
  end,

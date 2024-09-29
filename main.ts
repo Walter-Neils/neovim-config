@@ -53,7 +53,6 @@ if (!(getGlobalConfiguration().packages["copilot"]?.enabled ?? false)) {
   (vim.g as unknown as { copilot_filetypes: Record<string, boolean> }).copilot_filetypes = { '*': false };
 }
 
-
 setupLazy();
 const lazy = useExternalModule<LazyModuleInterface>("lazy");
 lazy.setup(

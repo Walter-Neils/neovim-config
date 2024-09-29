@@ -162,6 +162,9 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (globalConfig.packages.iconPicker?.enabled) {
     result.push(require("icon-picker").default);
   }
+  if (globalConfig.packages.todoComments?.enabled) {
+    result.push(require("todo-comments").default);
+  }
   result.push(require("nui").default);
   return result;
 }
