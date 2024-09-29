@@ -221,6 +221,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     navic: {
       enabled: true
+    },
+    illuminate: {
+      enabled: true
     }
   },
   targetEnvironments: {

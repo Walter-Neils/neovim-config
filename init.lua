@@ -3361,7 +3361,8 @@ ____exports.CONFIGURATION_DEFAULTS = {
         markview = {enabled = true},
         symbolUsage = {enabled = true},
         neotest = {enabled = true},
-        navic = {enabled = true}
+        navic = {enabled = true},
+        illuminate = {enabled = true}
     },
     targetEnvironments = {
         typescript = {enabled = true},
@@ -4061,6 +4062,10 @@ function ____exports.getPlugins()
     local ____opt_96 = globalConfig.packages.navic
     if ____opt_96 and ____opt_96.enabled then
         result[#result + 1] = require("lua.plugins.navic").default
+    end
+    local ____opt_98 = globalConfig.packages.illuminate
+    if ____opt_98 and ____opt_98.enabled then
+        result[#result + 1] = require("lua.plugins.illuminate").default
     end
     result[#result + 1] = require("lua.plugins.nui").default
     return result
@@ -4877,6 +4882,23 @@ local plugin = {
     [1] = "dnlhc/glance.nvim",
     config = function()
         useExternalModule("glance").setup({})
+    end
+}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.illuminate"] = function(...) 
+local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+local function getIlluminate()
+    return useExternalModule("illuminate")
+end
+local plugin = {
+    [1] = "RRethy/vim-illuminate",
+    event = "BufEnter",
+    config = function()
+        getIlluminate().configure({delay = 10})
     end
 }
 ____exports.default = plugin

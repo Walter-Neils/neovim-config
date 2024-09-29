@@ -153,7 +153,9 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (globalConfig.packages.navic?.enabled) {
     result.push(require("navic").default);
   }
-
+  if (globalConfig.packages.illuminate?.enabled) {
+    result.push(require("illuminate").default);
+  }
 
   result.push(require("nui").default);
   return result;
