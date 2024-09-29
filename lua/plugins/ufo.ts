@@ -1,6 +1,6 @@
 import { LazyPlugin } from "../../ambient/lazy";
 import { useExternalModule } from "../helpers/module/useModule";
-import { getLSPConfig } from "./lspconfig";
+import { getLSPConfig, registerLSPConfigurationHook } from "./lspconfig";
 
 const plugin: LazyPlugin = {
   1: 'kevinhwang91/nvim-ufo',
@@ -17,13 +17,12 @@ const plugin: LazyPlugin = {
       dynamicRegistration: false,
       lineFoldingOnly: true
     };
-    const lspconfig = getLSPConfig();
-    const language_server_ids = lspconfig.util.available_servers();
-    for (const server of language_server_ids) {
-      lspconfig[server].setup({
-        capabilities
-      });
-    }
+    registerLSPConfigurationHook((key, config) => {
+      config.capabilities.textDocument.foldingRange = {
+        dynamicRegistration: false,
+        lineFoldingOnly: true
+      };
+    });
     useExternalModule<{ setup: (this: void, arg?: unknown) => void }>("ufo").setup({
       // TODO: Setup fold_virt_text_handler
     });

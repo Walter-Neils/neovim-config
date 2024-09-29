@@ -218,6 +218,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     neotest: {
       enabled: true,
+    },
+    navic: {
+      enabled: true
     }
   },
   targetEnvironments: {

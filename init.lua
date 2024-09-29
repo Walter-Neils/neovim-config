@@ -3360,7 +3360,8 @@ ____exports.CONFIGURATION_DEFAULTS = {
         rainbowDelimiters = {enabled = false},
         markview = {enabled = true},
         symbolUsage = {enabled = true},
-        neotest = {enabled = true}
+        neotest = {enabled = true},
+        navic = {enabled = true}
     },
     targetEnvironments = {
         typescript = {enabled = true},
@@ -4056,6 +4057,10 @@ function ____exports.getPlugins()
     local ____opt_94 = globalConfig.packages.neotest
     if ____opt_94 and ____opt_94.enabled then
         result[#result + 1] = require("lua.plugins.neotest").default
+    end
+    local ____opt_96 = globalConfig.packages.navic
+    if ____opt_96 and ____opt_96.enabled then
+        result[#result + 1] = require("lua.plugins.navic").default
     end
     result[#result + 1] = require("lua.plugins.nui").default
     return result
@@ -4977,16 +4982,44 @@ local plugin = {
 ____exports.default = plugin
 return ____exports
  end,
+["lua.plugins.navic"] = function(...) 
+local ____exports = {}
+local ____configuration = require("lua.helpers.configuration.index")
+local getGlobalConfiguration = ____configuration.getGlobalConfiguration
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+function ____exports.getNavic()
+    local ____opt_0 = getGlobalConfiguration().packages.navic
+    if ____opt_0 and ____opt_0.enabled then
+        return useExternalModule("nvim-navic")
+    else
+        return nil
+    end
+end
+local plugin = {
+    [1] = "SmiteshP/nvim-navic",
+    event = "InsertEnter",
+    config = function()
+        ____exports.getNavic().setup({format_text = function(text)
+            return "Testing: " .. text
+        end})
+    end
+}
+____exports.default = plugin
+return ____exports
+ end,
 ["lua.plugins.lspconfig"] = function(...) 
 local ____lualib = require("lualib_bundle")
 local __TS__ArrayFind = ____lualib.__TS__ArrayFind
 local __TS__ObjectAssign = ____lualib.__TS__ObjectAssign
 local ____exports = {}
-local getConfig, on_attach, getPluginConfig, environmentKeyToConfig, configureLSP
+local getConfig, on_attach, environmentKeyToConfig, configureLSP, attachCallbacks, preHooks
 local ____configuration = require("lua.helpers.configuration.index")
 local getGlobalConfiguration = ____configuration.getGlobalConfiguration
 local ____useModule = require("lua.helpers.module.useModule")
 local useExternalModule = ____useModule.useExternalModule
+local ____navic = require("lua.plugins.navic")
+local getNavic = ____navic.getNavic
 function getConfig()
     local config = getGlobalConfiguration()
     local lspConfigRoot = config.packages.lspconfig
@@ -4995,6 +5028,19 @@ function getConfig()
 end
 function on_attach(client, bufnr)
     local lspConfig = getConfig()
+    do
+        local navic = getNavic()
+        if navic ~= nil then
+            if client.server_capabilities.documentSymbolProvider then
+                vim.notify("Attaching navic")
+                navic.attach(client, bufnr)
+            else
+                vim.notify("Unsupported navic")
+            end
+        else
+            vim.notify("Null navic")
+        end
+    end
     if lspConfig.inlayHints.enabled then
         local ____error
         do
@@ -5022,14 +5068,13 @@ function on_attach(client, bufnr)
         end
         vim.notify("Failed to enable LSP hints: " .. tostring(____error))
     end
+    for ____, callback in ipairs(attachCallbacks) do
+        callback(client, bufnr)
+    end
 end
 function ____exports.getLSPConfig()
     local lspconfig = useExternalModule("lspconfig")
     return lspconfig
-end
-function getPluginConfig()
-    local config = getGlobalConfiguration()
-    return config.packages.lspconfig
 end
 function environmentKeyToConfig(env)
     local configs = {
@@ -5057,44 +5102,54 @@ function environmentKeyToConfig(env)
 end
 function configureLSP()
     local lspconfig = ____exports.getLSPConfig()
-    local config = getPluginConfig()
-    local capabilities
-    local ____opt_0 = getGlobalConfiguration().packages.cmp
-    if ____opt_0 and ____opt_0.enabled then
-        capabilities = useExternalModule("cmp_nvim_lsp").default_capabilities()
-    end
     local targetEnvironments = getGlobalConfiguration().targetEnvironments
     for targetEnvKey in pairs(targetEnvironments) do
         do
-            local ____opt_2 = targetEnvironments[targetEnvKey]
-            if not (____opt_2 and ____opt_2.enabled) then
-                goto __continue24
+            local ____opt_0 = targetEnvironments[targetEnvKey]
+            if not (____opt_0 and ____opt_0.enabled) then
+                goto __continue32
             end
             local config = environmentKeyToConfig(targetEnvKey)
             if config == nil then
                 vim.notify("Failed to locate configuration for environment " .. targetEnvKey, vim.log.levels.WARN)
             else
-                local ____capabilities_5 = capabilities
-                local ____on_attach_6 = on_attach
+                local capabilities
+                local ____opt_2 = getGlobalConfiguration().packages.cmp
+                if ____opt_2 and ____opt_2.enabled then
+                    capabilities = useExternalModule("cmp_nvim_lsp").default_capabilities()
+                end
                 local ____config_additionalOptions_4 = config.additionalOptions
                 if ____config_additionalOptions_4 == nil then
                     ____config_additionalOptions_4 = {}
                 end
-                local setupConfig = __TS__ObjectAssign({capabilities = ____capabilities_5, on_attach = ____on_attach_6}, ____config_additionalOptions_4)
+                local setupConfig = __TS__ObjectAssign({}, ____config_additionalOptions_4, {capabilities = capabilities, on_attach = on_attach})
+                for ____, preHook in ipairs(preHooks) do
+                    preHook(config.lspKey, setupConfig)
+                end
                 lspconfig[config.lspKey].setup(setupConfig)
             end
         end
-        ::__continue24::
+        ::__continue32::
     end
-    local ____vim_diagnostic_config_10 = vim.diagnostic.config
-    local ____opt_7 = getGlobalConfiguration().packages.lspLines
-    local ____temp_9 = ____opt_7 and ____opt_7.enabled
-    if ____temp_9 == nil then
-        ____temp_9 = false
+    local ____vim_diagnostic_config_8 = vim.diagnostic.config
+    local ____opt_5 = getGlobalConfiguration().packages.lspLines
+    local ____temp_7 = ____opt_5 and ____opt_5.enabled
+    if ____temp_7 == nil then
+        ____temp_7 = false
     end
-    ____vim_diagnostic_config_10({update_in_insert = true, virtual_text = not ____temp_9})
+    ____vim_diagnostic_config_8({update_in_insert = true, virtual_text = not ____temp_7})
 end
 local plugin = {[1] = "neovim/nvim-lspconfig", config = configureLSP}
+attachCallbacks = {}
+preHooks = {}
+function ____exports.registerLSPServerAttachCallback(callback)
+    attachCallbacks[#attachCallbacks + 1] = callback
+    configureLSP()
+end
+function ____exports.registerLSPConfigurationHook(hook)
+    preHooks[#preHooks + 1] = hook
+    configureLSP()
+end
 do
     local lspConfig = getConfig()
     if lspConfig.inlayHints.enabled then
@@ -5116,6 +5171,10 @@ do
         )
     end
 end
+local function getPluginConfig()
+    local config = getGlobalConfiguration()
+    return config.packages.lspconfig
+end
 vim.api.nvim_create_autocmd(
     "LspAttach",
     {callback = function(_args)
@@ -5129,6 +5188,8 @@ return ____exports
 local ____exports = {}
 local ____useModule = require("lua.helpers.module.useModule")
 local useExternalModule = ____useModule.useExternalModule
+local ____navic = require("lua.plugins.navic")
+local getNavic = ____navic.getNavic
 local plugin = {
     [1] = "nvim-lualine/lualine.nvim",
     dependencies = {"nvim-tree/nvim-web-devicons"},
@@ -5153,7 +5214,21 @@ local plugin = {
                     createStandardComponent("diff"),
                     createStandardComponent("diagnostics")
                 },
-                lualine_c = {createCustomComponent(function() return "PID: " .. tostring(vim.fn.getpid()) end)}
+                lualine_c = {
+                    createCustomComponent(function() return "PID: " .. tostring(vim.fn.getpid()) end),
+                    createCustomComponent(function()
+                        local navic = getNavic()
+                        if navic == nil then
+                            return "Navic Disabled"
+                        else
+                            if navic.is_available() then
+                                return navic.get_location()
+                            else
+                                return "Scope unavailable"
+                            end
+                        end
+                    end)
+                }
             }
         }
         module.setup(config)
@@ -5658,7 +5733,7 @@ local ____exports = {}
 local ____useModule = require("lua.helpers.module.useModule")
 local useExternalModule = ____useModule.useExternalModule
 local ____lspconfig = require("lua.plugins.lspconfig")
-local getLSPConfig = ____lspconfig.getLSPConfig
+local registerLSPConfigurationHook = ____lspconfig.registerLSPConfigurationHook
 local plugin = {
     [1] = "kevinhwang91/nvim-ufo",
     dependencies = {"kevinhwang91/promise-async"},
@@ -5670,11 +5745,9 @@ local plugin = {
         vim.o.foldenable = true
         local capabilities = vim.lsp.protocol.make_client_capabilities()
         capabilities.textDocument.foldingRange = {dynamicRegistration = false, lineFoldingOnly = true}
-        local lspconfig = getLSPConfig()
-        local language_server_ids = lspconfig.util.available_servers()
-        for ____, server in ipairs(language_server_ids) do
-            lspconfig[server].setup({capabilities = capabilities})
-        end
+        registerLSPConfigurationHook(function(key, config)
+            config.capabilities.textDocument.foldingRange = {dynamicRegistration = false, lineFoldingOnly = true}
+        end)
         useExternalModule("ufo").setup({})
     end
 }

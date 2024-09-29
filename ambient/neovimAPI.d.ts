@@ -133,6 +133,10 @@ type NvimLspClient = {
   handlers: NvimLspClientHandlers,
   requests: NvimLspClientRequests,
   config: NvimLspClientConfig
+  server_capabilities: {
+    documentSymbolProvider: boolean,
+    inlayHintProvider: boolean
+  }
   // WIP
   // :h vim.lsp.client
 };

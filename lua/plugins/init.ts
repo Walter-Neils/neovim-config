@@ -150,6 +150,9 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (globalConfig.packages.neotest?.enabled) {
     result.push(require("neotest").default);
   }
+  if (globalConfig.packages.navic?.enabled) {
+    result.push(require("navic").default);
+  }
 
 
   result.push(require("nui").default);

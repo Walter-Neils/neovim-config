@@ -1,5 +1,6 @@
 import { LazyPlugin } from "../../ambient/lazy";
 import { useExternalModule } from "../helpers/module/useModule";
+import { getNavic } from "./navic";
 
 const plugin: LazyPlugin = {
   1: 'nvim-lualine/lualine.nvim',
@@ -35,7 +36,23 @@ const plugin: LazyPlugin = {
       },
       sections: {
         lualine_b: [createStandardComponent('branch'), createStandardComponent('diff'), createStandardComponent('diagnostics')],
-        lualine_c: [createCustomComponent(() => `PID: ${vim.fn.getpid().toString()}`)]
+        lualine_c: [
+          createCustomComponent(() => `PID: ${vim.fn.getpid().toString()}`),
+          createCustomComponent(() => {
+            const navic = getNavic();
+            if (navic === undefined) {
+              return `Navic Disabled`;
+            }
+            else {
+              if (navic.is_available()) {
+                return navic.get_location();
+              }
+              else {
+                return `Scope unavailable`;
+              }
+            }
+          })
+        ]
       }
     };
 

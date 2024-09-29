@@ -1,12 +1,13 @@
 import { LazyPlugin } from "../../ambient/lazy";
 import { getGlobalConfiguration } from "../helpers/configuration";
 import { useExternalModule } from "../helpers/module/useModule";
+import { getNavic } from "./navic";
 
 const plugin: LazyPlugin = {
   1: "neovim/nvim-lspconfig",
   config: configureLSP,
 };
-type LSPClient = any;
+type LSPClient = NvimLspClient;
 type NeovimLSPCapabilities = any;
 type LSPConfigInstanceBase<Extension> = {
   setup: (
@@ -47,8 +48,39 @@ function getConfig() {
   return lspConfig;
 }
 
+type LSPAttachCallback = (this: void, client: LSPClient, bufnr: number) => void;
+type LSPConfigurationMutator = (this: void, lspKey: string, configuration: any) => void;
+
+const attachCallbacks: LSPAttachCallback[] = [];
+const preHooks: LSPConfigurationMutator[] = [];
+
+export function registerLSPServerAttachCallback(this: void, callback: LSPAttachCallback) {
+  attachCallbacks.push(callback);
+  configureLSP();
+}
+
+export function registerLSPConfigurationHook(this: void, hook: LSPConfigurationMutator) {
+  preHooks.push(hook);
+  configureLSP();
+}
+
 function on_attach(this: void, client: LSPClient, bufnr: number) {
   const lspConfig = getConfig();
+  {
+    const navic = getNavic();
+    if (navic !== undefined) {
+      if (client.server_capabilities.documentSymbolProvider) {
+        vim.notify("Attaching navic");
+        navic.attach(client, bufnr);
+      }
+      else {
+        vim.notify("Unsupported navic");
+      }
+    }
+    else {
+      vim.notify("Null navic");
+    }
+  }
   if (lspConfig.inlayHints.enabled) {
     let error: any | undefined;
     try {
@@ -68,6 +100,10 @@ function on_attach(this: void, client: LSPClient, bufnr: number) {
       error = e;
     }
     vim.notify(`Failed to enable LSP hints: ${error}`);
+  }
+
+  for (const callback of attachCallbacks) {
+    callback(client, bufnr);
   }
 }
 
@@ -151,13 +187,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
 function configureLSP(this: void) {
   const lspconfig = getLSPConfig();
-  const config = getPluginConfig();
-  let capabilities: unknown | undefined;
-  if (getGlobalConfiguration().packages["cmp"]?.enabled) {
-    capabilities = useExternalModule<
-      { default_capabilities: (this: void) => unknown }
-    >("cmp_nvim_lsp").default_capabilities();
-  }
+
   const targetEnvironments = getGlobalConfiguration().targetEnvironments;
   for (const targetEnvKey in targetEnvironments) {
     if (!targetEnvironments[targetEnvKey]?.enabled) {
@@ -170,11 +200,22 @@ function configureLSP(this: void) {
         vim.log.levels.WARN,
       );
     } else {
+      let capabilities: unknown | undefined;
+      if (getGlobalConfiguration().packages["cmp"]?.enabled) {
+        capabilities = useExternalModule<
+          { default_capabilities: (this: void) => unknown }
+        >("cmp_nvim_lsp").default_capabilities();
+      }
       const setupConfig = {
-        capabilities,
-        on_attach,
         ...config.additionalOptions ?? {},
+        capabilities: capabilities,
+        on_attach: on_attach,
       };
+
+      for (const preHook of preHooks) {
+        preHook(config.lspKey, setupConfig);
+      }
+
       lspconfig[config.lspKey].setup(setupConfig);
     }
   }
