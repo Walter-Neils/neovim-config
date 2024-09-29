@@ -10,7 +10,7 @@ export type LazyPlugin = {
   branch?: string,
   import?: string,
   cmd?: string[],
-  keys?: LazyKey[],
+  keys?: LazyKey[] | string[],
   config?: ((this: void, arg1: unknown, opts: unknown) => void) | boolean,
   opts?: ((this: void) => any) | any,
   dependencies?: string[],

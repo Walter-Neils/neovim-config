@@ -3362,7 +3362,8 @@ ____exports.CONFIGURATION_DEFAULTS = {
         symbolUsage = {enabled = true},
         neotest = {enabled = true},
         navic = {enabled = true},
-        illuminate = {enabled = true}
+        illuminate = {enabled = true},
+        treesj = {enabled = true}
     },
     targetEnvironments = {
         typescript = {enabled = true},
@@ -4066,6 +4067,10 @@ function ____exports.getPlugins()
     local ____opt_98 = globalConfig.packages.illuminate
     if ____opt_98 and ____opt_98.enabled then
         result[#result + 1] = require("lua.plugins.illuminate").default
+    end
+    local ____opt_100 = globalConfig.packages.treesj
+    if ____opt_100 and ____opt_100.enabled then
+        result[#result + 1] = require("lua.plugins.treesj").default
     end
     result[#result + 1] = require("lua.plugins.nui").default
     return result
@@ -5727,6 +5732,24 @@ else
     ____getGlobalConfiguration_result_packages_tsAutoTag_enabled_2 = nil
 end
 local plugin = {[1] = "nvim-treesitter/nvim-treesitter", opts = {autotag = {enable = ____getGlobalConfiguration_result_packages_tsAutoTag_enabled_2}}}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.treesj"] = function(...) 
+local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+local function getTreesj()
+    return useExternalModule("treesj")
+end
+local plugin = {
+    [1] = "Wansmer/treesj",
+    keys = {"<space>j", "<space>s"},
+    dependencies = {"nvim-treesitter/nvim-treesitter"},
+    config = function()
+        getTreesj().setup()
+    end
+}
 ____exports.default = plugin
 return ____exports
  end,

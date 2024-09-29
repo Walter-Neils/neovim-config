@@ -156,7 +156,9 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (globalConfig.packages.illuminate?.enabled) {
     result.push(require("illuminate").default);
   }
-
+  if (globalConfig.packages.treesj?.enabled) {
+    result.push(require("treesj").default);
+  }
   result.push(require("nui").default);
   return result;
 }

@@ -224,6 +224,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     illuminate: {
       enabled: true
+    },
+    treesj: {
+      enabled: true
     }
   },
   targetEnvironments: {
