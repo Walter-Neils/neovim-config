@@ -3290,6 +3290,8 @@ local ____lualib = require("lualib_bundle")
 local __TS__ObjectKeys = ____lualib.__TS__ObjectKeys
 local __TS__StringSplit = ____lualib.__TS__StringSplit
 local __TS__ArrayReverse = ____lualib.__TS__ArrayReverse
+local __TS__StringIncludes = ____lualib.__TS__StringIncludes
+local __TS__ArrayFilter = ____lualib.__TS__ArrayFilter
 local __TS__TypeOf = ____lualib.__TS__TypeOf
 local Error = ____lualib.Error
 local RangeError = ____lualib.RangeError
@@ -3299,22 +3301,14 @@ local TypeError = ____lualib.TypeError
 local URIError = ____lualib.URIError
 local __TS__New = ____lualib.__TS__New
 local ____exports = {}
-local saveConfiguration, configuration, getGlobalConfig, setGlobalConfig
+local reloadConfiguration, saveConfiguration, configuration, getGlobalConfig, setGlobalConfig
 local ____nixos = require("lua.custom.nixos.index")
 local isRunningUnderNixOS = ____nixos.isRunningUnderNixOS
 local ____persistent_2Ddata = require("lua.helpers.persistent-data.index")
 local usePersistentValue = ____persistent_2Ddata.usePersistentValue
 local ____argparser = require("lua.helpers.user_command.argparser")
 local parseArgs = ____argparser.parseArgs
-function saveConfiguration()
-    setGlobalConfig(configuration)
-end
-function ____exports.saveGlobalConfiguration()
-    saveConfiguration()
-end
-configuration = nil
-getGlobalConfig, setGlobalConfig = unpack(usePersistentValue("configuration.json", {}))
-local function reloadConfiguration()
+function reloadConfiguration()
     local config = getGlobalConfig()
     if #__TS__ObjectKeys(config) < 1 then
         configuration = ____exports.CONFIGURATION_DEFAULTS
@@ -3324,6 +3318,20 @@ local function reloadConfiguration()
         configuration = config
     end
 end
+function saveConfiguration()
+    setGlobalConfig(configuration)
+end
+function ____exports.getGlobalConfiguration()
+    if configuration == nil then
+        reloadConfiguration()
+    end
+    return configuration
+end
+function ____exports.saveGlobalConfiguration()
+    saveConfiguration()
+end
+configuration = nil
+getGlobalConfig, setGlobalConfig = unpack(usePersistentValue("configuration.json", {}))
 ____exports.CONFIGURATION_DEFAULTS = {
     packages = {
         mason = {enabled = not isRunningUnderNixOS()},
@@ -3368,7 +3376,7 @@ ____exports.CONFIGURATION_DEFAULTS = {
         masonNvimDap = {enabled = false},
         timeTracker = {enabled = false},
         wakaTime = {enabled = true},
-        surround = {enabled = false},
+        surround = {enabled = true},
         tsAutoTag = {enabled = true},
         ultimateAutoPair = {enabled = true},
         rainbowDelimiters = {enabled = false},
@@ -3397,14 +3405,20 @@ ____exports.CONFIGURATION_DEFAULTS = {
     },
     shell = {target = "tmux", isolationScope = "isolated"},
     integrations = {ollama = {enabled = true}}
-};
-(function()
-end)()
-function ____exports.getGlobalConfiguration()
-    if configuration == nil then
-        reloadConfiguration()
+}
+local watchers = {}
+function ____exports.useConfigWatcher(key, watcher)
+    watchers[#watchers + 1] = {key, watcher}
+    local parts = __TS__ArrayReverse(__TS__StringSplit(key, "."))
+    local function currentTarget()
+        return parts[#parts]
     end
-    return configuration
+    local current = ____exports.getGlobalConfiguration()
+    while #parts > 1 do
+        current = current[currentTarget()]
+        table.remove(parts)
+    end
+    watcher(current, key)
 end
 vim.api.nvim_create_user_command(
     "Configuration",
@@ -3428,6 +3442,12 @@ vim.api.nvim_create_user_command(
                 table.remove(parts)
             end
             current[currentTarget()] = nil
+            for ____, watcher in ipairs(__TS__ArrayFilter(
+                watchers,
+                function(____, x) return __TS__StringIncludes(x[1], args.key) end
+            )) do
+                watcher[2](nil, args.key)
+            end
             ____exports.saveGlobalConfiguration()
         elseif args.mode == "list" then
             if args.key == nil then
@@ -3499,6 +3519,15 @@ vim.api.nvim_create_user_command(
                 error(
                     __TS__New(Error, ("Cannot convert target type to " .. currentType) .. ": unsupported"),
                     0
+                )
+            end
+            for ____, watcher in ipairs(__TS__ArrayFilter(
+                watchers,
+                function(____, x) return __TS__StringIncludes(x[1], args.key) end
+            )) do
+                watcher[2](
+                    current[currentTarget()],
+                    args.key
                 )
             end
             ____exports.saveGlobalConfiguration()
@@ -5821,7 +5850,16 @@ return ____exports
  end,
 ["lua.plugins.surround"] = function(...) 
 local ____exports = {}
-local plugin = {[1] = "tpope/vim-surround"}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+local plugin = {
+    [1] = "kylechui/nvim-surround",
+    version = "*",
+    event = {"VeryLazy", "InsertEnter"},
+    config = function()
+        useExternalModule("nvim-surround").setup({})
+    end
+}
 ____exports.default = plugin
 return ____exports
  end,

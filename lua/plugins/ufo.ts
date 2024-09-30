@@ -1,6 +1,6 @@
 import { LazyPlugin } from "../../ambient/lazy";
 import { useExternalModule } from "../helpers/module/useModule";
-import { getLSPConfig, registerLSPConfigurationHook } from "./lspconfig";
+import { registerLSPConfigurationHook } from "./lspconfig";
 
 const plugin: LazyPlugin = {
   1: 'kevinhwang91/nvim-ufo',

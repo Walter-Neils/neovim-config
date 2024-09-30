@@ -199,7 +199,7 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
       enabled: true
     },
     surround: {
-      enabled: false
+      enabled: true
     },
     tsAutoTag: {
       enabled: true
@@ -289,10 +289,28 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
   },
 };
 
-// Finalize setup of configuration
-(() => {
+type ConfigValueWatcher<TValue> = (this: void, value: TValue, key: string) => void;
 
-})();
+type ConfigValueWatcherContainer = [key: string, watcher: ConfigValueWatcher<any>];
+
+const watchers: ConfigValueWatcherContainer[] = [];
+
+export function useConfigWatcher<TValue>(this: void, key: string, watcher: ConfigValueWatcher<TValue>) {
+  watchers.push([
+    key,
+    watcher
+  ] as const);
+  let parts = key.split(".").reverse();
+  const currentTarget = function() {
+    return parts[parts.length - 1];
+  };
+  let current: any = getGlobalConfiguration();
+  while (parts.length > 1) {
+    current = current[currentTarget()];
+    parts.pop();
+  }
+  watcher(current, key);
+}
 
 export function getGlobalConfiguration() {
   if (configuration === undefined) {
@@ -341,6 +359,9 @@ vim.api.nvim_create_user_command("Configuration", (_args) => {
       parts.pop();
     }
     current[currentTarget()] = undefined;
+    for (const watcher of watchers.filter(x => x[0].includes(args.key))) {
+      watcher[1](undefined, args.key);
+    }
     saveGlobalConfiguration();
   } else if (args.mode === "list") {
     args.key ??= "";
@@ -413,6 +434,9 @@ vim.api.nvim_create_user_command("Configuration", (_args) => {
       throw new Error(
         `Cannot convert target type to ${currentType}: unsupported`,
       );
+    }
+    for (const watcher of watchers.filter(x => x[0].includes(args.key))) {
+      watcher[1](current[currentTarget()], args.key);
     }
     saveGlobalConfiguration();
   } else {
