@@ -3401,7 +3401,8 @@ ____exports.CONFIGURATION_DEFAULTS = {
         deno = {enabled = false},
         ["c/c++"] = {enabled = true},
         markdown = {enabled = true},
-        lua = {enabled = true}
+        lua = {enabled = true},
+        yaml = {enabled = true}
     },
     shell = {target = "tmux", isolationScope = "isolated"},
     integrations = {ollama = {enabled = true}}
@@ -5406,7 +5407,8 @@ function environmentKeyToConfig(env)
         },
         {key = "c/c++", lspKey = "clangd"},
         {key = "markdown", lspKey = "marksman"},
-        {key = "lua", lspKey = "lua_ls"}
+        {key = "lua", lspKey = "lua_ls"},
+        {key = "yaml", lspKey = "yamlls"}
     }
     return __TS__ArrayFind(
         configs,

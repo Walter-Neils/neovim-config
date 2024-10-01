@@ -276,7 +276,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     'lua': {
       enabled: true
     },
-
+    yaml: {
+      enabled: true
+    }
   },
   shell: {
     target: "tmux",

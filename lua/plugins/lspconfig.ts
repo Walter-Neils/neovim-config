@@ -154,6 +154,9 @@ function environmentKeyToConfig(env: string) {
   }, {
     key: 'lua',
     lspKey: 'lua_ls'
+  }, {
+    key: 'yaml',
+    lspKey: 'yamlls'
   }];
 
   return configs.find((x) => x.key === env);
