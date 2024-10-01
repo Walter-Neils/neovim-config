@@ -14,7 +14,7 @@ function textFormat(this: void, symbol: SUSymbol) {
   let roundEnd = ['', 'SymbolUsageRounding'] as const;
   let stackedFunctionsContent = symbol.stacked_count > 0 ? `${symbol.stacked_count}` : '';
   if (symbol.references !== undefined) {
-    const usage = symbol.references <= 1 ? 'usage' : 'usages';
+    const usage = symbol.references <= 1 ? 'reference' : 'references';
     const num = symbol.references === 0 ? 'no' : symbol.references;
     result.push(roundStart);
     result.push(['󰌹 ', 'SymbolUsageRef']);

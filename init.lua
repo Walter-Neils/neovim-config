@@ -4881,6 +4881,13 @@ function ____exports.centerText(input, width, spacer)
 end
 return ____exports
  end,
+["lua.helpers.typed-autocmd.index"] = function(...) 
+local ____exports = {}
+function ____exports.useAutocmd(key, callback)
+    vim.api.nvim_create_autocmd(key, {callback = callback})
+end
+return ____exports
+ end,
 ["lua.helpers.window-dimensions.index"] = function(...) 
 local ____exports = {}
 function ____exports.actualBufferDimensions(target)
@@ -5297,6 +5304,8 @@ local ____configuration = require("lua.helpers.configuration.index")
 local getGlobalConfiguration = ____configuration.getGlobalConfiguration
 local ____useModule = require("lua.helpers.module.useModule")
 local useExternalModule = ____useModule.useExternalModule
+local ____typed_2Dautocmd = require("lua.helpers.typed-autocmd.index")
+local useAutocmd = ____typed_2Dautocmd.useAutocmd
 function ____exports.getNavic()
     local ____opt_0 = getGlobalConfiguration().packages.navic
     if ____opt_0 and ____opt_0.enabled then
@@ -5305,6 +5314,18 @@ function ____exports.getNavic()
         return nil
     end
 end
+useAutocmd(
+    "LspAttach",
+    function(args)
+        local navic = ____exports.getNavic()
+        if navic then
+            local client = vim.lsp.get_client_by_id(args.data.client_id)
+            if client.server_capabilities.documentSymbolProvider then
+                navic.attach(client, args.buf)
+            end
+        end
+    end
+)
 local plugin = {
     [1] = "SmiteshP/nvim-navic",
     event = "InsertEnter",
@@ -5325,8 +5346,6 @@ local ____configuration = require("lua.helpers.configuration.index")
 local getGlobalConfiguration = ____configuration.getGlobalConfiguration
 local ____useModule = require("lua.helpers.module.useModule")
 local useExternalModule = ____useModule.useExternalModule
-local ____navic = require("lua.plugins.navic")
-local getNavic = ____navic.getNavic
 function getConfig()
     local config = getGlobalConfiguration()
     local lspConfigRoot = config.packages.lspconfig
@@ -5335,16 +5354,6 @@ function getConfig()
 end
 function on_attach(client, bufnr)
     local lspConfig = getConfig()
-    do
-        local navic = getNavic()
-        if navic ~= nil then
-            if client.server_capabilities.documentSymbolProvider then
-                navic.attach(client, bufnr)
-            else
-            end
-        else
-        end
-    end
     if lspConfig.inlayHints.enabled then
         local ____error
         do
@@ -5411,7 +5420,7 @@ function configureLSP()
         do
             local ____opt_0 = targetEnvironments[targetEnvKey]
             if not (____opt_0 and ____opt_0.enabled) then
-                goto __continue32
+                goto __continue27
             end
             local config = environmentKeyToConfig(targetEnvKey)
             if config == nil then
@@ -5433,7 +5442,7 @@ function configureLSP()
                 lspconfig[config.lspKey].setup(setupConfig)
             end
         end
-        ::__continue32::
+        ::__continue27::
     end
     local ____vim_diagnostic_config_8 = vim.diagnostic.config
     local ____opt_5 = getGlobalConfiguration().packages.lspLines
@@ -5873,7 +5882,7 @@ local function textFormat(symbol)
     local roundEnd = {"", "SymbolUsageRounding"}
     local stackedFunctionsContent = symbol.stacked_count > 0 and tostring(symbol.stacked_count) or ""
     if symbol.references ~= nil then
-        local usage = symbol.references <= 1 and "usage" or "usages"
+        local usage = symbol.references <= 1 and "reference" or "references"
         local num = symbol.references == 0 and "no" or symbol.references
         result[#result + 1] = roundStart
         result[#result + 1] = {"󰌹 ", "SymbolUsageRef"}
