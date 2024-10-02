@@ -3394,7 +3394,8 @@ ____exports.CONFIGURATION_DEFAULTS = {
         neogen = {enabled = true},
         tsContextCommentString = {enabled = true},
         nvimDapVirtualText = {enabled = true},
-        overseer = {enabled = true}
+        overseer = {enabled = true},
+        hlchunk = {enabled = true}
     },
     targetEnvironments = {
         typescript = {enabled = true},
@@ -4162,6 +4163,10 @@ function ____exports.getPlugins()
     local ____opt_118 = globalConfig.packages.overseer
     if ____opt_118 and ____opt_118.enabled then
         result[#result + 1] = require("lua.plugins.overseer").default
+    end
+    local ____opt_120 = globalConfig.packages.hlchunk
+    if ____opt_120 and ____opt_120.enabled then
+        result[#result + 1] = require("lua.plugins.hlchunk").default
     end
     result[#result + 1] = require("lua.plugins.nui").default
     return result
@@ -5148,6 +5153,24 @@ local plugin = {
 ____exports.default = plugin
 return ____exports
  end,
+["lua.plugins.hlchunk"] = function(...) 
+local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+local function useHLChunk()
+    return useExternalModule("hlchunk")
+end
+local plugin = {
+    [1] = "shellRaining/hlchunk.nvim",
+    event = {"BufReadPre", "BufNewFile"},
+    config = function()
+        vim.notify("Loading HLChunk")
+        useHLChunk().setup({chunk = {enable = true}})
+    end
+}
+____exports.default = plugin
+return ____exports
+ end,
 ["lua.plugins.icon-picker"] = function(...) 
 local ____exports = {}
 local ____useModule = require("lua.helpers.module.useModule")
@@ -5184,6 +5207,8 @@ return ____exports
  end,
 ["lua.plugins.indent-blankline"] = function(...) 
 local ____exports = {}
+local ____configuration = require("lua.helpers.configuration.index")
+local getGlobalConfiguration = ____configuration.getGlobalConfiguration
 local ____useModule = require("lua.helpers.module.useModule")
 local useExternalModule = ____useModule.useExternalModule
 local plugin = {
@@ -5191,7 +5216,15 @@ local plugin = {
     version = "^3",
     config = function()
         local ibl = useExternalModule("ibl")
-        ibl.setup()
+        local ____ibl_setup_3 = ibl.setup
+        local ____getGlobalConfiguration_result_packages_hlchunk_enabled_2
+        local ____opt_0 = getGlobalConfiguration().packages.hlchunk
+        if ____opt_0 and ____opt_0.enabled then
+            ____getGlobalConfiguration_result_packages_hlchunk_enabled_2 = false
+        else
+            ____getGlobalConfiguration_result_packages_hlchunk_enabled_2 = true
+        end
+        ____ibl_setup_3({scope = {enabled = ____getGlobalConfiguration_result_packages_hlchunk_enabled_2}})
     end
 }
 ____exports.default = plugin

@@ -188,6 +188,9 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (globalConfig.packages.overseer?.enabled) {
     result.push(require("overseer").default);
   }
+  if (globalConfig.packages.hlchunk?.enabled) {
+    result.push(require("hlchunk").default);
+  }
   result.push(require("nui").default);
   return result;
 }

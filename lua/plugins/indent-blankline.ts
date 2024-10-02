@@ -1,4 +1,5 @@
 import { LazyPlugin } from "../../ambient/lazy";
+import { getGlobalConfiguration } from "../helpers/configuration";
 import { useExternalModule } from "../helpers/module/useModule";
 
 const plugin: LazyPlugin = {
@@ -8,7 +9,11 @@ const plugin: LazyPlugin = {
     const ibl = useExternalModule<{
       setup: (this: void, opts?: unknown) => void
     }>("ibl");
-    ibl.setup()
+    ibl.setup({
+      scope: {
+        enabled: getGlobalConfiguration().packages.hlchunk?.enabled ? false : true
+      }
+    });
   }
 };
 export { plugin as default };
