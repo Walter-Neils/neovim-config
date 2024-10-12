@@ -5497,10 +5497,11 @@ function configureLSP()
             if config == nil then
                 vim.notify("Failed to locate configuration for environment " .. targetEnvKey, vim.log.levels.WARN)
             else
-                local capabilities
+                local capabilities = vim.lsp.protocol.make_client_capabilities()
                 local ____opt_2 = getGlobalConfiguration().packages.cmp
                 if ____opt_2 and ____opt_2.enabled then
-                    capabilities = useExternalModule("cmp_nvim_lsp").default_capabilities()
+                    local cmp_capabilities = useExternalModule("cmp_nvim_lsp").default_capabilities()
+                    capabilities = __TS__ObjectAssign({}, capabilities, cmp_capabilities)
                 end
                 local ____config_additionalOptions_4 = config.additionalOptions
                 if ____config_additionalOptions_4 == nil then

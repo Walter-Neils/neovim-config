@@ -64,6 +64,7 @@ export function registerLSPConfigurationHook(this: void, hook: LSPConfigurationM
   configureLSP();
 }
 
+
 function on_attach(this: void, client: LSPClient, bufnr: number) {
   const lspConfig = getConfig();
   // TODO: Move plugin-specific logic to an attach hook
@@ -192,11 +193,15 @@ function configureLSP(this: void) {
         vim.log.levels.WARN,
       );
     } else {
-      let capabilities: unknown | undefined;
+      let capabilities = vim.lsp.protocol.make_client_capabilities();
       if (getGlobalConfiguration().packages["cmp"]?.enabled) {
-        capabilities = useExternalModule<
+        let cmp_capabilities = useExternalModule<
           { default_capabilities: (this: void) => unknown }
         >("cmp_nvim_lsp").default_capabilities();
+        capabilities = {
+          ...capabilities,
+          ...(cmp_capabilities as any)
+        }
       }
       const setupConfig = {
         ...config.additionalOptions ?? {},
@@ -207,7 +212,6 @@ function configureLSP(this: void) {
       for (const preHook of preHooks) {
         preHook(config.lspKey, setupConfig);
       }
-
       lspconfig[config.lspKey].setup(setupConfig);
     }
   }
