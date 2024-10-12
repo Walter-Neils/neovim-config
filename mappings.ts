@@ -529,7 +529,7 @@ if (config.packages["nvimDapUI"]) {
 
   applyKeyMapping({
     mode: 'v',
-    inputStroke: 'e',
+    inputStroke: '<leader>e',
     action: () => {
       getDapUI().eval();
     },
@@ -539,7 +539,7 @@ if (config.packages["nvimDapUI"]) {
   });
   applyKeyMapping({
     mode: 'n',
-    inputStroke: 'e',
+    inputStroke: '<leader>e',
     action: () => {
       getDapUI().eval();
     },
