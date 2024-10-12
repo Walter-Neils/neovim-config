@@ -83,7 +83,7 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
       enabled: false,
     },
     rustaceanvim: {
-      enabled: true,
+      enabled: false,
     },
     lspSignature: {
       enabled: true,
@@ -280,6 +280,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
       enabled: true
     },
     yaml: {
+      enabled: true
+    },
+    rust: {
       enabled: true
     }
   },

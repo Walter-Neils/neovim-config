@@ -3344,7 +3344,7 @@ ____exports.CONFIGURATION_DEFAULTS = {
         cmp = {enabled = true},
         telescope = {enabled = true},
         lspUI = {enabled = false},
-        rustaceanvim = {enabled = true},
+        rustaceanvim = {enabled = false},
         lspSignature = {enabled = true},
         indentBlankline = {enabled = true},
         treeDevIcons = {enabled = true},
@@ -3403,7 +3403,8 @@ ____exports.CONFIGURATION_DEFAULTS = {
         ["c/c++"] = {enabled = true},
         markdown = {enabled = true},
         lua = {enabled = true},
-        yaml = {enabled = true}
+        yaml = {enabled = true},
+        rust = {enabled = true}
     },
     shell = {target = "tmux", isolationScope = "isolated"},
     integrations = {ollama = {enabled = true}}
@@ -4534,6 +4535,40 @@ vim.api.nvim_create_autocmd(
         cppExePath = nil
     end}
 )
+local function createOrUseArray(root, arrayKey, callback)
+    if root[arrayKey] == nil or root[arrayKey] == nil then
+        root[arrayKey] = {}
+    end
+    return callback(root[arrayKey])
+end
+local function configureLanguages()
+    local dap = ____exports.getDap()
+    if vim.fn.executable("codelldb") then
+        dap.adapters.lldb = {type = "server", port = "${port}", host = "127.0.0.1", executable = {command = "codelldb", args = {"--port", "${port}"}}}
+        for ____, language in ipairs({"c", "cpp", "rust"}) do
+            createOrUseArray(
+                dap.configurations,
+                language,
+                function(languageConfig)
+                    languageConfig[#languageConfig + 1] = {
+                        name = "Launch",
+                        type = "lldb",
+                        request = "launch",
+                        program = getCPPTargetExecutable,
+                        cwd = "${workspaceFolder}",
+                        stopOnEntry = false,
+                        args = function()
+                            local result = {}
+                            result[#result + 1] = "test"
+                            return result
+                        end,
+                        runInTerminal = true
+                    }
+                end
+            )
+        end
+    end
+end
 local function configureActiveLanguages()
     local config = getGlobalConfiguration()
     local ____opt_0 = config.packages.nvimDapUI
@@ -4613,7 +4648,7 @@ local plugin = {
     config = function()
         ____exports.getDapUI().setup({})
         bindDapUIEvents()
-        configureActiveLanguages()
+        configureLanguages()
         ____exports.getDap().defaults.fallback.exception_breakpoints = {"uncaught", "raised"}
     end
 }
@@ -5441,7 +5476,8 @@ function environmentKeyToConfig(env)
         {key = "c/c++", lspKey = "clangd"},
         {key = "markdown", lspKey = "marksman"},
         {key = "lua", lspKey = "lua_ls"},
-        {key = "yaml", lspKey = "yamlls"}
+        {key = "yaml", lspKey = "yamlls"},
+        {key = "rust", lspKey = "rust_analyzer"}
     }
     return __TS__ArrayFind(
         configs,

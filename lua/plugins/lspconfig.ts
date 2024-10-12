@@ -157,6 +157,9 @@ function environmentKeyToConfig(env: string) {
   }, {
     key: 'yaml',
     lspKey: 'yamlls'
+  }, {
+    key: 'rust',
+    lspKey: 'rust_analyzer'
   }];
 
   return configs.find((x) => x.key === env);

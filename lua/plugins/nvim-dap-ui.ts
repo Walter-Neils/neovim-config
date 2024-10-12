@@ -13,7 +13,7 @@ type DapUIModule = {
 type DapAdapterStructure = {
   type: 'server',
   host: '::1' | string,
-  port: number | '${port}',
+  port: number | '${port}' | ((this: void) => number),
   executable: {
     command: string,
     args?: string[]
@@ -34,7 +34,7 @@ type DapConfig = {
   runtimeExecutable?: 'node' | string,
   runtimeArgs?: string[],
   stopOnEntry?: boolean,
-  args?: string[],
+  args?: string[] | ((this: void) => string[]),
   runInTerminal?: boolean
 } & {
   [key: string]: unknown | undefined
@@ -124,6 +124,48 @@ type DapGlobalConfig = {
   }
 };
 
+function createOrUseArray<TRoot extends {}, TKey extends keyof TRoot, TResult>(this: void, root: TRoot, arrayKey: TKey, callback: (this: void, array: NonNullable<TRoot[TKey]>) => TResult) {
+  if (root[arrayKey] === undefined || root[arrayKey] === null) {
+    root[arrayKey] = [] as any;
+  }
+  return callback(root[arrayKey]!);
+}
+
+function configureLanguages(this: void) {
+  const dap = getDap();
+  if (vim.fn.executable("codelldb")) {
+    // Configure LLDB as an adapter
+    dap.adapters['lldb'] = {
+      type: 'server',
+      port: '${port}',
+      host: '127.0.0.1',
+      executable: {
+        command: 'codelldb',
+        args: ['--port', '${port}']
+      }
+    };
+    for (const language of ['c', 'cpp', 'rust'] as const) {
+      createOrUseArray(dap.configurations, language, languageConfig => {
+        languageConfig.push({
+          name: 'Launch',
+          type: 'lldb',
+          request: 'launch',
+          program: getCPPTargetExecutable,
+          cwd: '${workspaceFolder}',
+          stopOnEntry: false,
+          args: () => {
+            let result: string[] = [];
+            result.push("test");
+            return result;
+          },
+          runInTerminal: true
+        })
+      });
+    }
+
+  }
+}
+
 function configureActiveLanguages(this: void) {
   const config = getGlobalConfiguration();
   const dapConfig = config.packages["nvimDapUI"]?.config as DapGlobalConfig;
@@ -206,7 +248,8 @@ const plugin: LazyPlugin = {
   config: function(this: void) {
     getDapUI().setup({});
     bindDapUIEvents();
-    configureActiveLanguages();
+    // configureActiveLanguages();
+    configureLanguages();
     getDap().defaults.fallback.exception_breakpoints = ["uncaught", "raised"]
   }
 };
