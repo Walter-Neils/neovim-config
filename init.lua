@@ -3310,7 +3310,7 @@ local ____argparser = require("lua.helpers.user_command.argparser")
 local parseArgs = ____argparser.parseArgs
 function reloadConfiguration()
     local config = getGlobalConfig()
-    if #__TS__ObjectKeys(config) < 1 then
+    if #__TS__ObjectKeys(config) < 1 or true then
         configuration = ____exports.CONFIGURATION_DEFAULTS
         ____exports.saveGlobalConfiguration()
         configuration = getGlobalConfig()
@@ -3364,7 +3364,7 @@ ____exports.CONFIGURATION_DEFAULTS = {
         actionsPreview = {enabled = true},
         fireNvim = {enabled = true},
         ufo = {enabled = true},
-        lspconfig = {enabled = true, config = {inlayHints = {enabled = true, displayMode = "only-in-normal-mode"}}},
+        lspconfig = {enabled = true, config = {inlayHints = {enabled = true, displayMode = "always"}}},
         markdownPreview = {enabled = true},
         gitBrowse = {enabled = true},
         obsidian = {enabled = true, config = {workspaces = {{name = "notes", path = "~/Documents/obsidian/notes"}}}},
@@ -4873,7 +4873,7 @@ if config.packages.nvimDapUI then
     })
     applyKeyMapping({
         mode = "v",
-        inputStroke = "e",
+        inputStroke = "<leader>e",
         action = function()
             getDapUI().eval()
         end,
@@ -4881,7 +4881,7 @@ if config.packages.nvimDapUI then
     })
     applyKeyMapping({
         mode = "n",
-        inputStroke = "e",
+        inputStroke = "<leader>e",
         action = function()
             getDapUI().eval()
         end,
@@ -5491,7 +5491,7 @@ function configureLSP()
         do
             local ____opt_0 = targetEnvironments[targetEnvKey]
             if not (____opt_0 and ____opt_0.enabled) then
-                goto __continue27
+                goto __continue28
             end
             local config = environmentKeyToConfig(targetEnvKey)
             if config == nil then
@@ -5514,7 +5514,7 @@ function configureLSP()
                 lspconfig[config.lspKey].setup(setupConfig)
             end
         end
-        ::__continue27::
+        ::__continue28::
     end
     local ____vim_diagnostic_config_8 = vim.diagnostic.config
     local ____opt_5 = getGlobalConfiguration().packages.lspLines
@@ -5538,18 +5538,20 @@ end
 do
     local lspConfig = getConfig()
     if lspConfig.inlayHints.enabled then
-        vim.api.nvim_create_autocmd(
-            "InsertEnter",
-            {callback = function()
-                if lspConfig.inlayHints.displayMode == "only-in-normal-mode" then
-                    vim.lsp.inlay_hint.enable(false)
-                end
-            end}
-        )
+        if lspConfig.inlayHints.displayMode ~= "always" then
+            vim.api.nvim_create_autocmd(
+                "InsertEnter",
+                {callback = function()
+                    if lspConfig.inlayHints.displayMode == "only-in-normal-mode" then
+                        vim.lsp.inlay_hint.enable(false)
+                    end
+                end}
+            )
+        end
         vim.api.nvim_create_autocmd(
             "InsertLeave",
             {callback = function()
-                if lspConfig.inlayHints.displayMode == "only-in-normal-mode" then
+                if lspConfig.inlayHints.displayMode == "only-in-normal-mode" or lspConfig.inlayHints.displayMode == "always" then
                     vim.lsp.inlay_hint.enable(true)
                 end
             end}

@@ -36,7 +36,7 @@ export type LSPConfig = {
 type GlobalConfigLSPConfig = {
   inlayHints: {
     enabled: true;
-    displayMode: "only-in-normal-mode";
+    displayMode: "only-in-normal-mode" | 'always';
   };
 };
 
@@ -63,7 +63,6 @@ export function registerLSPConfigurationHook(this: void, hook: LSPConfigurationM
   preHooks.push(hook);
   configureLSP();
 }
-
 
 function on_attach(this: void, client: LSPClient, bufnr: number) {
   const lspConfig = getConfig();
@@ -97,17 +96,19 @@ function on_attach(this: void, client: LSPClient, bufnr: number) {
 {
   const lspConfig = getConfig();
   if (lspConfig.inlayHints.enabled) {
-    vim.api.nvim_create_autocmd("InsertEnter", {
-      callback: () => {
-        if (lspConfig.inlayHints.displayMode === "only-in-normal-mode") {
-          vim.lsp.inlay_hint.enable(false);
-        }
-      },
-    });
+    if (lspConfig.inlayHints.displayMode !== 'always') {
+      vim.api.nvim_create_autocmd("InsertEnter", {
+        callback: () => {
+          if (lspConfig.inlayHints.displayMode === "only-in-normal-mode") {
+            vim.lsp.inlay_hint.enable(false);
+          }
+        },
+      });
+    }
 
     vim.api.nvim_create_autocmd("InsertLeave", {
       callback: () => {
-        if (lspConfig.inlayHints.displayMode === "only-in-normal-mode") {
+        if (lspConfig.inlayHints.displayMode === "only-in-normal-mode" || lspConfig.inlayHints.displayMode === 'always') {
           vim.lsp.inlay_hint.enable(true);
         }
       },

@@ -11,7 +11,7 @@ const [getGlobalConfig, setGlobalConfig] = usePersistentValue(
 
 function reloadConfiguration() {
   let config = getGlobalConfig();
-  if (Object.keys(config).length < 1) {
+  if (Object.keys(config).length < 1 || true) {
     // Empty, apply default config
     configuration = CONFIGURATION_DEFAULTS;
     saveGlobalConfiguration();
@@ -152,7 +152,7 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
       config: {
         inlayHints: {
           enabled: true,
-          displayMode: "only-in-normal-mode",
+          displayMode: "always",
         },
       },
     },
