@@ -3395,7 +3395,13 @@ ____exports.CONFIGURATION_DEFAULTS = {
         tsContextCommentString = {enabled = true},
         nvimDapVirtualText = {enabled = true},
         overseer = {enabled = true},
-        hlchunk = {enabled = true}
+        hlchunk = {enabled = true},
+        rest = {enabled = true},
+        flatten = {enabled = true},
+        tinyInlineDiagnostic = {enabled = true},
+        screenkey = {enabled = true},
+        hex = {enabled = true},
+        fidget = {enabled = true}
     },
     targetEnvironments = {
         typescript = {enabled = true},
@@ -3407,7 +3413,7 @@ ____exports.CONFIGURATION_DEFAULTS = {
         rust = {enabled = true}
     },
     shell = {target = "tmux", isolationScope = "isolated"},
-    integrations = {ollama = {enabled = true}}
+    integrations = {ollama = {enabled = false}}
 }
 local watchers = {}
 function ____exports.useConfigWatcher(key, watcher)
@@ -3799,73 +3805,6 @@ local plugin = {
 ____exports.default = plugin
 return ____exports
  end,
-["lua.integrations.ollama"] = function(...) 
-local ____exports = {}
-local ____configuration = require("lua.helpers.configuration.index")
-local getGlobalConfiguration = ____configuration.getGlobalConfiguration
-local ____copilot = require("lua.plugins.copilot")
-local getCopilotExtendedVimAPI = ____copilot.getCopilotExtendedVimAPI
-function ____exports.setupOllamaCopilot()
-    local vim = getCopilotExtendedVimAPI()
-    local ____opt_0 = getGlobalConfiguration().integrations.ollama
-    if not (____opt_0 and ____opt_0.enabled) then
-        return
-    end
-    local ____opt_2 = getGlobalConfiguration().packages.copilot
-    if not (____opt_2 and ____opt_2.enabled) then
-        return
-    end
-    vim.g.copilot_proxy = "http://localhost:11435"
-    vim.g.copilot_proxy_strict_ssl = false
-    if not vim.fn.executable("go") then
-        vim.notify("Cannot configure copilot ollama proxy: the `go` binary is not installed", vim.log.levels.ERROR)
-        return
-    end
-    vim.fn.system({"go", "install", "github.com/bernardo-bruning/ollama-copilot@latest"})
-    if vim.v.shell_error ~= 0 then
-        vim.notify("An error occurred while installing `ollama-copilot@latest`.", vim.log.levels.ERROR)
-        return
-    end
-    local username = os.getenv("USER")
-    if username == nil then
-        vim.notify("$USER var is unset", vim.log.levels.ERROR)
-        return
-    end
-    local ollamaPath = ("/home/" .. username) .. "/go/bin/ollama-copilot"
-    if not vim.fn.executable(ollamaPath) then
-        vim.notify("Unable to locate ollama-copilot binary")
-        return
-    end
-    local handle
-    handle = vim.loop.spawn(
-        ollamaPath,
-        {detached = true},
-        function(code, signal)
-            vim.notify(((("ollama exited: signal(" .. tostring(signal)) .. ") code(") .. tostring(code)) .. ")")
-            handle:close()
-        end
-    )
-end
-return ____exports
- end,
-["lua.integrations.portable-appimage"] = function(...) 
-local ____exports = {}
-local function getAppImageConfigData()
-    return {appDir = os.getenv("APPDIR")}
-end
-local function injectSTDPathOverride()
-    vim.fn.stdpath = function(target)
-        return "/tmp/winvim/" .. target
-    end
-end
-function ____exports.enablePortableAppImageLogic()
-    local appImageEnvironment = getAppImageConfigData()
-    if appImageEnvironment.appDir ~= nil then
-        injectSTDPathOverride()
-    end
-end
-return ____exports
- end,
 ["lua.shims.mainLoopCallbacks"] = function(...) 
 local ____exports = {}
 function ____exports.setTimeout(callback, ms)
@@ -3912,6 +3851,77 @@ function ____exports.insertMainLoopCallbackShims()
     global.setInterval = ____exports.setInterval
     global.clearInterval = ____exports.clearInterval
     global.setImmediate = ____exports.setImmediate
+end
+return ____exports
+ end,
+["lua.integrations.ollama"] = function(...) 
+local ____exports = {}
+local ____configuration = require("lua.helpers.configuration.index")
+local getGlobalConfiguration = ____configuration.getGlobalConfiguration
+local ____copilot = require("lua.plugins.copilot")
+local getCopilotExtendedVimAPI = ____copilot.getCopilotExtendedVimAPI
+local ____mainLoopCallbacks = require("lua.shims.mainLoopCallbacks")
+local setImmediate = ____mainLoopCallbacks.setImmediate
+function ____exports.setupOllamaCopilot()
+    local vim = getCopilotExtendedVimAPI()
+    local ____opt_0 = getGlobalConfiguration().integrations.ollama
+    if not (____opt_0 and ____opt_0.enabled) then
+        return
+    end
+    local ____opt_2 = getGlobalConfiguration().packages.copilot
+    if not (____opt_2 and ____opt_2.enabled) then
+        return
+    end
+    vim.g.copilot_proxy = "http://localhost:11435"
+    vim.g.copilot_proxy_strict_ssl = false
+    if not vim.fn.executable("go") then
+        vim.notify("Cannot configure copilot ollama proxy: the `go` binary is not installed", vim.log.levels.ERROR)
+        return
+    end
+    vim.fn.system({"go", "install", "github.com/bernardo-bruning/ollama-copilot@latest"})
+    if vim.v.shell_error ~= 0 then
+        vim.notify("An error occurred while installing `ollama-copilot@latest`.", vim.log.levels.ERROR)
+        return
+    end
+    local username = os.getenv("USER")
+    if username == nil then
+        vim.notify("$USER var is unset", vim.log.levels.ERROR)
+        return
+    end
+    local ollamaPath = ("/home/" .. username) .. "/go/bin/ollama-copilot"
+    if not vim.fn.executable(ollamaPath) then
+        vim.notify("Unable to locate ollama-copilot binary")
+        return
+    end
+    local handle
+    handle = vim.loop.spawn(
+        ollamaPath,
+        {detached = true},
+        function(code, signal)
+            setImmediate(function()
+                vim.notify(((("ollama exited: signal(" .. tostring(signal)) .. ") code(") .. tostring(code)) .. ")")
+            end)
+            handle:close()
+        end
+    )
+end
+return ____exports
+ end,
+["lua.integrations.portable-appimage"] = function(...) 
+local ____exports = {}
+local function getAppImageConfigData()
+    return {appDir = os.getenv("APPDIR")}
+end
+local function injectSTDPathOverride()
+    vim.fn.stdpath = function(target)
+        return "/tmp/winvim/" .. target
+    end
+end
+function ____exports.enablePortableAppImageLogic()
+    local appImageEnvironment = getAppImageConfigData()
+    if appImageEnvironment.appDir ~= nil then
+        injectSTDPathOverride()
+    end
 end
 return ____exports
  end,
@@ -4168,6 +4178,30 @@ function ____exports.getPlugins()
     local ____opt_120 = globalConfig.packages.hlchunk
     if ____opt_120 and ____opt_120.enabled then
         result[#result + 1] = require("lua.plugins.hlchunk").default
+    end
+    local ____opt_122 = globalConfig.packages.rest
+    if ____opt_122 and ____opt_122.enabled then
+        result[#result + 1] = require("lua.plugins.rest").default
+    end
+    local ____opt_124 = globalConfig.packages.flatten
+    if ____opt_124 and ____opt_124.enabled then
+        result[#result + 1] = require("lua.plugins.flatten").default
+    end
+    local ____opt_126 = globalConfig.packages.tinyInlineDiagnostic
+    if ____opt_126 and ____opt_126.enabled then
+        result[#result + 1] = require("lua.plugins.tiny-inline-diagnostic").default
+    end
+    local ____opt_128 = globalConfig.packages.screenkey
+    if ____opt_128 and ____opt_128.enabled then
+        result[#result + 1] = require("lua.plugins.screenkey").default
+    end
+    local ____opt_130 = globalConfig.packages.hex
+    if ____opt_130 and ____opt_130.enabled then
+        result[#result + 1] = require("lua.plugins.hex").default
+    end
+    local ____opt_132 = globalConfig.packages.fidget
+    if ____opt_132 and ____opt_132.enabled then
+        result[#result + 1] = require("lua.plugins.fidget").default
     end
     result[#result + 1] = require("lua.plugins.nui").default
     return result
@@ -4568,6 +4602,29 @@ local function configureLanguages()
             )
         end
     end
+    if vim.fn.executable("js-debug-adapter") then
+        dap.adapters["pwa-node"] = {type = "server", host = "::1", port = 8123, executable = {command = "js-debug-adapter"}}
+        vim.notify("JS Debug Adapter installed, but no DAP configuration uses it.", vim.log.levels.WARN)
+    end
+    if vim.fn.executable("node-debug2-adapter") then
+        dap.adapters.node2 = {name = "NodeJS Debug", type = "executable", command = "node-debug2-adapter"}
+        for ____, language in ipairs({"javascript", "typescript"}) do
+            dap.configurations[language] = {{
+                type = "node2",
+                request = "launch",
+                name = "Launch file",
+                program = "${file}",
+                cwd = "${workspaceFolder}",
+                runtimeExecutable = "node",
+                outDir = "dist",
+                args = {"${file}"},
+                sourceMap = true,
+                skipFiles = {"<node_internals>/**", "node_modules/**"},
+                protocol = "inspector",
+                outFiles = {"${workspaceFolder}/dist/*.js"}
+            }}
+        end
+    end
 end
 local function configureActiveLanguages()
     local config = getGlobalConfiguration()
@@ -4907,6 +4964,7 @@ local ____opt_13 = config.packages.lazyGit
 if ____opt_13 and ____opt_13.enabled then
     applyKeyMapping({mode = "n", inputStroke = "<leader>lg", outputStroke = "<cmd>LazyGit<CR>", options = {desc = "Show code actions"}})
 end
+vim.cmd("map q <Nop>")
 return ____exports
  end,
 ["lua.helpers.text.center"] = function(...) 
@@ -5152,9 +5210,26 @@ local plugin = {[1] = "sindrets/diffview.nvim", cmd = {"DiffviewOpen"}}
 ____exports.default = plugin
 return ____exports
  end,
+["lua.plugins.fidget"] = function(...) 
+local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+local function useFidgetPlugin()
+    return useExternalModule("fidget")
+end
+local plugin = {[1] = "j-hui/fidget.nvim", event = "VeryLazy", opts = {}}
+____exports.default = plugin
+return ____exports
+ end,
 ["lua.plugins.firenvim"] = function(...) 
 local ____exports = {}
 local plugin = {[1] = "glacambre/firenvim", build = ":call firenvim#install(0)"}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.flatten"] = function(...) 
+local ____exports = {}
+local plugin = {[1] = "willothy/flatten.nvim", config = true, lazy = false, priority = 1001}
 ____exports.default = plugin
 return ____exports
  end,
@@ -5188,6 +5263,27 @@ local plugin = {
 ____exports.default = plugin
 return ____exports
  end,
+["lua.plugins.hex"] = function(...) 
+local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+local function useHexPlugin()
+    return useExternalModule("hex")
+end
+local plugin = {
+    [1] = "RaafatTurki/hex.nvim",
+    event = "VeryLazy",
+    cmd = {"HexDump", "HexAssemble", "HexToggle"},
+    config = function()
+        if not vim.fn.executable("xxd") then
+            vim.notify("xxd utility is required for hex editor functionality", vim.log.levels.ERROR)
+        end
+        useHexPlugin().setup()
+    end
+}
+____exports.default = plugin
+return ____exports
+ end,
 ["lua.plugins.hlchunk"] = function(...) 
 local ____exports = {}
 local ____useModule = require("lua.helpers.module.useModule")
@@ -5199,7 +5295,6 @@ local plugin = {
     [1] = "shellRaining/hlchunk.nvim",
     event = {"BufReadPre", "BufNewFile"},
     config = function()
-        vim.notify("Loading HLChunk")
         useHLChunk().setup({chunk = {enable = true}})
     end
 }
@@ -5913,6 +6008,12 @@ local plugin = {
 ____exports.default = plugin
 return ____exports
  end,
+["lua.plugins.rest"] = function(...) 
+local ____exports = {}
+local plugin = {[1] = "rest-nvim/rest.nvim"}
+____exports.default = plugin
+return ____exports
+ end,
 ["lua.plugins.rustaceanvim"] = function(...) 
 local ____exports = {}
 function ____exports.getRustaceonVimExtendedVIMApi()
@@ -5928,6 +6029,12 @@ local plugin = {
         vim.g.rustaceanvim = {tools = {hover_actions = {auto_focus = false, replace_builtin_hover = false}}}
     end
 }
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.screenkey"] = function(...) 
+local ____exports = {}
+local plugin = {[1] = "NStefan002/screenkey.nvim", lazy = false, version = "*"}
 ____exports.default = plugin
 return ____exports
  end,
@@ -6092,6 +6199,23 @@ local plugin = {
             },
             tracking_timeout_seconds = 5 * 1000
         })
+    end
+}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.tiny-inline-diagnostic"] = function(...) 
+local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+local function useTinyInlineDiagnostic()
+    return useExternalModule("tiny-inline-diagnostic")
+end
+local plugin = {
+    [1] = "rachartier/tiny-inline-diagnostic.nvim",
+    event = "VeryLazy",
+    config = function()
+        useTinyInlineDiagnostic().setup({})
     end
 }
 ____exports.default = plugin

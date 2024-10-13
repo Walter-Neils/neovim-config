@@ -13,7 +13,6 @@ const plugin: LazyPlugin = {
   1: 'shellRaining/hlchunk.nvim',
   event: ["BufReadPre", "BufNewFile"],
   config: () => {
-    vim.notify("Loading HLChunk")
     useHLChunk().setup({
       chunk: {
         enable: true

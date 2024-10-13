@@ -164,6 +164,42 @@ function configureLanguages(this: void) {
     }
 
   }
+
+  if (vim.fn.executable("js-debug-adapter")) {
+    dap.adapters['pwa-node'] = {
+      type: 'server',
+      host: '::1',
+      port: 8123,
+      executable: {
+        command: 'js-debug-adapter'
+      }
+    };
+    vim.notify("JS Debug Adapter installed, but no DAP configuration uses it.", vim.log.levels.WARN);
+  }
+  if (vim.fn.executable("node-debug2-adapter")) {
+    dap.adapters["node2"] = {
+      name: 'NodeJS Debug',
+      type: 'executable',
+      command: 'node-debug2-adapter'
+    };
+    for (const language of ['javascript', 'typescript'] as const) {
+      // Dunno what half this does, but by god it works
+      dap.configurations[language] = [{
+        type: 'node2',
+        request: 'launch',
+        name: 'Launch file',
+        program: '${file}',
+        cwd: '${workspaceFolder}',
+        runtimeExecutable: 'node',
+        outDir: 'dist',
+        args: ["${file}"],
+        sourceMap: true,
+        skipFiles: ["<node_internals>/**", "node_modules/**"],
+        protocol: 'inspector',
+        outFiles: ['${workspaceFolder}/dist/*.js']
+      }];
+    }
+  }
 }
 
 function configureActiveLanguages(this: void) {

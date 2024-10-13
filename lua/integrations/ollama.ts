@@ -1,5 +1,6 @@
 import { getGlobalConfiguration } from "../helpers/configuration";
 import { getCopilotExtendedVimAPI } from "../plugins/copilot";
+import { setImmediate } from "../shims/mainLoopCallbacks";
 
 export function setupOllamaCopilot(this: void) {
   const vim = getCopilotExtendedVimAPI();
@@ -35,7 +36,9 @@ export function setupOllamaCopilot(this: void) {
   const handle = vim.loop.spawn(ollamaPath, {
     detached: true
   }, (code, signal) => {
-    vim.notify(`ollama exited: signal(${signal}) code(${code})`);
+    setImmediate(() => {
+      vim.notify(`ollama exited: signal(${signal}) code(${code})`);
+    });
     handle.close();
   });
 }

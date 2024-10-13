@@ -260,6 +260,24 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     hlchunk: {
       enabled: true
+    },
+    rest: {
+      enabled: true
+    },
+    flatten: {
+      enabled: true
+    },
+    tinyInlineDiagnostic: {
+      enabled: true
+    },
+    screenkey: {
+      enabled: true
+    },
+    hex: {
+      enabled: true
+    },
+    fidget: {
+      enabled: true
     }
   },
   targetEnvironments: {
@@ -292,7 +310,7 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
   },
   integrations: {
     ollama: {
-      enabled: true,
+      enabled: false,
     },
   },
 };

@@ -191,6 +191,24 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (globalConfig.packages.hlchunk?.enabled) {
     result.push(require("hlchunk").default);
   }
+  if (globalConfig.packages.rest?.enabled) {
+    result.push(require("rest").default);
+  }
+  if (globalConfig.packages.flatten?.enabled) {
+    result.push(require("flatten").default);
+  }
+  if (globalConfig.packages.tinyInlineDiagnostic?.enabled) {
+    result.push(require("tiny-inline-diagnostic").default);
+  }
+  if (globalConfig.packages.screenkey?.enabled) {
+    result.push(require("screenkey").default);
+  }
+  if (globalConfig.packages.hex?.enabled) {
+    result.push(require("hex").default);
+  }
+  if (globalConfig.packages.fidget?.enabled) {
+    result.push(require("fidget").default);
+  }
   result.push(require("nui").default);
   return result;
 }

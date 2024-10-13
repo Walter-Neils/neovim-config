@@ -580,3 +580,6 @@ if (config.packages["lazyGit"]?.enabled) {
     }
   });
 }
+
+// Disable macro recording
+vim.cmd("map q <Nop>");

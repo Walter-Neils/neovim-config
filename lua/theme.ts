@@ -58,7 +58,6 @@ function TokyoNight(this: void) {
   vim.fn.sign_define('DapLogPoint', { text: '', texthl: 'DapLogPoint', linehl: 'DapLogPoint', numhl: 'DapLogPoint' });
   vim.fn.sign_define('DapStopped', { text: '', texthl: 'DapStopped', linehl: 'DapStopped', numhl: 'DapStopped' });
 
-
   vim.api.nvim_set_hl(0, 'SymbolUsageRounding', { fg: h('CursorLine').bg, italic: true } as any)
   vim.api.nvim_set_hl(0, 'SymbolUsageContent', { bg: h('CursorLine').bg, fg: h('Comment').fg, italic: true } as any);
   vim.api.nvim_set_hl(0, 'SymbolUsageRef', { fg: h('Function').fg, bg: h('CursorLine').bg, italic: true } as any);
