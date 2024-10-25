@@ -3401,7 +3401,8 @@ ____exports.CONFIGURATION_DEFAULTS = {
         tinyInlineDiagnostic = {enabled = true},
         screenkey = {enabled = true},
         hex = {enabled = true},
-        fidget = {enabled = true}
+        fidget = {enabled = true},
+        treesitterContext = {enabled = true}
     },
     targetEnvironments = {
         typescript = {enabled = true},
@@ -4202,6 +4203,10 @@ function ____exports.getPlugins()
     local ____opt_132 = globalConfig.packages.fidget
     if ____opt_132 and ____opt_132.enabled then
         result[#result + 1] = require("lua.plugins.fidget").default
+    end
+    local ____opt_134 = globalConfig.packages.treesitterContext
+    if ____opt_134 and ____opt_134.enabled then
+        result[#result + 1] = require("lua.plugins.treesitter-context").default
     end
     result[#result + 1] = require("lua.plugins.nui").default
     return result
@@ -5453,10 +5458,9 @@ local useExternalModule = ____useModule.useExternalModule
 local plugin = {
     [1] = "ray-x/lsp_signature.nvim",
     event = "VeryLazy",
-    opts = {},
     config = function(_, opts)
         local lsp_signature = useExternalModule("lsp_signature")
-        lsp_signature.setup(opts)
+        lsp_signature.setup({always_trigger = true})
     end
 }
 ____exports.default = plugin
@@ -6233,6 +6237,23 @@ local plugin = {[1] = "folke/tokyonight.nvim", lazy = false, priority = 1000, op
 ____exports.default = plugin
 return ____exports
  end,
+["lua.plugins.treesitter-context"] = function(...) 
+local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+local function useTreeSitterContextPlugin()
+    return useExternalModule("treesitter-context")
+end
+local plugin = {
+    [1] = "nvim-treesitter/nvim-treesitter-context",
+    event = "VeryLazy",
+    config = function()
+        useTreeSitterContextPlugin().setup({enabled = true, max_lines = -1, trim_scope = "inner"})
+    end
+}
+____exports.default = plugin
+return ____exports
+ end,
 ["lua.plugins.treesitter"] = function(...) 
 local ____exports = {}
 local ____configuration = require("lua.helpers.configuration.index")
@@ -6250,6 +6271,8 @@ return ____exports
  end,
 ["lua.plugins.treesj"] = function(...) 
 local ____exports = {}
+local ____keymap = require("lua.helpers.keymap.index")
+local applyKeyMapping = ____keymap.applyKeyMapping
 local ____useModule = require("lua.helpers.module.useModule")
 local useExternalModule = ____useModule.useExternalModule
 local function getTreesj()
@@ -6260,7 +6283,15 @@ local plugin = {
     keys = {"<space>j", "<space>s"},
     dependencies = {"nvim-treesitter/nvim-treesitter"},
     config = function()
-        getTreesj().setup()
+        applyKeyMapping({
+            mode = "n",
+            inputStroke = "<leader>j",
+            action = function()
+                getTreesj().toggle()
+            end,
+            options = {}
+        })
+        return getTreesj().setup({use_default_keymaps = false, max_join_length = 4096})
     end
 }
 ____exports.default = plugin

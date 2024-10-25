@@ -278,6 +278,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     fidget: {
       enabled: true
+    },
+    treesitterContext: {
+      enabled: true
     }
   },
   targetEnvironments: {

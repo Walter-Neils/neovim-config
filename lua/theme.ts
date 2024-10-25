@@ -63,7 +63,6 @@ function TokyoNight(this: void) {
   vim.api.nvim_set_hl(0, 'SymbolUsageRef', { fg: h('Function').fg, bg: h('CursorLine').bg, italic: true } as any);
   vim.api.nvim_set_hl(0, 'SymbolUsageDef', { fg: h('Type').fg, bg: h('CursorLine').bg, italic: true } as any);
   vim.api.nvim_set_hl(0, 'SymbolUsageImpl', { fg: h('@keyword').fg, bg: h('CursorLine').bg, italic: true } as any);
-
   vim.o.fillchars = "eob: ,fold: ,foldopen:,foldsep: ,foldclose:";
 }
 

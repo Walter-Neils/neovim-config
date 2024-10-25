@@ -209,6 +209,9 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (globalConfig.packages.fidget?.enabled) {
     result.push(require("fidget").default);
   }
+  if (globalConfig.packages.treesitterContext?.enabled) {
+    result.push(require("treesitter-context").default);
+  }
   result.push(require("nui").default);
   return result;
 }
