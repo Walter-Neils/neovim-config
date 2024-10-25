@@ -212,6 +212,9 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (globalConfig.packages.treesitterContext?.enabled) {
     result.push(require("treesitter-context").default);
   }
+  if (globalConfig.packages.gotoPreview?.enabled) {
+    result.push(require("goto-preview").default);
+  }
   result.push(require("nui").default);
   return result;
 }

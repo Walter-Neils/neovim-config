@@ -3402,7 +3402,8 @@ ____exports.CONFIGURATION_DEFAULTS = {
         screenkey = {enabled = true},
         hex = {enabled = true},
         fidget = {enabled = true},
-        treesitterContext = {enabled = true}
+        treesitterContext = {enabled = true},
+        gotoPreview = {enabled = true}
     },
     targetEnvironments = {
         typescript = {enabled = true},
@@ -4207,6 +4208,10 @@ function ____exports.getPlugins()
     local ____opt_134 = globalConfig.packages.treesitterContext
     if ____opt_134 and ____opt_134.enabled then
         result[#result + 1] = require("lua.plugins.treesitter-context").default
+    end
+    local ____opt_136 = globalConfig.packages.gotoPreview
+    if ____opt_136 and ____opt_136.enabled then
+        result[#result + 1] = require("lua.plugins.goto-preview").default
     end
     result[#result + 1] = require("lua.plugins.nui").default
     return result
@@ -5265,6 +5270,12 @@ local plugin = {
         useExternalModule("glance").setup({})
     end
 }
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.goto-preview"] = function(...) 
+local ____exports = {}
+local plugin = {[1] = "rmagatti/goto-preview", event = "BufEnter", opts = {default_mappings = true}, config = true}
 ____exports.default = plugin
 return ____exports
  end,

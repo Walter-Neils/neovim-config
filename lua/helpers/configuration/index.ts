@@ -281,6 +281,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     treesitterContext: {
       enabled: true
+    },
+    gotoPreview: {
+      enabled: true
     }
   },
   targetEnvironments: {
