@@ -2,10 +2,12 @@ type KeymapSetOptions = {
   desc?: string,
   noremap?: boolean,
   expr?: boolean,
-  silent?: boolean
+  silent?: boolean,
+  buffer?: number
 };
+type VimModes = 'i' | 'a' | 'n' | 't' | 'v';
 type KeyMapping = {
-  mode: 'i' | 'a' | 'n' | 't' | 'v'
+  mode: VimModes | VimModes[],
   options?: KeymapSetOptions
 } & (
     {

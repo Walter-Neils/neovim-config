@@ -274,7 +274,7 @@ type VimAPI = {
   },
   keymap: {
     del: (this: void, mode: string, bind: string) => boolean,
-    set: (this: void, mode: 'i' | 'n' | 'a' | 't' | 'v' | 'x', stroke: string, ...args: any[]) => void
+    set: (this: void, mode: string | string[], stroke: string, ...args: any[]) => void
   },
   ui: {
     input: (this: void, config: { prompt: string }, callback: (this: void, input?: string) => void) => void,
