@@ -3180,6 +3180,8 @@ end
 return ____exports
  end,
 ["lua.helpers.keymap.index"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local __TS__ObjectAssign = ____lualib.__TS__ObjectAssign
 local ____exports = {}
 function ____exports.keyMappingExists(mode, bind)
     local result = vim.api.nvim_call_function("mapcheck", {bind, mode})
@@ -3190,6 +3192,7 @@ function ____exports.keyMappingExists(mode, bind)
     end
 end
 function ____exports.applyKeyMapping(map)
+    map.options = __TS__ObjectAssign({silent = true}, map.options)
     if map.action ~= nil then
         vim.keymap.set(map.mode, map.inputStroke, map.action, map.options)
     else
@@ -3233,6 +3236,31 @@ function ____exports.initCustomJumplist()
             vim.cmd("tabdo windo clearjumps | tabnext")
         end,
         {}
+    )
+end
+return ____exports
+ end,
+["lua.custom.profile.index"] = function(...) 
+local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+local ____argparser = require("lua.helpers.user_command.argparser")
+local parseArgs = ____argparser.parseArgs
+function ____exports.setupCustomProfilerCommands()
+    vim.api.nvim_create_user_command(
+        "LuaJITProfiler",
+        function(_args)
+            local args = parseArgs(_args.fargs)
+            local function getJIT()
+                return useExternalModule("jit.p")
+            end
+            if args.operation == "start" then
+                getJIT().start("32", "profile.txt")
+            elseif args.operation == "stop" then
+                getJIT().stop()
+            end
+        end,
+        {nargs = "*"}
     )
 end
 return ____exports
@@ -3384,7 +3412,7 @@ ____exports.CONFIGURATION_DEFAULTS = {
         symbolUsage = {enabled = true},
         neotest = {enabled = true},
         navic = {enabled = true},
-        illuminate = {enabled = true},
+        illuminate = {enabled = false},
         treesj = {enabled = true},
         iconPicker = {enabled = true},
         todoComments = {enabled = true},
@@ -3712,6 +3740,8 @@ local ____git = require("lua.custom.git.index")
 local initCustomGit = ____git.initCustomGit
 local ____jumplist = require("lua.custom.jumplist.index")
 local initCustomJumplist = ____jumplist.initCustomJumplist
+local ____profile = require("lua.custom.profile.index")
+local setupCustomProfilerCommands = ____profile.setupCustomProfilerCommands
 local ____tmux = require("lua.custom.tmux.index")
 local initCustomTmux = ____tmux.initCustomTmux
 function ____exports.setupCustomLogic()
@@ -3720,6 +3750,7 @@ function ____exports.setupCustomLogic()
     initCustomEnvLoader()
     initCustomJumplist()
     initCustomGit()
+    setupCustomProfilerCommands()
 end
 return ____exports
  end,
@@ -4975,6 +5006,71 @@ if ____opt_13 and ____opt_13.enabled then
     applyKeyMapping({mode = "n", inputStroke = "<leader>lg", outputStroke = "<cmd>LazyGit<CR>", options = {desc = "Show code actions"}})
 end
 vim.cmd("map q <Nop>")
+return ____exports
+ end,
+["lua.custom.settings.index"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local Error = ____lualib.Error
+local RangeError = ____lualib.RangeError
+local ReferenceError = ____lualib.ReferenceError
+local SyntaxError = ____lualib.SyntaxError
+local TypeError = ____lualib.TypeError
+local URIError = ____lualib.URIError
+local __TS__New = ____lualib.__TS__New
+local __TS__ObjectAssign = ____lualib.__TS__ObjectAssign
+local __TS__ObjectKeys = ____lualib.__TS__ObjectKeys
+local __TS__ArrayMap = ____lualib.__TS__ArrayMap
+local ____exports = {}
+local ____configuration = require("lua.helpers.configuration.index")
+local getGlobalConfiguration = ____configuration.getGlobalConfiguration
+local ____nui = require("lua.plugins.nui")
+local useNUI = ____nui.useNUI
+local function configurePlugin(pluginKey)
+    local nui = useNUI()
+    local configuration = getGlobalConfiguration().packages[pluginKey]
+    if configuration == nil then
+        error(
+            __TS__New(Error, "Failed to locate plugin " .. pluginKey),
+            0
+        )
+    end
+    console.log("good")
+end
+local function showSettingsMenu()
+    local nui = useNUI()
+    local modules = __TS__ArrayMap(
+        __TS__ArrayMap(
+            __TS__ObjectKeys(getGlobalConfiguration().packages),
+            function(____, x) return __TS__ObjectAssign(
+                {},
+                getGlobalConfiguration().packages[x],
+                {key = x}
+            ) end
+        ),
+        function(____, x) return nui.Menu.item(x.key, x) end
+    )
+    local menu = nui.Menu(
+        {position = "50%", size = {width = 33, height = 10}, border = {style = "single", text = {top = "Configure Plugin"}}},
+        {
+            on_submit = function(item)
+                if item ~= nil then
+                    configurePlugin(item.key)
+                end
+            end,
+            lines = modules
+        }
+    )
+    menu:mount()
+end
+function ____exports.initCustomSettingsSystem()
+    vim.api.nvim_create_user_command(
+        "ShowSettings",
+        function()
+            showSettingsMenu()
+        end,
+        {}
+    )
+end
 return ____exports
  end,
 ["lua.helpers.text.center"] = function(...) 
@@ -6291,7 +6387,7 @@ local function getTreesj()
 end
 local plugin = {
     [1] = "Wansmer/treesj",
-    keys = {"<space>j", "<space>s"},
+    keys = {"<leader>j"},
     dependencies = {"nvim-treesitter/nvim-treesitter"},
     config = function()
         applyKeyMapping({

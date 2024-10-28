@@ -2,6 +2,7 @@ import { initCustomOpen } from "./custom-open";
 import { initCustomEnvLoader } from "./env-load";
 import { initCustomGit } from "./git";
 import { initCustomJumplist } from "./jumplist";
+import { setupCustomProfilerCommands } from "./profile";
 import { initCustomTmux } from "./tmux";
 
 export function setupCustomLogic() {
@@ -10,4 +11,5 @@ export function setupCustomLogic() {
   initCustomEnvLoader();
   initCustomJumplist();
   initCustomGit();
+  setupCustomProfilerCommands();
 }

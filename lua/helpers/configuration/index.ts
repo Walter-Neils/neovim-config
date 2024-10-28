@@ -223,7 +223,7 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
       enabled: true
     },
     illuminate: {
-      enabled: true,
+      enabled: false,
     },
     treesj: {
       enabled: true,

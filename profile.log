@@ -1,0 +1,1056 @@
+SCRIPT  /usr/share/nvim/runtime/ftplugin/lua.vim
+Sourced 1 time
+Total time:   0.000387
+ Self time:   0.000387
+
+count  total (s)   self (s)
+                            " Vim filetype plugin file.
+                            " Language:		Lua
+                            " Maintainer:		Doug Kearns <dougkearns@gmail.com>
+                            " Previous Maintainer:	Max Ischenko <mfi@ukr.net>
+                            " Contributor:		Dorai Sitaram <ds26@gte.com>
+                            "			C.D. MacEachern <craig.daniel.maceachern@gmail.com>
+                            "			Tyler Miller <tmillr@proton.me>
+                            " Last Change:		2024 Jan 14
+                            
+    1              0.000022 if exists("b:did_ftplugin")
+                              finish
+    1              0.000002 endif
+    1              0.000010 let b:did_ftplugin = 1
+                            
+    1              0.000010 let s:cpo_save = &cpo
+    1              0.000027 set cpo&vim
+                            
+    1              0.000017 setlocal comments=:---,:--
+    1              0.000012 setlocal commentstring=--\ %s
+    1              0.000019 setlocal formatoptions-=t formatoptions+=croql
+                            
+    1              0.000018 let &l:define = '\<function\|\<local\%(\s\+function\)\='
+                            
+                            " TODO: handle init.lua
+    1              0.000016 setlocal includeexpr=tr(v:fname,'.','/')
+    1              0.000010 setlocal suffixesadd=.lua
+                            
+    1              0.000009 let b:undo_ftplugin = "setlocal cms< com< def< fo< inex< sua<"
+                            
+    1              0.000015 if exists("loaded_matchit") && !exists("b:match_words")
+    1              0.000007   let b:match_ignorecase = 0
+    1              0.000020   let b:match_words =
+                            	\ '\<\%(do\|function\|if\)\>:' ..
+                            	\ '\<\%(return\|else\|elseif\)\>:' ..
+                            	\ '\<end\>,' ..
+                            	\ '\<repeat\>:\<until\>,' ..
+                            	\ '\%(--\)\=\[\(=*\)\[:]\1]'
+    1              0.000011   let b:undo_ftplugin ..= " | unlet! b:match_words b:match_ignorecase"
+    1              0.000003 endif
+                            
+    1              0.000023 if (has("gui_win32") || has("gui_gtk")) && !exists("b:browsefilter")
+                              let b:browsefilter = "Lua Source Files (*.lua)\t*.lua\n"
+                              if has("win32")
+                                let b:browsefilter ..= "All Files (*.*)\t*\n"
+                              else
+                                let b:browsefilter ..= "All Files (*)\t*\n"
+                              endif
+                              let b:undo_ftplugin ..= " | unlet! b:browsefilter"
+    1              0.000002 endif
+                            
+    1              0.000017 let &cpo = s:cpo_save
+    1              0.000022 unlet s:cpo_save
+                            
+                            " vim: nowrap sw=2 sts=2 ts=8 noet:
+
+SCRIPT  /usr/share/nvim/runtime/ftplugin/lua.lua
+Sourced 1 time
+Total time:   0.047159
+ Self time:   0.047159
+
+count  total (s)   self (s)
+                            -- use treesitter over syntax
+                            vim.treesitter.start()
+
+SCRIPT  /usr/share/nvim/runtime/indent/lua.vim
+Sourced 1 time
+Total time:   0.000026
+ Self time:   0.000026
+
+count  total (s)   self (s)
+                            " Vim indent file
+                            " Language:	Lua script
+                            " Maintainer:	Marcus Aurelius Farias <marcus.cf 'at' bol.com.br>
+                            " First Author:	Max Ischenko <mfi 'at' ukr.net>
+                            " Last Change:	2017 Jun 13
+                            "		2022 Sep 07: b:undo_indent added by Doug Kearns
+                            
+                            " Only load this indent file when no other was loaded.
+    1              0.000003 if exists("b:did_indent")
+                              finish
+    1              0.000000 endif
+    1              0.000002 let b:did_indent = 1
+                            
+    1              0.000005 setlocal indentexpr=GetLuaIndent()
+                            
+                            " To make Vim call GetLuaIndent() when it finds '\s*end' or '\s*until'
+                            " on the current line ('else' is default and includes 'elseif').
+    1              0.000002 setlocal indentkeys+=0=end,0=until
+                            
+    1              0.000001 setlocal autoindent
+                            
+    1              0.000001 let b:undo_indent = "setlocal autoindent< indentexpr< indentkeys<"
+                            
+                            " Only define the function once.
+    1              0.000002 if exists("*GetLuaIndent")
+    1              0.000001   finish
+                            endif
+                            
+                            function! GetLuaIndent()
+                                let ignorecase_save = &ignorecase
+                              try
+                                let &ignorecase = 0
+                                return GetLuaIndentIntern()
+                              finally
+                                let &ignorecase = ignorecase_save
+                              endtry
+                            endfunction
+                            
+                            function! GetLuaIndentIntern()
+                              " Find a non-blank line above the current line.
+                              let prevlnum = prevnonblank(v:lnum - 1)
+                            
+                              " Hit the start of the file, use zero indent.
+                              if prevlnum == 0
+                                return 0
+                              endif
+                            
+                              " Add a 'shiftwidth' after lines that start a block:
+                              " 'function', 'if', 'for', 'while', 'repeat', 'else', 'elseif', '{'
+                              let ind = indent(prevlnum)
+                              let prevline = getline(prevlnum)
+                              let midx = match(prevline, '^\s*\%(if\>\|for\>\|while\>\|repeat\>\|else\>\|elseif\>\|do\>\|then\>\)')
+                              if midx == -1
+                                let midx = match(prevline, '{\s*\%(--\%([^[].*\)\?\)\?$')
+                                if midx == -1
+                                  let midx = match(prevline, '\<function\>\s*\%(\k\|[.:]\)\{-}\s*(')
+                                endif
+                              endif
+                            
+                              if midx != -1
+                                " Add 'shiftwidth' if what we found previously is not in a comment and
+                                " an "end" or "until" is not present on the same line.
+                                if synIDattr(synID(prevlnum, midx + 1, 1), "name") != "luaComment" && prevline !~ '\<end\>\|\<until\>'
+                                  let ind = ind + shiftwidth()
+                                endif
+                              endif
+                            
+                              " Subtract a 'shiftwidth' on end, else, elseif, until and '}'
+                              " This is the part that requires 'indentkeys'.
+                              let midx = match(getline(v:lnum), '^\s*\%(end\>\|else\>\|elseif\>\|until\>\|}\)')
+                              if midx != -1 && synIDattr(synID(v:lnum, midx + 1, 1), "name") != "luaComment"
+                                let ind = ind - shiftwidth()
+                              endif
+                            
+                              return ind
+                            endfunction
+
+FUNCTION  <SNR>14_on_text_changed()
+    Defined: ~/.local/share/nvim/lazy/vim-vsnip/plugin/vsnip.vim:212
+Called 2 times
+Total time:   0.000079
+ Self time:   0.000065
+
+count  total (s)   self (s)
+    2   0.000049   0.000035   let l:session = vsnip#get_session()
+    2              0.000011   if !empty(l:session)
+                                call l:session.on_text_changed()
+    2              0.000003   endif
+
+FUNCTION  <SNR>40_SanitizeArg()
+    Defined: ~/.local/share/nvim/lazy/vim-wakatime/plugin/wakatime.vim:474
+Called 16 times
+Total time:   0.000069
+ Self time:   0.000069
+
+count  total (s)   self (s)
+   16              0.000024         let sanitized = shellescape(a:arg)
+   16              0.000031         let sanitized = substitute(sanitized, '!', '\\!', 'g')
+   16              0.000009         return sanitized
+
+FUNCTION  33()
+    Defined: /usr/share/nvim/runtime/autoload/provider/clipboard.vim:166
+Called 1 time
+Total time:   0.013187
+ Self time:   0.000250
+
+count  total (s)   self (s)
+    1              0.000014   if type(s:paste[a:reg]) == v:t_func
+                                return s:paste[a:reg]()
+    1              0.000012   elseif s:selections[a:reg].owner > 0
+                                return s:selections[a:reg].data
+    1              0.000002   end
+                            
+    1   0.012992   0.000056   let clipboard_data = s:try_cmd(s:paste[a:reg])
+    1              0.000118   if match(&clipboard, '\v(unnamed|unnamedplus)') >= 0 && type(clipboard_data) == v:t_list && get(s:selections[a:reg].data, 0, []) ==# clipboard_data
+                                " When system clipboard return is same as our cache return the cache
+                                " as it contains regtype information
+                                return s:selections[a:reg].data
+    1              0.000002   end
+    1              0.000006   return clipboard_data
+
+FUNCTION  <SNR>40_StripWhitespace()
+    Defined: ~/.local/share/nvim/lazy/vim-wakatime/plugin/wakatime.vim:310
+Called 1 time
+Total time:   0.000061
+ Self time:   0.000061
+
+count  total (s)   self (s)
+    1              0.000059         return substitute(a:str, '^\s*\(.\{-}\)\s*$', '\1', '')
+
+FUNCTION  <SNR>61_SynSet()
+    Defined: /usr/share/nvim/runtime/syntax/synload.vim:27
+Called 3 times
+Total time:   0.001644
+ Self time:   0.001644
+
+count  total (s)   self (s)
+                              " clear syntax for :set syntax=OFF  and any syntax name that doesn't exist
+    3              0.000009   syn clear
+    3              0.000008   if exists("b:current_syntax")
+                                unlet b:current_syntax
+    3              0.000001   endif
+                            
+    3              0.000010   0verbose let s = expand("<amatch>")
+    3              0.000003   if s == "ON"
+                                " :set syntax=ON
+                                if &filetype == ""
+                                  echohl ErrorMsg
+                                  echo "filetype unknown"
+                                  echohl None
+                                endif
+                                let s = &filetype
+    3              0.000002   elseif s == "OFF"
+                                let s = ""
+    3              0.000001   endif
+                            
+    3              0.000002   if s != ""
+                                " Load the syntax file(s).  When there are several, separated by dots,
+                                " load each in sequence.  Skip empty entries.
+    4              0.000008     for name in split(s, '\.')
+    2              0.000003       if !empty(name)
+                                    " XXX: "[.]" in the first pattern makes it a wildcard on Windows
+    2              0.001557         exe $'runtime! syntax/{name}[.]{{vim,lua}} syntax/{name}/*.{{vim,lua}}'
+    2              0.000002       endif
+    4              0.000002     endfor
+    3              0.000001   endif
+
+FUNCTION  <SNR>40_InitAndHandleActivity()
+    Defined: ~/.local/share/nvim/lazy/vim-wakatime/plugin/wakatime.vim:780
+Called 3 times
+Total time:   0.017061
+ Self time:   0.000137
+
+count  total (s)   self (s)
+    3   0.000086   0.000031         call s:SetupDebugMode()
+    3   0.000155   0.000025         call s:SetupConfigFile()
+    3   0.000098   0.000028         call s:SetupCLI()
+    3   0.016716   0.000046         call s:HandleActivity(a:is_write)
+
+FUNCTION  vsnip#get_session()
+    Defined: ~/.local/share/nvim/lazy/vim-vsnip/autoload/vsnip.vim:109
+Called 2 times
+Total time:   0.000014
+ Self time:   0.000014
+
+count  total (s)   self (s)
+    2              0.000010   return s:session
+
+FUNCTION  <SNR>40_HandleActivity()
+    Defined: ~/.local/share/nvim/lazy/vim-wakatime/plugin/wakatime.vim:787
+Called 5 times
+Total time:   0.016937
+ Self time:   0.000524
+
+count  total (s)   self (s)
+    5              0.000020         if !s:config_file_already_setup
+                                        return
+    5              0.000005         endif
+    5   0.000194   0.000072         let file = s:GetCurrentFile()
+    5              0.000088         if !empty(file) && file !~ "-MiniBufExplorer-" && file !~ "--NO NAME--" && file !~ "^term:"
+    4   0.000177   0.000040             let last = s:GetLastHeartbeat()
+    4              0.000009             let now = localtime()
+                            
+                                        " Create a heartbeat when saving a file, when the current file
+                                        " changes, and when still editing the same file but enough time
+                                        " has passed since the last heartbeat.
+    4   0.000098   0.000054             if a:is_write || s:EnoughTimePassed(now, last) || file != last.file
+    1   0.014197   0.000007                 call s:AppendHeartbeat(file, now, a:is_write, last)
+    3              0.000003             else
+    3              0.000010                 if now - s:last_heartbeat.last_activity_at > s:local_cache_expire
+    1   0.000009   0.000005                     call s:SetLastHeartbeatInMemory(now, last.last_heartbeat_at, last.file)
+    3              0.000003                 endif
+    4              0.000003             endif
+                            
+                                        " When buffering heartbeats disabled, no need to re-check the
+                                        " heartbeats buffer.
+    4              0.000007             if s:buffering_heartbeats_enabled
+                            
+                                            " Only send buffered heartbeats every s:send_buffer_seconds
+    4              0.000010                 if now - s:last_sent > s:send_buffer_seconds
+    1   0.001933   0.000018                     call s:SendHeartbeats()
+    4              0.000003                 endif
+    4              0.000002             endif
+    5              0.000004         endif
+
+FUNCTION  <SNR>40_SetLastHeartbeat()
+    Defined: ~/.local/share/nvim/lazy/vim-wakatime/plugin/wakatime.vim:726
+Called 1 time
+Total time:   0.014134
+ Self time:   0.014122
+
+count  total (s)   self (s)
+    1   0.000009   0.000005         call s:SetLastHeartbeatInMemory(a:last_activity_at, a:last_heartbeat_at, a:file)
+    1              0.000004         if !isdirectory(s:shared_state_parent_dir)
+                                        call mkdir(s:shared_state_parent_dir, "p", "0o700")
+    1              0.000000         endif
+    1   0.014117   0.014110         call writefile([s:n2s(a:last_activity_at), s:n2s(a:last_heartbeat_at), a:file], s:shared_state_file)
+
+FUNCTION  <SNR>40_GetHeartbeatsJson()
+    Defined: ~/.local/share/nvim/lazy/vim-wakatime/plugin/wakatime.vim:664
+Called 1 time
+Total time:   0.000148
+ Self time:   0.000100
+
+count  total (s)   self (s)
+    1              0.000001         let arr = []
+    1              0.000001         let loop_count = 1
+    3              0.000003         for heartbeat in s:heartbeats_buffer
+    2   0.000016   0.000010             let heartbeat_str = '{"entity": "' . s:JsonEscape(heartbeat.entity) . '", '
+    2   0.000017   0.000009             let heartbeat_str = heartbeat_str . '"lineno": ' . s:n2s(heartbeat.lineno) . ', '
+    2   0.000013   0.000008             let heartbeat_str = heartbeat_str . '"cursorpos": ' . s:n2s(heartbeat.cursorpos) . ', '
+    2   0.000013   0.000007             let heartbeat_str = heartbeat_str . '"lines": ' . s:n2s(heartbeat.lines) . ', '
+    2   0.000028   0.000009             let heartbeat_str = heartbeat_str . '"timestamp": ' . s:OrderTime(heartbeat.time, loop_count) . ', '
+    2              0.000002             let heartbeat_str = heartbeat_str . '"is_write": '
+    2              0.000001             if heartbeat.is_write
+                                            let heartbeat_str = heartbeat_str . 'true'
+    2              0.000001             else
+    2              0.000003                 let heartbeat_str = heartbeat_str . 'false'
+    2              0.000001             endif
+    2              0.000003             if has_key(heartbeat, 'language')
+    2   0.000013   0.000009                 let heartbeat_str = heartbeat_str . ', "alternate_language": "' . s:JsonEscape(heartbeat.language) . '"'
+    2              0.000001             endif
+    2              0.000003             let heartbeat_str = heartbeat_str . '}'
+    2              0.000003             let arr = arr + [heartbeat_str]
+    2              0.000002             let loop_count = loop_count + 1
+    3              0.000002         endfor
+    1              0.000003         let s:heartbeats_buffer = []
+    1              0.000003         return '[' . join(arr, ',') . ']'
+
+FUNCTION  <SNR>65_try_cmd()
+    Defined: /usr/share/nvim/runtime/autoload/provider/clipboard.vim:38
+Called 1 time
+Total time:   0.012937
+ Self time:   0.000244
+
+count  total (s)   self (s)
+    1   0.012859   0.000166   let out = systemlist(a:cmd, (a:0 ? a:1 : ['']), 1)
+    1              0.000014   if v:shell_error
+                                if !exists('s:did_error_try_cmd')
+                                  echohl WarningMsg
+                                  echomsg "clipboard: error: ".(len(out) ? out[0] : v:shell_error)
+                                  echohl None
+                                  let s:did_error_try_cmd = 1
+                                endif
+                                return 0
+    1              0.000002   endif
+    1              0.000008   return out
+
+FUNCTION  <SNR>40_AppendHeartbeat()
+    Defined: ~/.local/share/nvim/lazy/vim-wakatime/plugin/wakatime.vim:506
+Called 1 time
+Total time:   0.014190
+ Self time:   0.000046
+
+count  total (s)   self (s)
+    1              0.000001         let file = a:file
+    1              0.000001         if empty(file)
+                                        let file = a:last.file
+    1              0.000000         endif
+    1              0.000001         if !empty(file)
+    1              0.000001             let heartbeat = {}
+    1              0.000001             let heartbeat.entity = file
+    1   0.000015   0.000004             let heartbeat.time = s:CurrentTimeStr()
+    1              0.000001             let heartbeat.is_write = a:is_write
+    1              0.000002             if !empty(&syntax) && &syntax != 'ON'
+                                            let heartbeat.language = &syntax
+    1              0.000000             else
+    1              0.000001                 if !empty(&filetype)
+    1              0.000001                     let heartbeat.language = &filetype
+    1              0.000000                 endif
+    1              0.000000             endif
+    1              0.000002             let cursor = getpos(".")
+    1              0.000001             let heartbeat.lineno = cursor[1]
+    1              0.000001             let heartbeat.cursorpos = cursor[2]
+    1              0.000001             let heartbeat.lines = line("$")
+    1              0.000003             let s:heartbeats_buffer = s:heartbeats_buffer + [heartbeat]
+    1   0.014141   0.000007             call s:SetLastHeartbeat(a:now, a:now, file)
+                            
+    1              0.000006             if !s:buffering_heartbeats_enabled
+                                            call s:SendHeartbeats()
+    1              0.000001             endif
+    1              0.000000         endif
+
+FUNCTION  CursorHoldTimer()
+    Defined: ~/.local/share/nvim/lazy/FixCursorHold.nvim/plugin/fix_cursorhold_nvim.vim:37
+Called 17 times
+Total time:   0.000409
+ Self time:   0.000409
+
+count  total (s)   self (s)
+   17              0.000106   call timer_stop(g:fix_cursorhold_nvim_timer)
+   17              0.000061   if mode() == 'n'
+   17              0.000187     let g:fix_cursorhold_nvim_timer = timer_start(g:cursorhold_updatetime, 'CursorHold_Cb')
+   17              0.000017   endif
+
+FUNCTION  <SNR>40_SetupConfigFile()
+    Defined: ~/.local/share/nvim/lazy/vim-wakatime/plugin/wakatime.vim:318
+Called 3 times
+Total time:   0.000130
+ Self time:   0.000130
+
+count  total (s)   self (s)
+    3              0.000008         if !s:config_file_already_setup
+                            
+                                        " Create config file if does not exist
+                                        if !filereadable(s:config_file)
+                                            call writefile(s:default_configs, s:config_file)
+                                        endif
+                            
+                                        " Make sure config file has api_key
+                                        let found_api_key = s:false
+                                        if !empty(s:GetIniSetting('settings', 'api_key')) || !empty(s:GetIniSetting('settings', 'apikey'))
+                                            let found_api_key = s:true
+                                        endif
+                            
+                                        if !found_api_key
+                                            let vault_cmd = s:GetIniSetting('settings', 'api_key_vault_cmd')
+                                            if !empty(vault_cmd) && !empty(s:Chomp(system(vault_cmd)))
+                                                let found_api_key = s:true
+                                            endif
+                                        endif
+                            
+                                        if !found_api_key
+                                            echomsg '[WakaTime] Type the Vim command :WakaTimeApiKey to enter your WakaTime API Key. Find yours at https://wakatime.com/api-key'
+                                        else
+                                            let s:config_file_already_setup = s:true
+                                        endif
+    3              0.000002         endif
+
+FUNCTION  <SNR>46_Highlight_Matching_Pair()
+    Defined: /usr/share/nvim/runtime/plugin/matchparen.vim:44
+Called 25 times
+Total time:   0.003218
+ Self time:   0.002777
+
+count  total (s)   self (s)
+   25              0.000157   if !exists("w:matchparen_ids")
+                                let w:matchparen_ids = []
+   25              0.000024   endif
+                              " Remove any previous match.
+   25   0.000725   0.000283   call s:Remove_Matches()
+                            
+                              " Avoid that we remove the popup menu.
+                              " Return when there are no colors (looks like the cursor jumps).
+   25              0.000159   if pumvisible() || (&t_Co < 8 && !has("gui_running"))
+                                return
+   25              0.000034   endif
+                            
+                              " Get the character under the cursor and check if it's in 'matchpairs'.
+   25              0.000107   let c_lnum = line('.')
+   25              0.000115   let c_col = col('.')
+   25              0.000042   let before = 0
+                            
+   25              0.000098   let text = getline(c_lnum)
+   25              0.000197   let c_before = text->strpart(0, c_col - 1)->slice(-1)
+   25              0.000135   let c = text->strpart(c_col - 1)->slice(0, 1)
+   25              0.000551   let plist = split(&matchpairs, '.\zs[:,]')
+   25              0.000122   let i = index(plist, c)
+   25              0.000042   if i < 0
+                                " not found, in Insert mode try character before the cursor
+   25              0.000116     if c_col > 1 && (mode() == 'i' || mode() == 'R')
+                                  let before = strlen(c_before)
+                                  let c = c_before
+                                  let i = index(plist, c)
+   25              0.000020     endif
+   25              0.000035     if i < 0
+                                  " not found, nothing to do
+   25              0.000035       return
+                                endif
+                              endif
+                            
+                              " Figure out the arguments for searchpairpos().
+                              if i % 2 == 0
+                                let s_flags = 'nW'
+                                let c2 = plist[i + 1]
+                              else
+                                let s_flags = 'nbW'
+                                let c2 = c
+                                let c = plist[i - 1]
+                              endif
+                              if c == '['
+                                let c = '\['
+                                let c2 = '\]'
+                              endif
+                            
+                              " Find the match.  When it was just before the cursor move it there for a
+                              " moment.
+                              if before > 0
+                                let has_getcurpos = exists("*getcurpos")
+                                if has_getcurpos
+                                  " getcurpos() is more efficient but doesn't exist before 7.4.313.
+                                  let save_cursor = getcurpos()
+                                else
+                                  let save_cursor = winsaveview()
+                                endif
+                                call cursor(c_lnum, c_col - before)
+                              endif
+                            
+                              if !has("syntax") || !exists("g:syntax_on")
+                                let s_skip = "0"
+                              else
+                                " Build an expression that detects whether the current cursor position is
+                                " in certain syntax types (string, comment, etc.), for use as
+                                " searchpairpos()'s skip argument.
+                                " We match "escape" for special items, such as lispEscapeSpecial, and
+                                " match "symbol" for lispBarSymbol.
+                                let s_skip = 'synstack(".", col("."))' . '->indexof({_, id -> synIDattr(id, "name") =~? ' . '"string\\|character\\|singlequote\\|escape\\|symbol\\|comment"}) >= 0'
+                                " If executing the expression determines that the cursor is currently in
+                                " one of the syntax types, then we want searchpairpos() to find the pair
+                                " within those syntax types (i.e., not skip).  Otherwise, the cursor is
+                                " outside of the syntax types and s_skip should keep its value so we skip
+                                " any matching pair inside the syntax types.
+                                " Catch if this throws E363: pattern uses more memory than 'maxmempattern'.
+                                try
+                                  execute 'if ' . s_skip . ' | let s_skip = "0" | endif'
+                                catch /^Vim\%((\a\+)\)\=:E363/
+                                  " We won't find anything, so skip searching, should keep Vim responsive.
+                                  return
+                                endtry
+                              endif
+                            
+                              " Limit the search to lines visible in the window.
+                              let stoplinebottom = line('w$')
+                              let stoplinetop = line('w0')
+                              if i % 2 == 0
+                                let stopline = stoplinebottom
+                              else
+                                let stopline = stoplinetop
+                              endif
+                            
+                              " Limit the search time to 300 msec to avoid a hang on very long lines.
+                              " This fails when a timeout is not supported.
+                              if mode() == 'i' || mode() == 'R'
+                                let timeout = exists("b:matchparen_insert_timeout") ? b:matchparen_insert_timeout : g:matchparen_insert_timeout
+                              else
+                                let timeout = exists("b:matchparen_timeout") ? b:matchparen_timeout : g:matchparen_timeout
+                              endif
+                              try
+                                let [m_lnum, m_col] = searchpairpos(c, '', c2, s_flags, s_skip, stopline, timeout)
+                              catch /E118/
+                                " Can't use the timeout, restrict the stopline a bit more to avoid taking
+                                " a long time on closed folds and long lines.
+                                " The "viewable" variables give a range in which we can scroll while
+                                " keeping the cursor at the same position.
+                                " adjustedScrolloff accounts for very large numbers of scrolloff.
+                                let adjustedScrolloff = min([&scrolloff, (line('w$') - line('w0')) / 2])
+                                let bottom_viewable = min([line('$'), c_lnum + &lines - adjustedScrolloff - 2])
+                                let top_viewable = max([1, c_lnum-&lines+adjustedScrolloff + 2])
+                                " one of these stoplines will be adjusted below, but the current values are
+                                " minimal boundaries within the current window
+                                if i % 2 == 0
+                                  if has("byte_offset") && has("syntax_items") && &smc > 0
+                            	let stopbyte = min([line2byte("$"), line2byte(".") + col(".") + &smc * 2])
+                            	let stopline = min([bottom_viewable, byte2line(stopbyte)])
+                                  else
+                            	let stopline = min([bottom_viewable, c_lnum + 100])
+                                  endif
+                                  let stoplinebottom = stopline
+                                else
+                                  if has("byte_offset") && has("syntax_items") && &smc > 0
+                            	let stopbyte = max([1, line2byte(".") + col(".") - &smc * 2])
+                            	let stopline = max([top_viewable, byte2line(stopbyte)])
+                                  else
+                            	let stopline = max([top_viewable, c_lnum - 100])
+                                  endif
+                                  let stoplinetop = stopline
+                                endif
+                                let [m_lnum, m_col] = searchpairpos(c, '', c2, s_flags, s_skip, stopline)
+                              endtry
+                            
+                              if before > 0
+                                if has_getcurpos
+                                  call setpos('.', save_cursor)
+                                else
+                                  call winrestview(save_cursor)
+                                endif
+                              endif
+                            
+                              " If a match is found setup match highlighting.
+                              if m_lnum > 0 && m_lnum >= stoplinetop && m_lnum <= stoplinebottom 
+                                if s:has_matchaddpos
+                                  call add(w:matchparen_ids, matchaddpos('MatchParen', [[c_lnum, c_col - before], [m_lnum, m_col]], 10))
+                                else
+                                  exe '3match MatchParen /\(\%' . c_lnum . 'l\%' . (c_col - before) . 'c\)\|\(\%' . m_lnum . 'l\%' . m_col . 'c\)/'
+                                  call add(w:matchparen_ids, 3)
+                                endif
+                                let w:paren_hl_on = 1
+                              endif
+
+FUNCTION  <SNR>40_n2s()
+    Defined: ~/.local/share/nvim/lazy/vim-wakatime/plugin/wakatime.vim:721
+Called 10 times
+Total time:   0.000034
+ Self time:   0.000034
+
+count  total (s)   self (s)
+                                    " Converts an integer or float number to a string
+   10              0.000030         return substitute(printf('%d', a:number), ',', '.', '')
+
+FUNCTION  <SNR>40_NeovimAsyncOutputHandler()
+    Defined: ~/.local/share/nvim/lazy/vim-wakatime/plugin/wakatime.vim:992
+Called 2 times
+Total time:   0.000087
+ Self time:   0.000087
+
+count  total (s)   self (s)
+    2              0.000049         let s:nvim_async_output[-1] .= a:output[0]
+    2              0.000030         call extend(s:nvim_async_output, a:output[1:])
+
+FUNCTION  <SNR>40_OrderTime()
+    Defined: ~/.local/share/nvim/lazy/vim-wakatime/plugin/wakatime.vim:690
+Called 2 times
+Total time:   0.000018
+ Self time:   0.000018
+
+count  total (s)   self (s)
+                                    " Add a milisecond to a:time.
+                                    " Time prevision doesn't matter, but order of heartbeats does.
+    2              0.000006         if !(a:time_str =~ "\.")
+                                        let millisecond = s:n2s(a:loop_count)
+                                        while strlen(millisecond) < 6
+                                            let millisecond = '0' . millisecond
+                                        endwhile
+                                        return a:time_str . '.' . millisecond
+    2              0.000001         endif
+    2              0.000001         return a:time_str
+
+FUNCTION  CursorHold_Cb()
+    Defined: ~/.local/share/nvim/lazy/FixCursorHold.nvim/plugin/fix_cursorhold_nvim.vim:19
+Called 2 times
+Total time:   0.000592
+ Self time:   0.000146
+
+count  total (s)   self (s)
+    2              0.000028   if v:exiting isnot v:null
+                                return
+    2              0.000004   endif
+    2   0.000121   0.000053   set eventignore-=CursorHold
+    2   0.000352   0.000014   doautocmd <nomodeline> CursorHold
+    2   0.000070   0.000030   set eventignore+=CursorHold
+
+FUNCTION  provider#clipboard#Call()
+    Defined: /usr/share/nvim/runtime/autoload/provider/clipboard.vim:243
+Called 1 time
+Total time:   0.013332
+ Self time:   0.000146
+
+count  total (s)   self (s)
+    1              0.000031   if get(s:, 'here', v:false)  " Clipboard provider must not recurse. #7184
+                                return 0
+    1              0.000003   endif
+    1              0.000010   let s:here = v:true
+    1              0.000003   try
+    1   0.013250   0.000063     return call(s:clipboard[a:method],a:args,s:clipboard)
+    1              0.000007   finally
+    1              0.000007     let s:here = v:false
+    1              0.000003   endtry
+
+FUNCTION  <SNR>46_Remove_Matches()
+    Defined: /usr/share/nvim/runtime/plugin/matchparen.vim:202
+Called 34 times
+Total time:   0.000869
+ Self time:   0.000869
+
+count  total (s)   self (s)
+   34              0.000258   if exists('w:paren_hl_on') && w:paren_hl_on
+                                while !empty(w:matchparen_ids)
+                                  silent! call remove(w:matchparen_ids, 0)->matchdelete()
+                                endwhile
+                                let w:paren_hl_on = 0
+   34              0.000034   endif
+
+FUNCTION  <SNR>40_SendHeartbeats()
+    Defined: ~/.local/share/nvim/lazy/vim-wakatime/plugin/wakatime.vim:536
+Called 1 time
+Total time:   0.001915
+ Self time:   0.001598
+
+count  total (s)   self (s)
+    1              0.000001         let start_time = localtime()
+    1              0.000001         let stdout = ''
+                            
+    1              0.000001         if len(s:heartbeats_buffer) == 0
+                                        let s:last_sent = start_time
+                                        return
+    1              0.000000         endif
+                            
+    1              0.000001         let heartbeat = s:heartbeats_buffer[0]
+    1              0.000003         let s:heartbeats_buffer = s:heartbeats_buffer[1:-1]
+    1              0.000001         if len(s:heartbeats_buffer) > 0
+    1   0.000154   0.000006             let extra_heartbeats = s:GetHeartbeatsJson()
+                                    else
+                                        let extra_heartbeats = ''
+    1              0.000000         endif
+                            
+    1              0.000002         let cmd = [s:wakatime_cli, '--entity', heartbeat.entity]
+    1              0.000002         let cmd = cmd + ['--time', heartbeat.time]
+    1              0.000002         let cmd = cmd + ['--lineno', heartbeat.lineno]
+    1              0.000002         let cmd = cmd + ['--cursorpos', heartbeat.cursorpos]
+    1              0.000002         let cmd = cmd + ['--lines-in-file', heartbeat.lines]
+                            
+    1              0.000001         let editor_name = 'vim'
+    1              0.000002         if has('nvim')
+    1              0.000001             let editor_name = 'neovim'
+    1              0.000000         endif
+    1   0.000011   0.000007         let cmd = cmd + ['--plugin', printf('%s/%s vim-wakatime/%s', editor_name, s:n2s(v:version), s:VERSION)]
+                            
+    1              0.000001         if heartbeat.is_write
+                                        let cmd = cmd + ['--write']
+    1              0.000000         endif
+    1              0.000001         if has_key(heartbeat, 'language')
+    1              0.000002             let cmd = cmd + ['--alternate-language', heartbeat.language]
+    1              0.000000         endif
+    1              0.000001         if !empty(extra_heartbeats)
+    1              0.000002             let cmd = cmd + ['--extra-heartbeats']
+    1              0.000000         endif
+                            
+                                    " overwrite shell
+    1              0.000003         let [sh, shellcmdflag, shrd] = [&shell, &shellcmdflag, &shellredir]
+    1   0.000007   0.000003         if !s:IsWindows()
+    1              0.000006             set shell=sh shellredir=>%s\ 2>&1
+    1              0.000000         endif
+                            
+    1              0.000001         if s:has_async
+                                        if !s:IsWindows()
+                                            let job_cmd = [&shell, &shellcmdflag, s:JoinArgs(cmd)]
+                                        elseif &shell =~ 'sh\(\.exe\)\?$'
+                                            let job_cmd = [&shell, '-c', s:JoinArgs(cmd)]
+                                        else
+                                            let job_cmd = [&shell, &shellcmdflag] + cmd
+                                        endif
+                                        let job = job_start(job_cmd, { 'stoponexit': '', 'callback': {channel, output -> s:AsyncHandler(output, cmd)}})
+                                        if !empty(extra_heartbeats)
+                                            let channel = job_getchannel(job)
+                                            call ch_sendraw(channel, extra_heartbeats . "\n")
+                                        endif
+    1              0.000001         elseif s:nvim_async
+    1   0.000006   0.000003             if s:IsWindows()
+                                            let job_cmd = cmd
+    1              0.000000             else
+    1   0.000160   0.000005                 let job_cmd = [&shell, &shellcmdflag, s:JoinArgs(cmd)]
+    1              0.000000             endif
+    1              0.000002             let s:nvim_async_output = ['']
+    1              0.000006             let job_opts = { 'on_stdout': function('s:NeovimAsyncOutputHandler'), 'on_stderr': function('s:NeovimAsyncOutputHandler'), 'on_exit': function('s:NeovimAsyncExitHandler')}
+    1   0.000007   0.000003             if !s:IsWindows()
+    1              0.000002                 let job_opts['detach'] = 1
+    1              0.000000             endif
+    1              0.001440             let job = jobstart(job_cmd, job_opts)
+    1              0.000004             if !empty(extra_heartbeats)
+    1              0.000006                 call jobsend(job, extra_heartbeats . "\n")
+    1              0.000000             endif
+                                    elseif s:IsWindows()
+                                        if s:is_debug_on
+                                            if !empty(extra_heartbeats)
+                                                let stdout = system('(' . s:JoinArgs(cmd) . ')', extra_heartbeats)
+                                            else
+                                                let stdout = system('(' . s:JoinArgs(cmd) . ')')
+                                            endif
+                                        else
+                                            if s:buffering_heartbeats_enabled
+                                                echo "[WakaTime] Error: Buffering heartbeats should be disabled on Windows without async support."
+                                            endif
+                                            exec 'silent !start /b cmd /c "' . s:JoinArgs(cmd) . ' > nul 2> nul"'
+                                        endif
+                                    else
+                                        if s:is_debug_on
+                                            if !empty(extra_heartbeats)
+                                                let stdout = system(s:JoinArgs(cmd), extra_heartbeats)
+                                            else
+                                                let stdout = system(s:JoinArgs(cmd))
+                                            endif
+                                        else
+                                            if !empty(extra_heartbeats)
+                                                let stdout = system(s:JoinArgs(cmd) . ' &', extra_heartbeats)
+                                            else
+                                                let stdout = system(s:JoinArgs(cmd) . ' &')
+                                            endif
+                                        endif
+    1              0.000000         endif
+                            
+                                    " restore shell
+    1              0.000011         let [&shell, &shellcmdflag, &shellredir] = [sh, shellcmdflag, shrd]
+                            
+    1              0.000002         let s:last_sent = localtime()
+                            
+                                    " need to repaint in case a key was pressed while sending
+    1              0.000002         if !s:has_async && !s:nvim_async && s:redraw_setting != 'disabled'
+                                        if s:redraw_setting == 'auto'
+                                            if s:last_sent - start_time > 0
+                                                redraw!
+                                            endif
+                                        else
+                                            redraw!
+                                        endif
+    1              0.000000         endif
+                            
+    1              0.000001         if s:is_debug_on && !empty(stdout)
+                                        echoerr '[WakaTime] Command: ' . s:JoinArgs(cmd) . "\n[WakaTime] Error: " . stdout
+    1              0.000000         endif
+
+FUNCTION  <SNR>40_NeovimAsyncExitHandler()
+    Defined: ~/.local/share/nvim/lazy/vim-wakatime/plugin/wakatime.vim:997
+Called 1 time
+Total time:   0.000192
+ Self time:   0.000131
+
+count  total (s)   self (s)
+    1   0.000114   0.000053         let output = s:StripWhitespace(join(s:nvim_async_output, "\n"))
+    1              0.000009         if a:exit_code == s:exit_code_api_key_error
+                                        let output .= 'Invalid API Key'
+    1              0.000003         endif
+    1              0.000042         if (s:is_debug_on || a:exit_code == s:exit_code_config_parse_error || a:exit_code == s:exit_code_api_key_error) && !empty(output)
+                                        echoerr printf('[WakaTime] Error %d: %s', a:exit_code, output)
+    1              0.000002         endif
+
+FUNCTION  <SNR>40_SetupDebugMode()
+    Defined: ~/.local/share/nvim/lazy/vim-wakatime/plugin/wakatime.vim:354
+Called 3 times
+Total time:   0.000055
+ Self time:   0.000055
+
+count  total (s)   self (s)
+    3              0.000010         if !s:debug_mode_already_setup
+                                        if s:GetIniSetting('settings', 'debug') == 'true'
+                                            let s:is_debug_on = s:true
+                                        else
+                                            let s:is_debug_on = s:false
+                                        endif
+                                        let s:debug_mode_already_setup = s:true
+    3              0.000003         endif
+
+FUNCTION  <SNR>40_GetLastHeartbeat()
+    Defined: ~/.local/share/nvim/lazy/vim-wakatime/plugin/wakatime.vim:703
+Called 4 times
+Total time:   0.000137
+ Self time:   0.000137
+
+count  total (s)   self (s)
+    4              0.000031         if !s:last_heartbeat.last_activity_at || localtime() - s:last_heartbeat.last_activity_at > s:local_cache_expire
+    1              0.000006             if !filereadable(s:shared_state_file)
+                                            return {'last_activity_at': 0, 'last_heartbeat_at': 0, 'file': ''}
+    1              0.000000             endif
+    1              0.000018             let last = readfile(s:shared_state_file, '', 3)
+    1              0.000002             if len(last) == 3
+    1              0.000002                 let s:last_heartbeat.last_heartbeat_at = last[1]
+    1              0.000001                 let s:last_heartbeat.file = last[2]
+    1              0.000000             endif
+    4              0.000002         endif
+    4              0.000007         return s:last_heartbeat
+
+FUNCTION  <SNR>40_JoinArgs()
+    Defined: ~/.local/share/nvim/lazy/vim-wakatime/plugin/wakatime.vim:484
+Called 1 time
+Total time:   0.000156
+ Self time:   0.000087
+
+count  total (s)   self (s)
+    1              0.000001         let safeArgs = []
+   17              0.000008         for arg in a:args
+   16   0.000133   0.000064             let safeArgs = safeArgs + [s:SanitizeArg(arg)]
+   17              0.000006         endfor
+    1              0.000005         return join(safeArgs, ' ')
+
+FUNCTION  <SNR>40_SetupCLI()
+    Defined: ~/.local/share/nvim/lazy/vim-wakatime/plugin/wakatime.vim:347
+Called 3 times
+Total time:   0.000070
+ Self time:   0.000070
+
+count  total (s)   self (s)
+    3              0.000007         if !s:cli_already_setup
+                                        let s:cli_already_setup = s:true
+                                        call s:InstallCLI(s:true)
+    3              0.000002         endif
+
+FUNCTION  <SNR>40_GetCurrentFile()
+    Defined: ~/.local/share/nvim/lazy/vim-wakatime/plugin/wakatime.vim:470
+Called 5 times
+Total time:   0.000122
+ Self time:   0.000122
+
+count  total (s)   self (s)
+    5              0.000116         return expand("%:p")
+
+FUNCTION  <SNR>1_LoadFTPlugin()
+    Defined: /usr/share/nvim/runtime/ftplugin.vim:15
+Called 3 times
+Total time:   0.056237
+ Self time:   0.008657
+
+count  total (s)   self (s)
+    3              0.000029     if exists("b:undo_ftplugin")
+                                  exe b:undo_ftplugin
+                                  unlet! b:undo_ftplugin b:did_ftplugin
+    3              0.000004     endif
+                            
+    3              0.000021     let s = expand("<amatch>")
+    3              0.000008     if s != ""
+    3              0.000031       if &cpo =~# "S" && exists("b:did_ftplugin")
+                            	" In compatible mode options are reset to the global values, need to
+                            	" set the local values also when a plugin was already used.
+                            	unlet b:did_ftplugin
+    3              0.000003       endif
+                            
+                                  " When there is a dot it is used to separate filetype names.  Thus for
+                                  " "aaa.bbb" load "aaa" and then "bbb".
+    6              0.000033       for name in split(s, '\.')
+                                    " Load Lua ftplugins after Vim ftplugins _per directory_
+                                    " TODO(clason): use nvim__get_runtime when supports globs and modeline
+                                    " XXX: "[.]" in the first pattern makes it a wildcard on Windows
+    3   0.056041   0.008461         exe $'runtime! ftplugin/{name}[.]{{vim,lua}} ftplugin/{name}_*.{{vim,lua}} ftplugin/{name}/*.{{vim,lua}}'
+    6              0.000006       endfor
+    3              0.000001     endif
+
+FUNCTION  <SNR>40_SetLastHeartbeatInMemory()
+    Defined: ~/.local/share/nvim/lazy/vim-wakatime/plugin/wakatime.vim:717
+Called 2 times
+Total time:   0.000009
+ Self time:   0.000009
+
+count  total (s)   self (s)
+    2              0.000008         let s:last_heartbeat = {'last_activity_at': a:last_activity_at, 'last_heartbeat_at': a:last_heartbeat_at, 'file': a:file}
+
+FUNCTION  <SNR>40_IsWindows()
+    Defined: ~/.local/share/nvim/lazy/vim-wakatime/plugin/wakatime.vim:492
+Called 3 times
+Total time:   0.000011
+ Self time:   0.000011
+
+count  total (s)   self (s)
+    3              0.000005         if has('win32')
+                                        return s:true
+    3              0.000001         endif
+    3              0.000002         return s:false
+
+FUNCTION  <SNR>40_CurrentTimeStr()
+    Defined: ~/.local/share/nvim/lazy/vim-wakatime/plugin/wakatime.vim:499
+Called 1 time
+Total time:   0.000011
+ Self time:   0.000006
+
+count  total (s)   self (s)
+    1              0.000001         if s:has_reltime
+                                        return split(reltimestr(reltime()))[0]
+    1              0.000000         endif
+    1   0.000008   0.000003         return s:n2s(localtime())
+
+FUNCTION  <SNR>2_LoadIndent()
+    Defined: /usr/share/nvim/runtime/indent.vim:14
+Called 3 times
+Total time:   0.001244
+ Self time:   0.001216
+
+count  total (s)   self (s)
+    3              0.000008     if exists("b:undo_indent")
+                                  exe b:undo_indent
+                                  unlet! b:undo_indent b:did_indent
+    3              0.000001     endif
+    3              0.000007     let s = expand("<amatch>")
+    3              0.000003     if s != ""
+    3              0.000003       if exists("b:did_indent")
+                            	unlet b:did_indent
+    3              0.000001       endif
+                            
+                                  " When there is a dot it is used to separate filetype names.  Thus for
+                                  " "aaa.bbb" load "indent/aaa.vim" and then "indent/bbb.vim".
+    6              0.000012       for name in split(s, '\.')
+                                    " XXX: "[.]" in the pattern makes it a wildcard on Windows
+    3   0.001186   0.001157         exe $'runtime! indent/{name}[.]{{vim,lua}}'
+    6              0.000004       endfor
+    3              0.000001     endif
+
+FUNCTION  <SNR>40_JsonEscape()
+    Defined: ~/.local/share/nvim/lazy/vim-wakatime/plugin/wakatime.vim:480
+Called 4 times
+Total time:   0.000011
+ Self time:   0.000011
+
+count  total (s)   self (s)
+    4              0.000010         return substitute(a:str, '"', '\\"', 'g')
+
+FUNCTION  <SNR>40_EnoughTimePassed()
+    Defined: ~/.local/share/nvim/lazy/vim-wakatime/plugin/wakatime.vim:734
+Called 4 times
+Total time:   0.000044
+ Self time:   0.000044
+
+count  total (s)   self (s)
+    4              0.000012         let prev = a:last.last_heartbeat_at
+    4              0.000014         if a:now - prev > g:wakatime_HeartbeatFrequency * 60
+                                        return s:true
+    4              0.000002         endif
+    4              0.000005         return s:false
+
+FUNCTIONS SORTED ON TOTAL TIME
+count  total (s)   self (s)  function
+    3   0.056237   0.008657  <SNR>1_LoadFTPlugin()
+    3   0.017061   0.000137  <SNR>40_InitAndHandleActivity()
+    5   0.016937   0.000524  <SNR>40_HandleActivity()
+    1   0.014190   0.000046  <SNR>40_AppendHeartbeat()
+    1   0.014134   0.014122  <SNR>40_SetLastHeartbeat()
+    1   0.013332   0.000146  provider#clipboard#Call()
+    1   0.013187   0.000250  33()
+    1   0.012937   0.000244  <SNR>65_try_cmd()
+   25   0.003218   0.002777  <SNR>46_Highlight_Matching_Pair()
+    1   0.001915   0.001598  <SNR>40_SendHeartbeats()
+    3   0.001644             <SNR>61_SynSet()
+    3   0.001244   0.001216  <SNR>2_LoadIndent()
+   34   0.000869             <SNR>46_Remove_Matches()
+    2   0.000592   0.000146  CursorHold_Cb()
+   17   0.000409             CursorHoldTimer()
+    1   0.000192   0.000131  <SNR>40_NeovimAsyncExitHandler()
+    1   0.000156   0.000087  <SNR>40_JoinArgs()
+    1   0.000148   0.000100  <SNR>40_GetHeartbeatsJson()
+    4   0.000137             <SNR>40_GetLastHeartbeat()
+    3   0.000130             <SNR>40_SetupConfigFile()
+
+FUNCTIONS SORTED ON SELF TIME
+count  total (s)   self (s)  function
+    1   0.014134   0.014122  <SNR>40_SetLastHeartbeat()
+    3   0.056237   0.008657  <SNR>1_LoadFTPlugin()
+   25   0.003218   0.002777  <SNR>46_Highlight_Matching_Pair()
+    3              0.001644  <SNR>61_SynSet()
+    1   0.001915   0.001598  <SNR>40_SendHeartbeats()
+    3   0.001244   0.001216  <SNR>2_LoadIndent()
+   34              0.000869  <SNR>46_Remove_Matches()
+    5   0.016937   0.000524  <SNR>40_HandleActivity()
+   17              0.000409  CursorHoldTimer()
+    1   0.013187   0.000250  33()
+    1   0.012937   0.000244  <SNR>65_try_cmd()
+    2   0.000592   0.000146  CursorHold_Cb()
+    1   0.013332   0.000146  provider#clipboard#Call()
+    4              0.000137  <SNR>40_GetLastHeartbeat()
+    3   0.017061   0.000137  <SNR>40_InitAndHandleActivity()
+    1   0.000192   0.000131  <SNR>40_NeovimAsyncExitHandler()
+    3              0.000130  <SNR>40_SetupConfigFile()
+    5              0.000122  <SNR>40_GetCurrentFile()
+    1   0.000148   0.000100  <SNR>40_GetHeartbeatsJson()
+    2              0.000087  <SNR>40_NeovimAsyncOutputHandler()
+

@@ -1,6 +1,10 @@
 import { LazyPlugin } from "../../ambient/lazy";
 import { getGlobalConfiguration } from "../helpers/configuration";
-import { setImmediate } from "../shims/mainLoopCallbacks";
+
+type PluginRef = {
+  key: string,
+  include: string,
+};
 
 export function getPlugins(this: void): LazyPlugin[] {
   const globalConfig = getGlobalConfiguration();
