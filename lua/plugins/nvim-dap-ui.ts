@@ -1,6 +1,8 @@
 import { LazyPlugin } from "../../ambient/lazy";
 import { getGlobalConfiguration } from "../helpers/configuration";
 import { useExternalModule } from "../helpers/module/useModule";
+import { fs } from "../shims/fs";
+import { useNUI } from "./nui";
 
 type DapUIModule = {
   setup: (this: void, arg: unknown) => void,
@@ -44,6 +46,7 @@ type DapModule = {
   status: (this: void) => DapStatus,
   run_to_cursor: (this: void) => void,
   set_exception_breakpoints: (this: void, targets: string[]) => void,
+  toggle_breakpoint: (this: void, condition?: string, hit_condition?: string, log_message?: string) => void,
   defaults: {
     fallback: {
       exception_breakpoints: string[]
@@ -77,6 +80,42 @@ export function getDap(this: void) {
   let target = 'dap';
   const dapui = useExternalModule<DapModule>(target);
   return dapui;
+}
+type DapBreakpoint = {};
+export function getDapBreakpoints(this: void) {
+  return useExternalModule<{ get: (this: void) => DapBreakpoint[] }>("dap.breakpoints").get();
+}
+
+export function manageBreakpoint(this: void) {
+  vim.ui.select([{
+    text: 'Toggle Breakpoint',
+    action: () => getDap().toggle_breakpoint()
+  }, {
+    text: 'Create conditional breakpoint',
+    action: () => {
+      vim.ui.input({ prompt: "Condition: " }, condition => {
+        if (!condition) {
+          return;
+        }
+        getDap().toggle_breakpoint(condition);
+      });
+    }
+  }, {
+    text: 'Dump Breakpoint Info',
+    action: () => {
+      const result = vim.inspect(getDapBreakpoints());
+      print(result);
+      fs.writeFileSync("/tmp/dump.json", result);
+    }
+  }], {
+    prompt: 'Breakpoint Action',
+    format_item: item => item.text
+  }, choice => {
+    if (!choice) {
+      return;
+    }
+    choice.action();
+  });
 }
 
 export function getDapUI(this: void) {

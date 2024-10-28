@@ -3180,6 +3180,8 @@ end
 return ____exports
  end,
 ["lua.helpers.keymap.index"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local __TS__ObjectAssign = ____lualib.__TS__ObjectAssign
 local ____exports = {}
 function ____exports.keyMappingExists(mode, bind)
     local result = vim.api.nvim_call_function("mapcheck", {bind, mode})
@@ -3190,6 +3192,7 @@ function ____exports.keyMappingExists(mode, bind)
     end
 end
 function ____exports.applyKeyMapping(map)
+    map.options = __TS__ObjectAssign({silent = true}, map.options)
     if map.action ~= nil then
         vim.keymap.set(map.mode, map.inputStroke, map.action, map.options)
     else
@@ -4519,10 +4522,57 @@ local ____configuration = require("lua.helpers.configuration.index")
 local getGlobalConfiguration = ____configuration.getGlobalConfiguration
 local ____useModule = require("lua.helpers.module.useModule")
 local useExternalModule = ____useModule.useExternalModule
+local ____fs = require("lua.shims.fs.index")
+local fs = ____fs.fs
 function ____exports.getDap()
     local target = "dap"
     local dapui = useExternalModule(target)
     return dapui
+end
+function ____exports.getDapBreakpoints()
+    return useExternalModule("dap.breakpoints").get()
+end
+function ____exports.manageBreakpoint()
+    vim.ui.select(
+        {
+            {
+                text = "Toggle Breakpoint",
+                action = function() return ____exports.getDap().toggle_breakpoint() end
+            },
+            {
+                text = "Create conditional breakpoint",
+                action = function()
+                    vim.ui.input(
+                        {prompt = "Condition: "},
+                        function(condition)
+                            if not condition then
+                                return
+                            end
+                            ____exports.getDap().toggle_breakpoint(condition)
+                        end
+                    )
+                end
+            },
+            {
+                text = "Dump Breakpoint Info",
+                action = function()
+                    local result = vim.inspect(____exports.getDapBreakpoints())
+                    print(result)
+                    fs.writeFileSync("/tmp/dump.json", result)
+                end
+            }
+        },
+        {
+            prompt = "Breakpoint Action",
+            format_item = function(item) return item.text end
+        },
+        function(choice)
+            if not choice then
+                return
+            end
+            choice.action()
+        end
+    )
 end
 function ____exports.getDapUI()
     local target = "dapui"
@@ -4730,6 +4780,7 @@ local getCSharp = ____csharp.getCSharp
 local ____nvim_2Ddap_2Dui = require("lua.plugins.nvim-dap-ui")
 local getDap = ____nvim_2Ddap_2Dui.getDap
 local getDapUI = ____nvim_2Ddap_2Dui.getDapUI
+local manageBreakpoint = ____nvim_2Ddap_2Dui.manageBreakpoint
 vim.g.mapleader = " "
 vim.cmd("map w <Nop>")
 vim.cmd("map W <Nop>")
@@ -4883,7 +4934,30 @@ if ____opt_2 and ____opt_2.enabled then
     applyKeyMapping({mode = "n", inputStroke = "<leader>gli", outputStroke = ":Glance implementations<CR>", options = {desc = "Open implementations"}})
 end
 if config.packages.nvimDapUI then
-    applyKeyMapping({mode = "n", inputStroke = "<leader>db", outputStroke = ":DapToggleBreakpoint<CR>", options = {desc = "Toggle breakpoint"}})
+    applyKeyMapping({
+        mode = "n",
+        inputStroke = "<leader>dbn",
+        action = function()
+            getDap().toggle_breakpoint()
+        end,
+        options = {desc = "Toggle breakpoint"}
+    })
+    applyKeyMapping({
+        mode = "n",
+        inputStroke = "<leader>dbm",
+        action = function()
+            manageBreakpoint()
+        end,
+        options = {desc = "Toggle breakpoint"}
+    })
+    applyKeyMapping({
+        mode = "n",
+        inputStroke = "<leader>dbc",
+        action = function()
+            getDap().toggle_breakpoint(vim.fn.input("Condition: "))
+        end,
+        options = {desc = "Toggle breakpoint"}
+    })
     applyKeyMapping({
         mode = "n",
         inputStroke = "<leader>dr",

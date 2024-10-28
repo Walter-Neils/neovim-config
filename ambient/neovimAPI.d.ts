@@ -175,6 +175,8 @@ type VimFnJobStartOpts = {
 };
 
 type VimAPI = {
+
+  inspect: (this: void, target: any) => string,
   treesitter: NvimTreeSitterObj,
   cmd: (this: void, params: string) => void,
   notify: (this: void, value: string | [string, string], level?: VimAPI["log"]["levels"][keyof VimAPI["log"]["levels"]]) => void,

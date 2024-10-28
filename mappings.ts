@@ -4,7 +4,7 @@ import { applyKeyMapping } from "./lua/helpers/keymap";
 import { oneOffFunction } from "./lua/helpers/one-off";
 import { getActionsPreview } from "./lua/plugins/actions-preview";
 import { getCSharp } from "./lua/plugins/csharp";
-import { getDap, getDapUI } from "./lua/plugins/nvim-dap-ui";
+import { getDap, getDapUI, manageBreakpoint } from "./lua/plugins/nvim-dap-ui";
 
 vim.g.mapleader = " "; // Use space key as leader
 
@@ -446,8 +446,30 @@ if (config.packages["glance"]?.enabled) {
 if (config.packages["nvimDapUI"]) {
   applyKeyMapping({
     mode: 'n',
-    inputStroke: '<leader>db',
-    outputStroke: ':DapToggleBreakpoint<CR>',
+    inputStroke: '<leader>dbn',
+    action: () => {
+      getDap().toggle_breakpoint();
+    },
+    options: {
+      desc: 'Toggle breakpoint'
+    }
+  });
+  applyKeyMapping({
+    mode: 'n',
+    inputStroke: '<leader>dbm',
+    action: () => {
+      manageBreakpoint();
+    },
+    options: {
+      desc: 'Toggle breakpoint'
+    }
+  });
+  applyKeyMapping({
+    mode: 'n',
+    inputStroke: '<leader>dbc',
+    action: () => {
+      getDap().toggle_breakpoint(vim.fn.input("Condition: "));
+    },
     options: {
       desc: 'Toggle breakpoint'
     }
