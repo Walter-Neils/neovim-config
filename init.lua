@@ -6259,7 +6259,7 @@ local plugin = {
     [1] = "nvim-treesitter/nvim-treesitter-context",
     event = "VeryLazy",
     config = function()
-        useTreeSitterContextPlugin().setup({enabled = true, max_lines = -1, trim_scope = "inner"})
+        useTreeSitterContextPlugin().setup({enabled = true, max_lines = 1, trim_scope = "inner"})
     end
 }
 ____exports.default = plugin
