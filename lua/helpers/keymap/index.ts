@@ -6,15 +6,14 @@ type KeymapSetOptions = {
 };
 type KeyMapping = {
   mode: 'i' | 'a' | 'n' | 't' | 'v'
+  options?: KeymapSetOptions
 } & (
     {
       inputStroke: string,
       outputStroke: string,
-      options: KeymapSetOptions
     } | {
       inputStroke: string,
       action: (this: void) => void,
-      options: KeymapSetOptions
     }
   );
 
@@ -30,6 +29,7 @@ export function keyMappingExists(this: void, mode: KeyMapping['mode'], bind: str
 }
 
 export function applyKeyMapping(this: void, map: KeyMapping) {
+  map.options = map.options ?? {};
   if ('action' in map) {
     vim.keymap.set(map.mode, map.inputStroke, map.action, map.options);
   }
