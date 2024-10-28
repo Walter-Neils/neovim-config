@@ -29,7 +29,7 @@ export function keyMappingExists(this: void, mode: KeyMapping['mode'], bind: str
 }
 
 export function applyKeyMapping(this: void, map: KeyMapping) {
-  map.options = map.options ?? {};
+  map.options = { silent: true, ...map.options };
   if ('action' in map) {
     vim.keymap.set(map.mode, map.inputStroke, map.action, map.options);
   }
