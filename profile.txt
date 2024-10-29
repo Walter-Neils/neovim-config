@@ -1,4 +1,0 @@
-39%  get_scopes < containing_scope < (for generator) < get_definition_scopes < fn < get_definitions_lookup_table < find_definition < get_references < engine.lua:120 < pcall <  < _editor.lua:0
-36%  shared.lua:0 < tbl_contains < containing_scope < (for generator) < get_definition_scopes < fn < get_definitions_lookup_table < find_definition < get_references < engine.lua:120 < pcall <  < _editor.lua:0
- 7%  tbl_contains < containing_scope < (for generator) < get_definition_scopes < fn < get_definitions_lookup_table < find_definition < get_references < engine.lua:120 < pcall <  < _editor.lua:0
- 3%  containing_scope < (for generator) < get_definition_scopes < fn < get_definitions_lookup_table < find_definition < get_references < engine.lua:120 < pcall <  < _editor.lua:0

@@ -3,7 +3,6 @@ import { setupCustomLogic } from "./lua/custom";
 import { getGlobalConfiguration } from "./lua/helpers/configuration";
 import { setGUIFont } from "./lua/helpers/font";
 import { useExternalModule } from "./lua/helpers/module/useModule";
-import { parseArgs } from "./lua/helpers/user_command/argparser";
 import { Hyprland, isDesktopHyprland } from "./lua/integrations/hyprland";
 import { getNeovideExtendedVimContext } from "./lua/integrations/neovide";
 import { setupOllamaCopilot } from "./lua/integrations/ollama";
@@ -13,6 +12,7 @@ import { insertConsoleShims } from "./lua/shims/console";
 import { insertJSONShims } from "./lua/shims/json";
 import { insertMainLoopCallbackShims, setImmediate } from "./lua/shims/mainLoopCallbacks";
 import { THEME_APPLIERS } from "./lua/theme";
+
 insertJSONShims();
 insertConsoleShims();
 insertMainLoopCallbackShims();

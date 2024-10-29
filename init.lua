@@ -3395,7 +3395,7 @@ ____exports.CONFIGURATION_DEFAULTS = {
         lspconfig = {enabled = true, config = {inlayHints = {enabled = true, displayMode = "always"}}},
         markdownPreview = {enabled = true},
         gitBrowse = {enabled = true},
-        obsidian = {enabled = true, config = {workspaces = {{name = "notes", path = "~/Documents/obsidian/notes"}}}},
+        obsidian = {enabled = false, config = {workspaces = {{name = "notes", path = "~/Documents/obsidian/notes"}}}},
         undoTree = {enabled = true},
         octo = {enabled = true},
         leap = {enabled = false},
@@ -6387,7 +6387,7 @@ local function getTreesj()
 end
 local plugin = {
     [1] = "Wansmer/treesj",
-    keys = {"<leader>j"},
+    keys = {"<space>j"},
     dependencies = {"nvim-treesitter/nvim-treesitter"},
     config = function()
         applyKeyMapping({

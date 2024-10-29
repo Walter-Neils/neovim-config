@@ -12,7 +12,7 @@ function getTreesj() {
 
 const plugin: LazyPlugin = {
   1: 'Wansmer/treesj',
-  keys: ['<leader>j'],
+  keys: ['<space>j'],
   dependencies: ['nvim-treesitter/nvim-treesitter'],
   config: () => {
     applyKeyMapping({

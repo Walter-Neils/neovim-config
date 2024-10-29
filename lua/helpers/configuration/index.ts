@@ -163,7 +163,7 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
       enabled: true,
     },
     obsidian: {
-      enabled: true,
+      enabled: false,
       config: {
         workspaces: [
           {

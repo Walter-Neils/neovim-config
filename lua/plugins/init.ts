@@ -2,7 +2,7 @@ import { LazyPlugin } from "../../ambient/lazy";
 import { getGlobalConfiguration } from "../helpers/configuration";
 
 type PluginRef = {
-  key: string,
+  v: string,
   include: string,
 };
 
@@ -12,6 +12,7 @@ export function getPlugins(this: void): LazyPlugin[] {
   result.push(require("tokyonight").default);
   result.push(require("catppuccin").default);
   result.push(require("theme-flow").default);
+
   if (globalConfig.packages.treeSitter?.enabled) {
     result.push(require("treesitter").default);
   }
