@@ -256,7 +256,7 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
       enabled: true
     },
     overseer: {
-      enabled: true
+      enabled: false
     },
     hlchunk: {
       enabled: true

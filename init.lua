@@ -3422,7 +3422,7 @@ ____exports.CONFIGURATION_DEFAULTS = {
         neogen = {enabled = true},
         tsContextCommentString = {enabled = true},
         nvimDapVirtualText = {enabled = true},
-        overseer = {enabled = true},
+        overseer = {enabled = false},
         hlchunk = {enabled = true},
         rest = {enabled = true},
         flatten = {enabled = true},
