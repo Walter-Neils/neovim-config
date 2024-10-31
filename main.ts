@@ -38,7 +38,8 @@ function setupNeovide() {
 function setupLazy(this: void) {
   const lazyPath = vim.fn.stdpath("data") + "/lazy/lazy.nvim";
   if (!vim.loop.fs_stat(lazyPath)) {
-    const repo = "https://github.com/folke/lazy.nvim.git"; vim.fn.system(["git", "clone", "--filter=blob:none", repo, "--branch=stable", lazyPath]);
+    const repo = "https://github.com/folke/lazy.nvim.git";
+    vim.fn.system(["git", "clone", "--filter=blob:none", repo, "--branch=stable", lazyPath]);
   }
   vim.opt.rtp.prepend(lazyPath);
 }
@@ -60,6 +61,8 @@ lazy.setup(
 
 THEME_APPLIERS.TokyoNight();
 // THEME_APPLIERS.Catppuccin();
+// THEME_APPLIERS.VSCode();
+// THEME_APPLIERS.Kanagawa();
 
 vim.opt.clipboard = "unnamedplus"; // System-wide copy & paste
 vim.opt.expandtab = true;

@@ -223,7 +223,7 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
       enabled: true
     },
     illuminate: {
-      enabled: false,
+      enabled: false, // Huge latency issues on large files
     },
     treesj: {
       enabled: true,
@@ -307,6 +307,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
       enabled: true
     },
     rust: {
+      enabled: true
+    },
+    bash: {
       enabled: true
     }
   },

@@ -162,6 +162,9 @@ function environmentKeyToConfig(env: string) {
   }, {
     key: 'rust',
     lspKey: 'rust_analyzer'
+  }, {
+    key: 'bash',
+    lspKey: 'bashls'
   }];
 
   return configs.find((x) => x.key === env);

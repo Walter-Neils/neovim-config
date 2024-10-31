@@ -3440,7 +3440,8 @@ ____exports.CONFIGURATION_DEFAULTS = {
         markdown = {enabled = true},
         lua = {enabled = true},
         yaml = {enabled = true},
-        rust = {enabled = true}
+        rust = {enabled = true},
+        bash = {enabled = true}
     },
     shell = {target = "tmux", isolationScope = "isolated"},
     integrations = {ollama = {enabled = false}}
@@ -3968,6 +3969,7 @@ function ____exports.getPlugins()
     result[#result + 1] = require("lua.plugins.tokyonight").default
     result[#result + 1] = require("lua.plugins.catppuccin").default
     result[#result + 1] = require("lua.plugins.theme-flow").default
+    result[#result + 1] = require("lua.plugins.kanagawa").default
     local ____opt_0 = globalConfig.packages.treeSitter
     if ____opt_0 and ____opt_0.enabled then
         result[#result + 1] = require("lua.plugins.treesitter").default
@@ -4290,49 +4292,11 @@ return ____exports
  end,
 ["lua.theme"] = function(...) 
 local ____exports = {}
-local function h(name)
+local h, applySymbolUsageStyle, applyDapSymbols, applyDefaultFoldChars
+function h(name)
     return vim.api.nvim_get_hl(0, {name = name})
 end
-local themeType = "dark"
-local callbacks = {}
-function ____exports.onThemeChange(callback)
-    callbacks[#callbacks + 1] = callback
-end
-local function updateThemeType(____type)
-    themeType = ____type
-    for ____, callback in ipairs(callbacks) do
-        callback(____type)
-    end
-end
-function ____exports.globalThemeType()
-    return themeType
-end
-local function VSCode()
-    vim.api.nvim_set_hl(0, "CmpItemAbbrDeprecated", {bg = "NONE", strikethrough = true, fg = "#808080"})
-    vim.api.nvim_set_hl(0, "CmpItemAbbrDeprecated", {bg = "NONE", strikethrough = true, fg = "#808080"})
-    vim.api.nvim_set_hl(0, "CmpItemAbbrMatch", {bg = "NONE", fg = "#569CD6"})
-    vim.api.nvim_set_hl(0, "CmpItemAbbrMatchFuzzy", {link = "CmpIntemAbbrMatch"})
-    vim.api.nvim_set_hl(0, "CmpItemKindVariable", {bg = "NONE", fg = "#9CDCFE"})
-    vim.api.nvim_set_hl(0, "CmpItemKindInterface", {link = "CmpItemKindVariable"})
-    vim.api.nvim_set_hl(0, "CmpItemKindText", {link = "CmpItemKindVariable"})
-    vim.api.nvim_set_hl(0, "CmpItemKindFunction", {bg = "NONE", fg = "#C586C0"})
-    vim.api.nvim_set_hl(0, "CmpItemKindMethod", {link = "CmpItemKindFunction"})
-    vim.api.nvim_set_hl(0, "CmpItemKindKeyword", {bg = "NONE", fg = "#D4D4D4"})
-    vim.api.nvim_set_hl(0, "CmpItemKindProperty", {link = "CmpItemKindKeyword"})
-    vim.api.nvim_set_hl(0, "CmpItemKindUnit", {link = "CmpItemKindKeyword"})
-    updateThemeType("dark")
-end
-local function TokyoNight()
-    vim.cmd("colorscheme tokyonight-storm")
-    updateThemeType("dark")
-    vim.api.nvim_set_hl(0, "DapBreakpoint", {ctermbg = 0, fg = "#993939", bg = "#31353f"})
-    vim.api.nvim_set_hl(0, "DapLogPoint", {ctermbg = 0, fg = "#61afef", bg = "#31353f"})
-    vim.api.nvim_set_hl(0, "DapStopped", {ctermbg = 0, fg = "#98c379", bg = "#31353f"})
-    vim.fn.sign_define("DapBreakpoint", {text = "", texthl = "DapBreakpoint", linehl = "DapBreakpoint", numhl = "DapBreakpoint"})
-    vim.fn.sign_define("DapBreakpointCondition", {text = "ﳁ", texthl = "DapBreakpoint", linehl = "DapBreakpoint", numhl = "DapBreakpoint"})
-    vim.fn.sign_define("DapBreakpointRejected", {text = "", texthl = "DapBreakpoint", linehl = "DapBreakpoint", numhl = "DapBreakpoint"})
-    vim.fn.sign_define("DapLogPoint", {text = "", texthl = "DapLogPoint", linehl = "DapLogPoint", numhl = "DapLogPoint"})
-    vim.fn.sign_define("DapStopped", {text = "", texthl = "DapStopped", linehl = "DapStopped", numhl = "DapStopped"})
+function applySymbolUsageStyle()
     vim.api.nvim_set_hl(
         0,
         "SymbolUsageRounding",
@@ -4377,14 +4341,62 @@ local function TokyoNight()
             italic = true
         }
     )
+end
+function applyDapSymbols()
+    vim.api.nvim_set_hl(0, "DapBreakpoint", {ctermbg = 0, fg = "#993939", bg = "#31353f"})
+    vim.api.nvim_set_hl(0, "DapLogPoint", {ctermbg = 0, fg = "#61afef", bg = "#31353f"})
+    vim.api.nvim_set_hl(0, "DapStopped", {ctermbg = 0, fg = "#98c379", bg = "#31353f"})
+    vim.fn.sign_define("DapBreakpoint", {text = "", texthl = "DapBreakpoint", linehl = "DapBreakpoint", numhl = "DapBreakpoint"})
+    vim.fn.sign_define("DapBreakpointCondition", {text = "ﳁ", texthl = "DapBreakpoint", linehl = "DapBreakpoint", numhl = "DapBreakpoint"})
+    vim.fn.sign_define("DapBreakpointRejected", {text = "", texthl = "DapBreakpoint", linehl = "DapBreakpoint", numhl = "DapBreakpoint"})
+    vim.fn.sign_define("DapLogPoint", {text = "", texthl = "DapLogPoint", linehl = "DapLogPoint", numhl = "DapLogPoint"})
+    vim.fn.sign_define("DapStopped", {text = "", texthl = "DapStopped", linehl = "DapStopped", numhl = "DapStopped"})
+end
+function applyDefaultFoldChars()
     vim.o.fillchars = "eob: ,fold: ,foldopen:,foldsep: ,foldclose:"
+end
+local themeType = "dark"
+local callbacks = {}
+function ____exports.onThemeChange(callback)
+    callbacks[#callbacks + 1] = callback
+end
+local function updateThemeType(____type)
+    themeType = ____type
+    for ____, callback in ipairs(callbacks) do
+        callback(____type)
+    end
+end
+function ____exports.globalThemeType()
+    return themeType
+end
+local function VSCode()
+    vim.api.nvim_set_hl(0, "CmpItemAbbrDeprecated", {bg = "NONE", strikethrough = true, fg = "#808080"})
+    applyDefaultFoldChars()
+    applyDapSymbols()
+    applySymbolUsageStyle()
+    updateThemeType("dark")
+end
+local function TokyoNight()
+    vim.cmd("colorscheme tokyonight-storm")
+    updateThemeType("dark")
+    applyDapSymbols()
+    applyDefaultFoldChars()
+    applySymbolUsageStyle()
 end
 local function Catppuccin()
     vim.cmd("colorscheme catppuccin")
-    vim.o.fillchars = "eob: ,fold: ,foldopen:,foldsep: ,foldclose:"
+    applyDefaultFoldChars()
+    applyDapSymbols()
+    applySymbolUsageStyle()
     updateThemeType("dark")
 end
-____exports.THEME_APPLIERS = {VSCode = VSCode, TokyoNight = TokyoNight, Catppuccin = Catppuccin}
+local function Kanagawa()
+    vim.cmd("colorscheme kanagawa")
+    updateThemeType("dark")
+    applySymbolUsageStyle()
+    applyDefaultFoldChars()
+end
+____exports.THEME_APPLIERS = {VSCode = VSCode, TokyoNight = TokyoNight, Catppuccin = Catppuccin, Kanagawa = Kanagawa}
 return ____exports
  end,
 ["main"] = function(...) 
@@ -5472,6 +5484,12 @@ local plugin = {
 ____exports.default = plugin
 return ____exports
  end,
+["lua.plugins.kanagawa"] = function(...) 
+local ____exports = {}
+local plugin = {[1] = "rebelot/kanagawa.nvim", lazy = false, priority = 1000, opts = {theme = "wave", background = {dark = "dragon", light = "lotus"}}}
+____exports.default = plugin
+return ____exports
+ end,
 ["lua.plugins.lazygit"] = function(...) 
 local ____exports = {}
 local plugin = {[1] = "kdheepak/lazygit.nvim", cmd = {
@@ -5683,7 +5701,8 @@ function environmentKeyToConfig(env)
         {key = "markdown", lspKey = "marksman"},
         {key = "lua", lspKey = "lua_ls"},
         {key = "yaml", lspKey = "yamlls"},
-        {key = "rust", lspKey = "rust_analyzer"}
+        {key = "rust", lspKey = "rust_analyzer"},
+        {key = "bash", lspKey = "bashls"}
     }
     return __TS__ArrayFind(
         configs,
