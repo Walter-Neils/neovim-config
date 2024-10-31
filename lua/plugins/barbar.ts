@@ -8,7 +8,8 @@ const plugin: LazyPlugin = {
   },
   opts: {
     animation: true,
-    insert_at_start: true
+    insert_at_start: true,
+    auto_hide: 1
   }
 };
 export { plugin as default };

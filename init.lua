@@ -5147,7 +5147,7 @@ local plugin = {
     init = function()
         vim.g.barbar_auto_setup = false
     end,
-    opts = {animation = true, insert_at_start = true}
+    opts = {animation = true, insert_at_start = true, auto_hide = 1}
 }
 ____exports.default = plugin
 return ____exports
