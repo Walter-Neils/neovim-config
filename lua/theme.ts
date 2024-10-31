@@ -81,6 +81,15 @@ function Kanagawa(this: void) {
   updateThemeType('dark');
   applySymbolUsageStyle();
   applyDefaultFoldChars();
+  applyDapSymbols();
+}
+
+function Nord(this: void) {
+  vim.cmd("colorscheme nord");
+  updateThemeType('dark');
+  applySymbolUsageStyle();
+  applyDefaultFoldChars();
+  applyDapSymbols();
 }
 
 
@@ -88,5 +97,6 @@ export const THEME_APPLIERS = {
   VSCode,
   TokyoNight,
   Catppuccin,
-  Kanagawa
+  Kanagawa,
+  Nord
 }

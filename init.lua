@@ -3970,6 +3970,7 @@ function ____exports.getPlugins()
     result[#result + 1] = require("lua.plugins.catppuccin").default
     result[#result + 1] = require("lua.plugins.theme-flow").default
     result[#result + 1] = require("lua.plugins.kanagawa").default
+    result[#result + 1] = require("lua.plugins.nord").default
     local ____opt_0 = globalConfig.packages.treeSitter
     if ____opt_0 and ____opt_0.enabled then
         result[#result + 1] = require("lua.plugins.treesitter").default
@@ -4395,8 +4396,22 @@ local function Kanagawa()
     updateThemeType("dark")
     applySymbolUsageStyle()
     applyDefaultFoldChars()
+    applyDapSymbols()
 end
-____exports.THEME_APPLIERS = {VSCode = VSCode, TokyoNight = TokyoNight, Catppuccin = Catppuccin, Kanagawa = Kanagawa}
+local function Nord()
+    vim.cmd("colorscheme nord")
+    updateThemeType("dark")
+    applySymbolUsageStyle()
+    applyDefaultFoldChars()
+    applyDapSymbols()
+end
+____exports.THEME_APPLIERS = {
+    VSCode = VSCode,
+    TokyoNight = TokyoNight,
+    Catppuccin = Catppuccin,
+    Kanagawa = Kanagawa,
+    Nord = Nord
+}
 return ____exports
  end,
 ["main"] = function(...) 
@@ -5966,6 +5981,12 @@ local plugin = {
         end
     end
 }
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.nord"] = function(...) 
+local ____exports = {}
+local plugin = {[1] = "shaunsingh/nord.nvim", lazy = false, priority = 1000}
 ____exports.default = plugin
 return ____exports
  end,

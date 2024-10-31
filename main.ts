@@ -63,6 +63,7 @@ THEME_APPLIERS.TokyoNight();
 // THEME_APPLIERS.Catppuccin();
 // THEME_APPLIERS.VSCode();
 // THEME_APPLIERS.Kanagawa();
+// THEME_APPLIERS.Nord();
 
 vim.opt.clipboard = "unnamedplus"; // System-wide copy & paste
 vim.opt.expandtab = true;
