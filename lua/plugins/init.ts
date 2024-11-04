@@ -12,7 +12,8 @@ export function getPlugins(this: void): LazyPlugin[] {
   result.push(require("tokyonight").default);
   result.push(require("catppuccin").default);
   result.push(require("theme-flow").default);
-
+  result.push(require("kanagawa").default);
+  result.push(require("nord").default);
   if (globalConfig.packages.treeSitter?.enabled) {
     result.push(require("treesitter").default);
   }
