@@ -308,6 +308,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     rust: {
       enabled: true
+    },
+    bash: {
+      enabled: true
     }
   },
   shell: {

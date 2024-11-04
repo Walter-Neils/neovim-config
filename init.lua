@@ -3440,7 +3440,8 @@ ____exports.CONFIGURATION_DEFAULTS = {
         markdown = {enabled = true},
         lua = {enabled = true},
         yaml = {enabled = true},
-        rust = {enabled = true}
+        rust = {enabled = true},
+        bash = {enabled = true}
     },
     shell = {target = "tmux", isolationScope = "isolated"},
     integrations = {ollama = {enabled = false}}
@@ -4618,7 +4619,7 @@ local function createOrUseArray(root, arrayKey, callback)
 end
 local function configureLanguages()
     local dap = ____exports.getDap()
-    if vim.fn.executable("codelldb") then
+    if vim.fn.executable("codelldb") == 1 then
         dap.adapters.lldb = {type = "server", port = "${port}", host = "127.0.0.1", executable = {command = "codelldb", args = {"--port", "${port}"}}}
         for ____, language in ipairs({"c", "cpp", "rust"}) do
             createOrUseArray(
@@ -4643,11 +4644,11 @@ local function configureLanguages()
             )
         end
     end
-    if vim.fn.executable("js-debug-adapter") then
+    if vim.fn.executable("js-debug-adapter") == 1 then
         dap.adapters["pwa-node"] = {type = "server", host = "::1", port = 8123, executable = {command = "js-debug-adapter"}}
         vim.notify("JS Debug Adapter installed, but no DAP configuration uses it.", vim.log.levels.WARN)
     end
-    if vim.fn.executable("node-debug2-adapter") then
+    if vim.fn.executable("node-debug2-adapter") == 1 then
         dap.adapters.node2 = {name = "NodeJS Debug", type = "executable", command = "node-debug2-adapter"}
         for ____, language in ipairs({"javascript", "typescript"}) do
             dap.configurations[language] = {{
@@ -5614,6 +5615,10 @@ return ____exports
 ["lua.plugins.lspconfig"] = function(...) 
 local ____lualib = require("lualib_bundle")
 local __TS__ArrayFind = ____lualib.__TS__ArrayFind
+local __TS__Promise = ____lualib.__TS__Promise
+local __TS__New = ____lualib.__TS__New
+local __TS__AsyncAwaiter = ____lualib.__TS__AsyncAwaiter
+local __TS__Await = ____lualib.__TS__Await
 local __TS__ObjectAssign = ____lualib.__TS__ObjectAssign
 local ____exports = {}
 local getConfig, on_attach, environmentKeyToConfig, configureLSP, attachCallbacks, preHooks
@@ -5621,6 +5626,8 @@ local ____configuration = require("lua.helpers.configuration.index")
 local getGlobalConfiguration = ____configuration.getGlobalConfiguration
 local ____useModule = require("lua.helpers.module.useModule")
 local useExternalModule = ____useModule.useExternalModule
+local ____mainLoopCallbacks = require("lua.shims.mainLoopCallbacks")
+local setImmediate = ____mainLoopCallbacks.setImmediate
 function getConfig()
     local config = getGlobalConfiguration()
     local lspConfigRoot = config.packages.lspconfig
@@ -5669,6 +5676,7 @@ function environmentKeyToConfig(env)
         {
             key = "typescript",
             lspKey = "tsserver",
+            required_executable = "typescript-language-server",
             additionalOptions = {
                 single_file_support = false,
                 root_dir = ____exports.getLSPConfig().util.root_pattern("package.json")
@@ -5682,8 +5690,9 @@ function environmentKeyToConfig(env)
         {key = "c/c++", lspKey = "clangd"},
         {key = "markdown", lspKey = "marksman"},
         {key = "lua", lspKey = "lua_ls"},
-        {key = "yaml", lspKey = "yamlls"},
-        {key = "rust", lspKey = "rust_analyzer"}
+        {key = "yaml", lspKey = "yamlls", required_executable = "yaml-language-server"},
+        {key = "rust", lspKey = "rust_analyzer"},
+        {key = "bash", lspKey = "bashls"}
     }
     return __TS__ArrayFind(
         configs,
@@ -5691,44 +5700,56 @@ function environmentKeyToConfig(env)
     )
 end
 function configureLSP()
-    local lspconfig = ____exports.getLSPConfig()
-    local targetEnvironments = getGlobalConfiguration().targetEnvironments
-    for targetEnvKey in pairs(targetEnvironments) do
-        do
-            local ____opt_0 = targetEnvironments[targetEnvKey]
-            if not (____opt_0 and ____opt_0.enabled) then
-                goto __continue28
+    return __TS__AsyncAwaiter(function(____awaiter_resolve)
+        __TS__Await(__TS__New(
+            __TS__Promise,
+            function(____, resolve) return setImmediate(resolve) end
+        ))
+        local lspconfig = ____exports.getLSPConfig()
+        local targetEnvironments = getGlobalConfiguration().targetEnvironments
+        for targetEnvKey in pairs(targetEnvironments) do
+            do
+                local ____opt_0 = targetEnvironments[targetEnvKey]
+                if not (____opt_0 and ____opt_0.enabled) then
+                    goto __continue29
+                end
+                local config = environmentKeyToConfig(targetEnvKey)
+                if config == nil then
+                    vim.notify("Failed to locate configuration for environment " .. targetEnvKey, vim.log.levels.WARN)
+                else
+                    if config.required_executable ~= nil then
+                        if vim.fn.executable(config.required_executable) ~= 1 then
+                            vim.notify(((("Cannot enable LSP server <" .. config.key) .. ">: required executable '") .. config.required_executable) .. "' is not present.", vim.log.levels.WARN)
+                            goto __continue29
+                        end
+                    end
+                    local capabilities = vim.lsp.protocol.make_client_capabilities()
+                    local ____opt_2 = getGlobalConfiguration().packages.cmp
+                    if ____opt_2 and ____opt_2.enabled then
+                        local cmp_capabilities = useExternalModule("cmp_nvim_lsp").default_capabilities()
+                        capabilities = __TS__ObjectAssign({}, capabilities, cmp_capabilities)
+                    end
+                    local ____config_additionalOptions_4 = config.additionalOptions
+                    if ____config_additionalOptions_4 == nil then
+                        ____config_additionalOptions_4 = {}
+                    end
+                    local setupConfig = __TS__ObjectAssign({}, ____config_additionalOptions_4, {capabilities = capabilities, on_attach = on_attach})
+                    for ____, preHook in ipairs(preHooks) do
+                        preHook(config.lspKey, setupConfig)
+                    end
+                    lspconfig[config.lspKey].setup(setupConfig)
+                end
             end
-            local config = environmentKeyToConfig(targetEnvKey)
-            if config == nil then
-                vim.notify("Failed to locate configuration for environment " .. targetEnvKey, vim.log.levels.WARN)
-            else
-                local capabilities = vim.lsp.protocol.make_client_capabilities()
-                local ____opt_2 = getGlobalConfiguration().packages.cmp
-                if ____opt_2 and ____opt_2.enabled then
-                    local cmp_capabilities = useExternalModule("cmp_nvim_lsp").default_capabilities()
-                    capabilities = __TS__ObjectAssign({}, capabilities, cmp_capabilities)
-                end
-                local ____config_additionalOptions_4 = config.additionalOptions
-                if ____config_additionalOptions_4 == nil then
-                    ____config_additionalOptions_4 = {}
-                end
-                local setupConfig = __TS__ObjectAssign({}, ____config_additionalOptions_4, {capabilities = capabilities, on_attach = on_attach})
-                for ____, preHook in ipairs(preHooks) do
-                    preHook(config.lspKey, setupConfig)
-                end
-                lspconfig[config.lspKey].setup(setupConfig)
-            end
+            ::__continue29::
         end
-        ::__continue28::
-    end
-    local ____vim_diagnostic_config_8 = vim.diagnostic.config
-    local ____opt_5 = getGlobalConfiguration().packages.lspLines
-    local ____temp_7 = ____opt_5 and ____opt_5.enabled
-    if ____temp_7 == nil then
-        ____temp_7 = false
-    end
-    ____vim_diagnostic_config_8({update_in_insert = true, virtual_text = not ____temp_7})
+        local ____vim_diagnostic_config_8 = vim.diagnostic.config
+        local ____opt_5 = getGlobalConfiguration().packages.lspLines
+        local ____temp_7 = ____opt_5 and ____opt_5.enabled
+        if ____temp_7 == nil then
+            ____temp_7 = false
+        end
+        ____vim_diagnostic_config_8({update_in_insert = true, virtual_text = not ____temp_7})
+    end)
 end
 local plugin = {[1] = "neovim/nvim-lspconfig", config = configureLSP}
 attachCallbacks = {}
@@ -6355,7 +6376,7 @@ local plugin = {
     [1] = "nvim-treesitter/nvim-treesitter-context",
     event = "VeryLazy",
     config = function()
-        useTreeSitterContextPlugin().setup({enabled = true, max_lines = 1, trim_scope = "inner"})
+        useTreeSitterContextPlugin().setup({enabled = true, max_lines = 2, trim_scope = "inner"})
     end
 }
 ____exports.default = plugin

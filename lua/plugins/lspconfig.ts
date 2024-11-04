@@ -1,6 +1,7 @@
 import { LazyPlugin } from "../../ambient/lazy";
 import { getGlobalConfiguration } from "../helpers/configuration";
 import { useExternalModule } from "../helpers/module/useModule";
+import { setImmediate, setTimeout } from "../shims/mainLoopCallbacks";
 import { getNavic } from "./navic";
 
 const plugin: LazyPlugin = {
@@ -134,9 +135,11 @@ function environmentKeyToConfig(env: string) {
     key: string;
     lspKey: string;
     additionalOptions?: unknown;
+    required_executable?: string;
   }[] = [{
     key: "typescript",
     lspKey: "tsserver",
+    required_executable: 'typescript-language-server',
     additionalOptions: {
       single_file_support: false,
       root_dir: getLSPConfig().util.root_pattern("package.json"),
@@ -158,10 +161,14 @@ function environmentKeyToConfig(env: string) {
     lspKey: 'lua_ls'
   }, {
     key: 'yaml',
-    lspKey: 'yamlls'
+    lspKey: 'yamlls',
+    required_executable: 'yaml-language-server'
   }, {
     key: 'rust',
     lspKey: 'rust_analyzer'
+  }, {
+    key: 'bash',
+    lspKey: 'bashls'
   }];
 
   return configs.find((x) => x.key === env);
@@ -179,21 +186,28 @@ vim.api.nvim_create_autocmd("LspAttach", {
   },
 });
 
-function configureLSP(this: void) {
+async function configureLSP(this: void) {
+  await new Promise<void>((resolve: (this: void) => void) => setImmediate(resolve)); // Wait for other plugins to initialize (notifs provider in this case)
   const lspconfig = getLSPConfig();
-
   const targetEnvironments = getGlobalConfiguration().targetEnvironments;
   for (const targetEnvKey in targetEnvironments) {
     if (!targetEnvironments[targetEnvKey]?.enabled) {
       continue;
     }
     const config = environmentKeyToConfig(targetEnvKey);
+
     if (config === undefined) {
       vim.notify(
         `Failed to locate configuration for environment ${targetEnvKey}`,
         vim.log.levels.WARN,
       );
     } else {
+      if (config.required_executable !== undefined) {
+        if (vim.fn.executable(config.required_executable) !== 1) {
+          vim.notify(`Cannot enable LSP server <${config.key}>: required executable '${config.required_executable}' is not present.`, vim.log.levels.WARN);
+          continue;
+        }
+      }
       let capabilities = vim.lsp.protocol.make_client_capabilities();
       if (getGlobalConfiguration().packages["cmp"]?.enabled) {
         let cmp_capabilities = useExternalModule<

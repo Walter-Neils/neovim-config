@@ -15,7 +15,7 @@ const plugin: LazyPlugin = {
   config: () => {
     useTreeSitterContextPlugin().setup({
       enabled: true,
-      max_lines: 1,
+      max_lines: 2,
       trim_scope: 'inner'
     });
   }

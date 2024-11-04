@@ -133,7 +133,7 @@ function createOrUseArray<TRoot extends {}, TKey extends keyof TRoot, TResult>(t
 
 function configureLanguages(this: void) {
   const dap = getDap();
-  if (vim.fn.executable("codelldb")) {
+  if (vim.fn.executable("codelldb") === 1) {
     // Configure LLDB as an adapter
     dap.adapters['lldb'] = {
       type: 'server',
@@ -165,7 +165,7 @@ function configureLanguages(this: void) {
 
   }
 
-  if (vim.fn.executable("js-debug-adapter")) {
+  if (vim.fn.executable("js-debug-adapter") === 1) {
     dap.adapters['pwa-node'] = {
       type: 'server',
       host: '::1',
@@ -176,7 +176,7 @@ function configureLanguages(this: void) {
     };
     vim.notify("JS Debug Adapter installed, but no DAP configuration uses it.", vim.log.levels.WARN);
   }
-  if (vim.fn.executable("node-debug2-adapter")) {
+  if (vim.fn.executable("node-debug2-adapter") === 1) {
     dap.adapters["node2"] = {
       name: 'NodeJS Debug',
       type: 'executable',

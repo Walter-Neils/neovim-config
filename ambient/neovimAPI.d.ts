@@ -311,7 +311,7 @@ type VimAPI = {
     // Returns -1 if a buffer is not currently in a window
     bufwinid: (this: void, buf: NeovimBuffer | number) => number,
     jobstart: (this: void, command: string, opts: VimFnJobStartOpts) => void,
-    executable: (this: void, exe: string) => boolean,
+    executable: (this: void, exe: string) => 0 | 1,
     getcwd: (this: void) => string,
     sign_define: (this: void, id: string, options: {
       text: string,
