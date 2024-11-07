@@ -4415,6 +4415,10 @@ ____exports.THEME_APPLIERS = {
 return ____exports
  end,
 ["main"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local __TS__SparseArrayNew = ____lualib.__TS__SparseArrayNew
+local __TS__SparseArrayPush = ____lualib.__TS__SparseArrayPush
+local __TS__SparseArraySpread = ____lualib.__TS__SparseArraySpread
 local ____exports = {}
 local ____custom = require("lua.custom.index")
 local setupCustomLogic = ____custom.setupCustomLogic
@@ -4454,7 +4458,9 @@ local function setupNeovide()
         vim.g.neovide_scale_factor = 0.85
         vim.g.neovide_detach_on_quit = "always_detach"
         if isDesktopHyprland() then
-            local targetRefresh = math.max(unpack(Hyprland.getRefreshRates()))
+            local ____array_0 = __TS__SparseArrayNew(unpack(Hyprland.getRefreshRates()))
+            __TS__SparseArrayPush(____array_0, 60)
+            local targetRefresh = math.max(unpack({__TS__SparseArraySpread(____array_0)}))
             vim.g.neovide_refresh_rate = targetRefresh
         end
         setGUIFont("VictorMono_Nerd_Font_Mono", 14)
@@ -4477,12 +4483,12 @@ local function setupLazy()
 end
 setupNeovide()
 setupOllamaCopilot()
-local ____opt_0 = getGlobalConfiguration().packages.copilot
-local ____temp_2 = ____opt_0 and ____opt_0.enabled
-if ____temp_2 == nil then
-    ____temp_2 = false
+local ____opt_1 = getGlobalConfiguration().packages.copilot
+local ____temp_3 = ____opt_1 and ____opt_1.enabled
+if ____temp_3 == nil then
+    ____temp_3 = false
 end
-if not ____temp_2 then
+if not ____temp_3 then
     vim.g.copilot_filetypes = {["*"] = false}
 end
 setupLazy()

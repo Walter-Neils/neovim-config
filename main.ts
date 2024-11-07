@@ -26,7 +26,7 @@ function setupNeovide() {
     vim.g.neovide_detach_on_quit = 'always_detach';
     if (isDesktopHyprland()) {
       // Update Neovide's refresh rate to match the fastest monitor
-      const targetRefresh = Math.max(...Hyprland.getRefreshRates());
+      const targetRefresh = Math.max(...[...Hyprland.getRefreshRates(), 60]);
       vim.g.neovide_refresh_rate = targetRefresh;
     }
     // If you want to get a list of available fonts, run `set guifont=*`
