@@ -5422,6 +5422,7 @@ local plugin = {
     config = function()
         if not vim.fn.executable("xxd") then
             vim.notify("xxd utility is required for hex editor functionality", vim.log.levels.ERROR)
+            return
         end
         useHexPlugin().setup()
     end

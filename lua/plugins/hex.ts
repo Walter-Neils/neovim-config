@@ -16,6 +16,7 @@ const plugin: LazyPlugin = {
   config: () => {
     if (!vim.fn.executable("xxd")) {
       vim.notify("xxd utility is required for hex editor functionality", vim.log.levels.ERROR);
+      return;
     }
     useHexPlugin().setup();
   }
