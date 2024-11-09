@@ -5713,7 +5713,7 @@ function environmentKeyToConfig(env)
     local configs = {
         {
             key = "typescript",
-            lspKey = "tsserver",
+            lspKey = "ts_ls",
             required_executable = "typescript-language-server",
             additionalOptions = {
                 single_file_support = false,
