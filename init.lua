@@ -5423,6 +5423,7 @@ local plugin = {
     config = function()
         if not vim.fn.executable("xxd") then
             vim.notify("xxd utility is required for hex editor functionality", vim.log.levels.ERROR)
+            return
         end
         useHexPlugin().setup()
     end
@@ -5714,7 +5715,7 @@ function environmentKeyToConfig(env)
     local configs = {
         {
             key = "typescript",
-            lspKey = "tsserver",
+            lspKey = "ts_ls",
             required_executable = "typescript-language-server",
             additionalOptions = {
                 single_file_support = false,
