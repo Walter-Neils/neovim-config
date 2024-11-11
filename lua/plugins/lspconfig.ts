@@ -67,7 +67,6 @@ export function registerLSPConfigurationHook(this: void, hook: LSPConfigurationM
 
 function on_attach(this: void, client: LSPClient, bufnr: number) {
   const lspConfig = getConfig();
-  // TODO: Move plugin-specific logic to an attach hook
   if (lspConfig.inlayHints.enabled) {
     let error: any | undefined;
     try {
@@ -75,6 +74,7 @@ function on_attach(this: void, client: LSPClient, bufnr: number) {
         if (vim.lsp.inlay_hint === undefined) {
           vim.notify(
             `Failed to enable inlay hints: neovim builtin inlay_hints unavailable`,
+            vim.log.levels.ERROR
           );
         } else {
           vim.lsp.inlay_hint.enable(true, { bufnr });

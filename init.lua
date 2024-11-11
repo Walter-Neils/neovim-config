@@ -3274,6 +3274,129 @@ function ____exports.isRunningUnderNixOS()
 end
 return ____exports
  end,
+["lua.theme"] = function(...) 
+local ____exports = {}
+local h, applySymbolUsageStyle, applyDapSymbols, applyDefaultFoldChars
+function h(name)
+    return vim.api.nvim_get_hl(0, {name = name})
+end
+function applySymbolUsageStyle()
+    vim.api.nvim_set_hl(
+        0,
+        "SymbolUsageRounding",
+        {
+            fg = h("CursorLine").bg,
+            italic = true
+        }
+    )
+    vim.api.nvim_set_hl(
+        0,
+        "SymbolUsageContent",
+        {
+            bg = h("CursorLine").bg,
+            fg = h("Comment").fg,
+            italic = true
+        }
+    )
+    vim.api.nvim_set_hl(
+        0,
+        "SymbolUsageRef",
+        {
+            fg = h("Function").fg,
+            bg = h("CursorLine").bg,
+            italic = true
+        }
+    )
+    vim.api.nvim_set_hl(
+        0,
+        "SymbolUsageDef",
+        {
+            fg = h("Type").fg,
+            bg = h("CursorLine").bg,
+            italic = true
+        }
+    )
+    vim.api.nvim_set_hl(
+        0,
+        "SymbolUsageImpl",
+        {
+            fg = h("@keyword").fg,
+            bg = h("CursorLine").bg,
+            italic = true
+        }
+    )
+end
+function applyDapSymbols()
+    vim.api.nvim_set_hl(0, "DapBreakpoint", {ctermbg = 0, fg = "#993939", bg = "#31353f"})
+    vim.api.nvim_set_hl(0, "DapLogPoint", {ctermbg = 0, fg = "#61afef", bg = "#31353f"})
+    vim.api.nvim_set_hl(0, "DapStopped", {ctermbg = 0, fg = "#98c379", bg = "#31353f"})
+    vim.fn.sign_define("DapBreakpoint", {text = "", texthl = "DapBreakpoint", linehl = "DapBreakpoint", numhl = "DapBreakpoint"})
+    vim.fn.sign_define("DapBreakpointCondition", {text = "ﳁ", texthl = "DapBreakpoint", linehl = "DapBreakpoint", numhl = "DapBreakpoint"})
+    vim.fn.sign_define("DapBreakpointRejected", {text = "", texthl = "DapBreakpoint", linehl = "DapBreakpoint", numhl = "DapBreakpoint"})
+    vim.fn.sign_define("DapLogPoint", {text = "", texthl = "DapLogPoint", linehl = "DapLogPoint", numhl = "DapLogPoint"})
+    vim.fn.sign_define("DapStopped", {text = "", texthl = "DapStopped", linehl = "DapStopped", numhl = "DapStopped"})
+end
+function applyDefaultFoldChars()
+    vim.o.fillchars = "eob: ,fold: ,foldopen:,foldsep: ,foldclose:"
+end
+local themeType = "dark"
+local callbacks = {}
+function ____exports.onThemeChange(callback)
+    callbacks[#callbacks + 1] = callback
+end
+local function updateThemeType(____type)
+    themeType = ____type
+    for ____, callback in ipairs(callbacks) do
+        callback(____type)
+    end
+end
+function ____exports.globalThemeType()
+    return themeType
+end
+local function VSCode()
+    vim.api.nvim_set_hl(0, "CmpItemAbbrDeprecated", {bg = "NONE", strikethrough = true, fg = "#808080"})
+    applyDefaultFoldChars()
+    applyDapSymbols()
+    applySymbolUsageStyle()
+    updateThemeType("dark")
+end
+local function TokyoNight()
+    vim.cmd("colorscheme tokyonight-storm")
+    updateThemeType("dark")
+    applyDapSymbols()
+    applyDefaultFoldChars()
+    applySymbolUsageStyle()
+end
+local function Catppuccin()
+    vim.cmd("colorscheme catppuccin")
+    applyDefaultFoldChars()
+    applyDapSymbols()
+    applySymbolUsageStyle()
+    updateThemeType("dark")
+end
+local function Kanagawa()
+    vim.cmd("colorscheme kanagawa")
+    updateThemeType("dark")
+    applySymbolUsageStyle()
+    applyDefaultFoldChars()
+    applyDapSymbols()
+end
+local function Nord()
+    vim.cmd("colorscheme nord")
+    updateThemeType("dark")
+    applySymbolUsageStyle()
+    applyDefaultFoldChars()
+    applyDapSymbols()
+end
+____exports.THEME_APPLIERS = {
+    VSCode = VSCode,
+    TokyoNight = TokyoNight,
+    Catppuccin = Catppuccin,
+    Kanagawa = Kanagawa,
+    Nord = Nord
+}
+return ____exports
+ end,
 ["lua.helpers.persistent-data.index"] = function(...) 
 local ____exports = {}
 local ____fs = require("lua.shims.fs.index")
@@ -3361,6 +3484,7 @@ end
 configuration = nil
 getGlobalConfig, setGlobalConfig = unpack(usePersistentValue("configuration.json", {}))
 ____exports.CONFIGURATION_DEFAULTS = {
+    theme = {key = "TokyoNight"},
     packages = {
         mason = {enabled = not isRunningUnderNixOS()},
         nvimTree = {enabled = true},
@@ -4291,129 +4415,6 @@ function ____exports.insertJSONShims()
 end
 return ____exports
  end,
-["lua.theme"] = function(...) 
-local ____exports = {}
-local h, applySymbolUsageStyle, applyDapSymbols, applyDefaultFoldChars
-function h(name)
-    return vim.api.nvim_get_hl(0, {name = name})
-end
-function applySymbolUsageStyle()
-    vim.api.nvim_set_hl(
-        0,
-        "SymbolUsageRounding",
-        {
-            fg = h("CursorLine").bg,
-            italic = true
-        }
-    )
-    vim.api.nvim_set_hl(
-        0,
-        "SymbolUsageContent",
-        {
-            bg = h("CursorLine").bg,
-            fg = h("Comment").fg,
-            italic = true
-        }
-    )
-    vim.api.nvim_set_hl(
-        0,
-        "SymbolUsageRef",
-        {
-            fg = h("Function").fg,
-            bg = h("CursorLine").bg,
-            italic = true
-        }
-    )
-    vim.api.nvim_set_hl(
-        0,
-        "SymbolUsageDef",
-        {
-            fg = h("Type").fg,
-            bg = h("CursorLine").bg,
-            italic = true
-        }
-    )
-    vim.api.nvim_set_hl(
-        0,
-        "SymbolUsageImpl",
-        {
-            fg = h("@keyword").fg,
-            bg = h("CursorLine").bg,
-            italic = true
-        }
-    )
-end
-function applyDapSymbols()
-    vim.api.nvim_set_hl(0, "DapBreakpoint", {ctermbg = 0, fg = "#993939", bg = "#31353f"})
-    vim.api.nvim_set_hl(0, "DapLogPoint", {ctermbg = 0, fg = "#61afef", bg = "#31353f"})
-    vim.api.nvim_set_hl(0, "DapStopped", {ctermbg = 0, fg = "#98c379", bg = "#31353f"})
-    vim.fn.sign_define("DapBreakpoint", {text = "", texthl = "DapBreakpoint", linehl = "DapBreakpoint", numhl = "DapBreakpoint"})
-    vim.fn.sign_define("DapBreakpointCondition", {text = "ﳁ", texthl = "DapBreakpoint", linehl = "DapBreakpoint", numhl = "DapBreakpoint"})
-    vim.fn.sign_define("DapBreakpointRejected", {text = "", texthl = "DapBreakpoint", linehl = "DapBreakpoint", numhl = "DapBreakpoint"})
-    vim.fn.sign_define("DapLogPoint", {text = "", texthl = "DapLogPoint", linehl = "DapLogPoint", numhl = "DapLogPoint"})
-    vim.fn.sign_define("DapStopped", {text = "", texthl = "DapStopped", linehl = "DapStopped", numhl = "DapStopped"})
-end
-function applyDefaultFoldChars()
-    vim.o.fillchars = "eob: ,fold: ,foldopen:,foldsep: ,foldclose:"
-end
-local themeType = "dark"
-local callbacks = {}
-function ____exports.onThemeChange(callback)
-    callbacks[#callbacks + 1] = callback
-end
-local function updateThemeType(____type)
-    themeType = ____type
-    for ____, callback in ipairs(callbacks) do
-        callback(____type)
-    end
-end
-function ____exports.globalThemeType()
-    return themeType
-end
-local function VSCode()
-    vim.api.nvim_set_hl(0, "CmpItemAbbrDeprecated", {bg = "NONE", strikethrough = true, fg = "#808080"})
-    applyDefaultFoldChars()
-    applyDapSymbols()
-    applySymbolUsageStyle()
-    updateThemeType("dark")
-end
-local function TokyoNight()
-    vim.cmd("colorscheme tokyonight-storm")
-    updateThemeType("dark")
-    applyDapSymbols()
-    applyDefaultFoldChars()
-    applySymbolUsageStyle()
-end
-local function Catppuccin()
-    vim.cmd("colorscheme catppuccin")
-    applyDefaultFoldChars()
-    applyDapSymbols()
-    applySymbolUsageStyle()
-    updateThemeType("dark")
-end
-local function Kanagawa()
-    vim.cmd("colorscheme kanagawa")
-    updateThemeType("dark")
-    applySymbolUsageStyle()
-    applyDefaultFoldChars()
-    applyDapSymbols()
-end
-local function Nord()
-    vim.cmd("colorscheme nord")
-    updateThemeType("dark")
-    applySymbolUsageStyle()
-    applyDefaultFoldChars()
-    applyDapSymbols()
-end
-____exports.THEME_APPLIERS = {
-    VSCode = VSCode,
-    TokyoNight = TokyoNight,
-    Catppuccin = Catppuccin,
-    Kanagawa = Kanagawa,
-    Nord = Nord
-}
-return ____exports
- end,
 ["main"] = function(...) 
 local ____lualib = require("lualib_bundle")
 local __TS__SparseArrayNew = ____lualib.__TS__SparseArrayNew
@@ -4494,7 +4495,7 @@ end
 setupLazy()
 local lazy = useExternalModule("lazy")
 lazy.setup(getPlugins())
-THEME_APPLIERS.TokyoNight()
+THEME_APPLIERS[getGlobalConfiguration().theme.key]()
 vim.opt.clipboard = "unnamedplus"
 vim.opt.expandtab = true
 vim.opt.shiftwidth = 2
@@ -5683,7 +5684,7 @@ function on_attach(client, bufnr)
             local ____try, ____hasReturned, ____returnValue = pcall(function()
                 if client.server_capabilities.inlayHintProvider then
                     if vim.lsp.inlay_hint == nil then
-                        vim.notify("Failed to enable inlay hints: neovim builtin inlay_hints unavailable")
+                        vim.notify("Failed to enable inlay hints: neovim builtin inlay_hints unavailable", vim.log.levels.ERROR)
                     else
                         vim.lsp.inlay_hint.enable(true, {bufnr = bufnr})
                     end

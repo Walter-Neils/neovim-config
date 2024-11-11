@@ -1,4 +1,5 @@
 import { isRunningUnderNixOS } from "../../custom/nixos";
+import { THEME_APPLIERS } from "../../theme";
 import { usePersistentValue } from "../persistent-data";
 import { parseArgs } from "../user_command/argparser";
 
@@ -25,7 +26,11 @@ function saveConfiguration() {
   setGlobalConfig(configuration);
 }
 
+
 type GlobalConfiguration = {
+  theme: {
+    key: keyof typeof THEME_APPLIERS
+  },
   packages: {
     [key: string]: {
       enabled: boolean;
@@ -50,6 +55,9 @@ type GlobalConfiguration = {
 };
 
 export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
+  theme: {
+    key: 'TokyoNight'
+  },
   packages: {
     mason: {
       // Mason doesn't work correctly under NixOS

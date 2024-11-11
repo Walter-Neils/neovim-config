@@ -59,7 +59,8 @@ lazy.setup(
   getPlugins()
 );
 
-THEME_APPLIERS.TokyoNight();
+
+THEME_APPLIERS[getGlobalConfiguration().theme.key]();
 // THEME_APPLIERS.Catppuccin();
 // THEME_APPLIERS.VSCode();
 // THEME_APPLIERS.Kanagawa();
