@@ -14,7 +14,7 @@ vim.cmd("map W <Nop>");
 const MOVEMENT_DIRECTION_KEYS = {
   left: {
     key: 'h',
-    command: "<Left>"
+    command: "<Left>",
   },
   right: {
     key: 'l',

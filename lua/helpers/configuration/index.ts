@@ -319,6 +319,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     bash: {
       enabled: true
+    },
+    python: {
+      enabled: true
     }
   },
   shell: {

@@ -169,6 +169,9 @@ function environmentKeyToConfig(env: string) {
   }, {
     key: 'bash',
     lspKey: 'bashls'
+  }, {
+    key: 'python',
+    lspKey: 'pyright'
   }];
 
   return configs.find((x) => x.key === env);

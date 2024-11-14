@@ -3565,7 +3565,8 @@ ____exports.CONFIGURATION_DEFAULTS = {
         lua = {enabled = true},
         yaml = {enabled = true},
         rust = {enabled = true},
-        bash = {enabled = true}
+        bash = {enabled = true},
+        python = {enabled = true}
     },
     shell = {target = "tmux", isolationScope = "isolated"},
     integrations = {ollama = {enabled = false}}
@@ -5732,7 +5733,8 @@ function environmentKeyToConfig(env)
         {key = "lua", lspKey = "lua_ls"},
         {key = "yaml", lspKey = "yamlls", required_executable = "yaml-language-server"},
         {key = "rust", lspKey = "rust_analyzer"},
-        {key = "bash", lspKey = "bashls"}
+        {key = "bash", lspKey = "bashls"},
+        {key = "python", lspKey = "pyright"}
     }
     return __TS__ArrayFind(
         configs,
