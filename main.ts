@@ -1,7 +1,7 @@
 import { LazyModuleInterface } from "./ambient/lazy";
 import { setupCustomLogic } from "./lua/custom";
 import { getGlobalConfiguration } from "./lua/helpers/configuration";
-import { getAvailableGUIFonts, setGUIFont } from "./lua/helpers/font";
+import { setGUIFont } from "./lua/helpers/font";
 import { useExternalModule } from "./lua/helpers/module/useModule";
 import { Hyprland, isDesktopHyprland } from "./lua/integrations/hyprland";
 import { getNeovideExtendedVimContext } from "./lua/integrations/neovide";
