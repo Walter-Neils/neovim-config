@@ -25,9 +25,9 @@ const plugin: LazyPlugin = {
       result[0] = type;
       return type as any;
     };
-    const createCustomComponent = (func: (this: void) => string) => {
+    const createCustomComponent = (func: (this: void) => string, fmt?: (this: void, unformatted: string) => string) => {
       const result: LuaLineSectionConfig = [] as unknown as LuaLineSectionConfig;
-      result.fmt = input => input;
+      result.fmt = fmt ?? (input => input);
       result[0] = func;
       return result;
     };
@@ -41,18 +41,17 @@ const plugin: LazyPlugin = {
         sections: {
           lualine_b: [createStandardComponent('branch'), createStandardComponent('diff'), createStandardComponent('diagnostics')],
           lualine_c: [
-            createCustomComponent(() => `PID: ${vim.fn.getpid().toString()}`),
             createCustomComponent(() => {
               const navic = getNavic();
               if (navic === undefined) {
-                return ` Navic Disabled`;
+                return ` Navic`;
               }
               else {
                 if (navic.is_available()) {
                   return navic.get_location();
                 }
                 else {
-                  return `󱈸 Scope Info Unavailable`;
+                  return `󱈸 Scope Unavailable`;
                 }
               }
             })

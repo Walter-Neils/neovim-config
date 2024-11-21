@@ -1,7 +1,7 @@
 import { LazyModuleInterface } from "./ambient/lazy";
 import { setupCustomLogic } from "./lua/custom";
 import { getGlobalConfiguration } from "./lua/helpers/configuration";
-import { setGUIFont } from "./lua/helpers/font";
+import { getAvailableGUIFonts, setGUIFont } from "./lua/helpers/font";
 import { useExternalModule } from "./lua/helpers/module/useModule";
 import { Hyprland, isDesktopHyprland } from "./lua/integrations/hyprland";
 import { getNeovideExtendedVimContext } from "./lua/integrations/neovide";
@@ -30,7 +30,7 @@ function setupNeovide() {
       vim.g.neovide_refresh_rate = targetRefresh;
     }
     // If you want to get a list of available fonts, run `set guifont=*`
-    // setGUIFont("Source Code Pro", 14);
+    // setGUIFont("Source_Code_Pro", 14);
     setGUIFont("VictorMono_Nerd_Font_Mono", 14);
   }
 }

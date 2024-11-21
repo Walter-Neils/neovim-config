@@ -3179,6 +3179,19 @@ function ____exports.initCustomEnvLoader()
 end
 return ____exports
  end,
+["lua.custom.getpid.index"] = function(...) 
+local ____exports = {}
+function ____exports.initCustomGetPIDCommand()
+    vim.api.nvim_create_user_command(
+        "GetPID",
+        function()
+            vim.notify("PID: " .. tostring(vim.fn.getpid()))
+        end,
+        {nargs = 0}
+    )
+end
+return ____exports
+ end,
 ["lua.helpers.keymap.index"] = function(...) 
 local ____lualib = require("lualib_bundle")
 local __TS__ObjectAssign = ____lualib.__TS__ObjectAssign
@@ -3554,7 +3567,7 @@ ____exports.CONFIGURATION_DEFAULTS = {
         screenkey = {enabled = true},
         hex = {enabled = true},
         fidget = {enabled = true},
-        treesitterContext = {enabled = true},
+        treesitterContext = {enabled = false},
         gotoPreview = {enabled = true}
     },
     targetEnvironments = {
@@ -3862,6 +3875,8 @@ local ____custom_2Dopen = require("lua.custom.custom-open.index")
 local initCustomOpen = ____custom_2Dopen.initCustomOpen
 local ____env_2Dload = require("lua.custom.env-load.index")
 local initCustomEnvLoader = ____env_2Dload.initCustomEnvLoader
+local ____getpid = require("lua.custom.getpid.index")
+local initCustomGetPIDCommand = ____getpid.initCustomGetPIDCommand
 local ____git = require("lua.custom.git.index")
 local initCustomGit = ____git.initCustomGit
 local ____jumplist = require("lua.custom.jumplist.index")
@@ -3877,6 +3892,7 @@ function ____exports.setupCustomLogic()
     initCustomJumplist()
     initCustomGit()
     setupCustomProfilerCommands()
+    initCustomGetPIDCommand()
 end
 return ____exports
  end,
@@ -3890,18 +3906,122 @@ function ____exports.getNeovideExtendedVimContext()
 end
 return ____exports
  end,
+["lua.shims.mainLoopCallbacks"] = function(...) 
+local ____exports = {}
+function ____exports.setTimeout(callback, ms)
+    local cancelFlag = false
+    local function cancel()
+        cancelFlag = true
+    end
+    local function wrapper()
+        if not cancelFlag then
+            callback()
+        end
+    end
+    vim.defer_fn(wrapper, ms)
+    return cancel
+end
+function ____exports.setImmediate(callback)
+    return vim.schedule(callback)
+end
+function ____exports.setInterval(callback, interval)
+    local cancelFlag = false
+    local wrapper
+    wrapper = function()
+        if not cancelFlag then
+            callback()
+            ____exports.setTimeout(wrapper, interval)
+        end
+    end
+    local function cancel()
+        cancelFlag = true
+    end
+    ____exports.setTimeout(wrapper, interval)
+    return cancel
+end
+function ____exports.clearTimeout(handle)
+    handle()
+end
+function ____exports.clearInterval(handle)
+    handle()
+end
+function ____exports.insertMainLoopCallbackShims()
+    local global = _G
+    global.setTimeout = ____exports.setTimeout
+    global.clearTimeout = ____exports.clearTimeout
+    global.setInterval = ____exports.setInterval
+    global.clearInterval = ____exports.clearInterval
+    global.setImmediate = ____exports.setImmediate
+end
+return ____exports
+ end,
 ["lua.helpers.font.index"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local __TS__StringReplaceAll = ____lualib.__TS__StringReplaceAll
+local __TS__Promise = ____lualib.__TS__Promise
+local __TS__New = ____lualib.__TS__New
+local __TS__AsyncAwaiter = ____lualib.__TS__AsyncAwaiter
+local __TS__Await = ____lualib.__TS__Await
+local __TS__ArrayIndexOf = ____lualib.__TS__ArrayIndexOf
+local Error = ____lualib.Error
+local RangeError = ____lualib.RangeError
+local ReferenceError = ____lualib.ReferenceError
+local SyntaxError = ____lualib.SyntaxError
+local TypeError = ____lualib.TypeError
+local URIError = ____lualib.URIError
+local __TS__ArraySlice = ____lualib.__TS__ArraySlice
 local ____exports = {}
 local ____neovide = require("lua.integrations.neovide")
 local getNeovideExtendedVimContext = ____neovide.getNeovideExtendedVimContext
 local isNeovideSession = ____neovide.isNeovideSession
+local ____mainLoopCallbacks = require("lua.shims.mainLoopCallbacks")
+local setTimeout = ____mainLoopCallbacks.setTimeout
 function ____exports.setGUIFont(fontName, fontSize)
     if isNeovideSession() then
+        fontName = __TS__StringReplaceAll(fontName, " ", "_")
         local opts = getNeovideExtendedVimContext()
         opts.o.guifont = (fontName .. ":h") .. tostring(fontSize)
     else
         vim.notify("Cannot update GUI font: feature is only available in a Neovide context", vim.log.levels.ERROR)
     end
+end
+function ____exports.getAvailableGUIFonts()
+    return __TS__AsyncAwaiter(function(____awaiter_resolve)
+        if isNeovideSession() then
+            vim.cmd("set guifont=*")
+            __TS__Await(__TS__New(
+                __TS__Promise,
+                function(____, resolve) return setTimeout(
+                    function() return resolve(nil) end,
+                    500
+                ) end
+            ))
+            local buffer = vim.api.nvim_get_current_buf()
+            local lines = vim.api.nvim_buf_get_lines(
+                buffer,
+                0,
+                vim.api.nvim_buf_line_count(buffer),
+                false
+            )
+            local targetIndex = __TS__ArrayIndexOf(lines, "Available Fonts on this System")
+            if targetIndex == -1 then
+                error(
+                    __TS__New(Error, "Possible format change"),
+                    0
+                )
+            end
+            targetIndex = targetIndex + 2
+            return ____awaiter_resolve(
+                nil,
+                __TS__ArraySlice(lines, targetIndex)
+            )
+        else
+            error(
+                __TS__New(Error, "Fetching the list of available GUI font options is only possible under Neovide"),
+                0
+            )
+        end
+    end)
 end
 return ____exports
  end,
@@ -3962,55 +4082,6 @@ local plugin = {
     end
 }
 ____exports.default = plugin
-return ____exports
- end,
-["lua.shims.mainLoopCallbacks"] = function(...) 
-local ____exports = {}
-function ____exports.setTimeout(callback, ms)
-    local cancelFlag = false
-    local function cancel()
-        cancelFlag = true
-    end
-    local function wrapper()
-        if not cancelFlag then
-            callback()
-        end
-    end
-    vim.defer_fn(wrapper, ms)
-    return cancel
-end
-function ____exports.setImmediate(callback)
-    return vim.schedule(callback)
-end
-function ____exports.setInterval(callback, interval)
-    local cancelFlag = false
-    local wrapper
-    wrapper = function()
-        if not cancelFlag then
-            callback()
-            ____exports.setTimeout(wrapper, interval)
-        end
-    end
-    local function cancel()
-        cancelFlag = true
-    end
-    ____exports.setTimeout(wrapper, interval)
-    return cancel
-end
-function ____exports.clearTimeout(handle)
-    handle()
-end
-function ____exports.clearInterval(handle)
-    handle()
-end
-function ____exports.insertMainLoopCallbackShims()
-    local global = _G
-    global.setTimeout = ____exports.setTimeout
-    global.clearTimeout = ____exports.clearTimeout
-    global.setInterval = ____exports.setInterval
-    global.clearInterval = ____exports.clearInterval
-    global.setImmediate = ____exports.setImmediate
-end
 return ____exports
  end,
 ["lua.integrations.ollama"] = function(...) 
@@ -5859,9 +5930,9 @@ local plugin = {
             result[1] = ____type
             return ____type
         end
-        local function createCustomComponent(func)
+        local function createCustomComponent(func, fmt)
             local result = {}
-            result.fmt = function(input) return input end
+            result.fmt = fmt or (function(input) return input end)
             result[1] = func
             return result
         end
@@ -5874,21 +5945,18 @@ local plugin = {
                         createStandardComponent("diff"),
                         createStandardComponent("diagnostics")
                     },
-                    lualine_c = {
-                        createCustomComponent(function() return "PID: " .. tostring(vim.fn.getpid()) end),
-                        createCustomComponent(function()
-                            local navic = getNavic()
-                            if navic == nil then
-                                return " Navic Disabled"
+                    lualine_c = {createCustomComponent(function()
+                        local navic = getNavic()
+                        if navic == nil then
+                            return " Navic"
+                        else
+                            if navic.is_available() then
+                                return navic.get_location()
                             else
-                                if navic.is_available() then
-                                    return navic.get_location()
-                                else
-                                    return "󱈸 Scope Info Unavailable"
-                                end
+                                return "󱈸 Scope Unavailable"
                             end
-                        end)
-                    }
+                        end
+                    end)}
                 }
             }
             return config

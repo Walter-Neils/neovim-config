@@ -232,6 +232,8 @@ type VimAPI = {
       buf?: number
     }) => void,
     nvim_buf_set_lines: (this: void, buf: NeovimBuffer, start: number, end: number, strict_indexing: boolean, values: string[]) => void,
+    nvim_buf_get_lines: (this: void, buf: NeovimBuffer, start: number, end: number, strict_indexing: boolean) => string[],
+    nvim_buf_line_count: (this: void, buf: NeovimBuffer) => number,
     nvim_buf_set_name: (this: void, buf: NeovimBuffer, name: string) => void,
     nvim_buf_delete: (this: void, buf: number | NeovimBuffer, opts: { force?: boolean }) => void,
     nvim_set_current_buf: (this: void, buf: number | NeovimBuffer) => void,

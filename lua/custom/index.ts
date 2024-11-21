@@ -1,5 +1,6 @@
 import { initCustomOpen } from "./custom-open";
 import { initCustomEnvLoader } from "./env-load";
+import { initCustomGetPIDCommand } from "./getpid";
 import { initCustomGit } from "./git";
 import { initCustomJumplist } from "./jumplist";
 import { setupCustomProfilerCommands } from "./profile";
@@ -12,4 +13,5 @@ export function setupCustomLogic() {
   initCustomJumplist();
   initCustomGit();
   setupCustomProfilerCommands();
+  initCustomGetPIDCommand();
 }
