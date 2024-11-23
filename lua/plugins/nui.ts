@@ -90,7 +90,7 @@ export type NUILayoutModule = {
   size: NUISize
 }, child: NUIElement) => NUILayoutElement);
 type NUIInputElement = NUIElement & {
-
+  on: (this: void, ev: NUIEvent, callback: (this: void) => void) => void
 };
 export type NUIInputModule = {
 
@@ -111,26 +111,34 @@ type NUIMenuItem = {
 type NUITableElement = {
   get_cell: (this: NUITableElement, position?: [number, number]) => NUITableCell | undefined,
   refresh_cell: (this: NUITableElement, cell: NUITableCell) => void,
-  render: (this: NUITableElement, linenr_start?: number) => void
+  render: (this: NUITableElement, linenr_start?: number) => void,
 };
 
 type NUITableCell = {
-
+  column: {
+    id: unknown,
+    accessor_key?: string
+  },
+  row: {
+    original: unknown
+  },
+  get_value: (this: void) => unknown
 };
 
-type NUITableColumnDef = ({
+export type NUITableColumnDef = ({
   id: string,
   accessor_fn: (this: void, row: unknown) => string | number,
 } | {
   accessor_key: string,
 } | {}) & {
+  cell?: (this: void, cell: NUITableCell) => unknown,
   align?: 'center' | 'left' | 'right',
   columns?: NUITableColumnDef[],
   header: string
 };
 
-type NUITableOptions = {
-  bufnr: number,
+export type NUITableOptions = {
+  bufnr: NeovimBuffer,
   ns_id?: number | string,
   columns: NUITableColumnDef[],
   data: unknown[],
@@ -210,7 +218,32 @@ type NUITreeModule = ((this: void, opts: NUITreeOptions) => NUITreeElement) & {
   Node: (this: void, opts: NUITreeNodePrimaryOptions, children?: NUITreeNode[]) => NUITreeNode
 }
 
+type NUILineElement = unknown;
 
+type NUILineModule = {
+
+} & ((this: void, elements: NUITextElement[]) => NUILineElement);
+
+type NUITextElement = unknown;
+type NUITextModule = {
+
+} & ((this: void, value: string, hlGroup?: string) => NUITextElement)
+type Mappable = {
+  map: (mode: string, key: string, action: (this: void) => void) => void,
+}
+type NUISplitElement = {
+  bufnr: NeovimBuffer,
+} & MountableUnmountable & Mappable;
+
+type NUISplitOpts = {
+  position: 'top' | 'bottom' | 'left' | 'right',
+  size: number,
+};
+
+type NUISplitModule = {
+
+} & ((this: void, opts: NUISplitOpts) => NUISplitElement);
+type NUIEvent = unknown;
 export const useNUI = () => {
   return {
     Popup: useExternalModule("nui.popup") as NUIPopupModule,
@@ -219,11 +252,14 @@ export const useNUI = () => {
     Menu: useExternalModule("nui.menu") as NUIMenuModule,
     Table: useExternalModule("nui.table") as NUITableModule,
     Tree: useExternalModule("nui.tree") as NUITreeModule,
+    Text: useExternalModule("nui.text") as NUITextModule,
+    Line: useExternalModule("nui.line") as NUILineModule,
+    Split: useExternalModule("nui.split") as NUISplitModule,
     event: useExternalModule("nui.utils.autocmd") as {
       event: {
-        [key in VimAutocmdEvent]: unknown
+        [key in VimAutocmdEvent]: NUIEvent
       }
-    }
+    },
   };
 }
 

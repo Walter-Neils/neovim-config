@@ -176,7 +176,9 @@ type VimFnJobStartOpts = {
 
 type VimAPI = {
   treesitter: NvimTreeSitterObj,
-  cmd: (this: void, params: string) => void,
+  cmd: ((this: void, params: string) => void) & {
+  	[key: string]: (this: void, ...args: unknown[]) => unknown
+  },
   notify: (this: void, value: string | [string, string], level?: VimAPI["log"]["levels"][keyof VimAPI["log"]["levels"]]) => void,
   print: (this: void, value: any) => void,
   schedule: (this: void, callback: (this: void) => void) => void,
@@ -328,7 +330,7 @@ type VimAPI = {
     getreg: (this: void, register: string) => string,
     setreg: (this: void, register: string, value: string) => void,
     getpid: (this: void) => number,
-    getwininfo: (this: void, window: NeovimWindow | number) => NvimWindowInfo[]
+    getwininfo: (this: void, window: NeovimWindow | number) => NvimWindowInfo[],
   },
   loop: {
     fs_stat: (this: void, path: string) => boolean,

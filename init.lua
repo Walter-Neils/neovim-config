@@ -2787,6 +2787,9 @@ ____exports.useNUI = function()
         Menu = useExternalModule("nui.menu"),
         Table = useExternalModule("nui.table"),
         Tree = useExternalModule("nui.tree"),
+        Text = useExternalModule("nui.text"),
+        Line = useExternalModule("nui.line"),
+        Split = useExternalModule("nui.split"),
         event = useExternalModule("nui.utils.autocmd")
     }
 end
@@ -3175,6 +3178,281 @@ function ____exports.initCustomEnvLoader()
             end
         end,
         {nargs = "*"}
+    )
+end
+return ____exports
+ end,
+["lua.shims.mainLoopCallbacks"] = function(...) 
+local ____exports = {}
+function ____exports.setTimeout(callback, ms)
+    local cancelFlag = false
+    local function cancel()
+        cancelFlag = true
+    end
+    local function wrapper()
+        if not cancelFlag then
+            callback()
+        end
+    end
+    vim.defer_fn(wrapper, ms)
+    return cancel
+end
+function ____exports.setImmediate(callback)
+    return vim.schedule(callback)
+end
+function ____exports.setInterval(callback, interval)
+    local cancelFlag = false
+    local wrapper
+    wrapper = function()
+        if not cancelFlag then
+            callback()
+            ____exports.setTimeout(wrapper, interval)
+        end
+    end
+    local function cancel()
+        cancelFlag = true
+    end
+    ____exports.setTimeout(wrapper, interval)
+    return cancel
+end
+function ____exports.clearTimeout(handle)
+    handle()
+end
+function ____exports.clearInterval(handle)
+    handle()
+end
+function ____exports.insertMainLoopCallbackShims()
+    local global = _G
+    global.setTimeout = ____exports.setTimeout
+    global.clearTimeout = ____exports.clearTimeout
+    global.setInterval = ____exports.setInterval
+    global.clearInterval = ____exports.clearInterval
+    global.setImmediate = ____exports.setImmediate
+end
+return ____exports
+ end,
+["lua.custom.env-manager.index"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local __TS__StringSubstring = ____lualib.__TS__StringSubstring
+local __TS__ArraySort = ____lualib.__TS__ArraySort
+local __TS__ArrayFindIndex = ____lualib.__TS__ArrayFindIndex
+local Error = ____lualib.Error
+local RangeError = ____lualib.RangeError
+local ReferenceError = ____lualib.ReferenceError
+local SyntaxError = ____lualib.SyntaxError
+local TypeError = ____lualib.TypeError
+local URIError = ____lualib.URIError
+local __TS__New = ____lualib.__TS__New
+local __TS__ArraySplice = ____lualib.__TS__ArraySplice
+local ____exports = {}
+local ____nui = require("lua.plugins.nui")
+local useNUI = ____nui.useNUI
+function ____exports.getEnvironment()
+    return vim.api.nvim_call_function("environ", {})
+end
+local function createEnvironmentTableView()
+    local MAX_LEN = 50
+    local NUI = useNUI()
+    local split = NUI.Split({position = "bottom", size = 50})
+    local columns = {
+        {
+            align = "center",
+            header = "Key",
+            accessor_key = "key",
+            cell = function(cell)
+                return NUI.Line({NUI.Text(
+                    tostring(cell.get_value()),
+                    "DiagnosticInfo"
+                )})
+            end
+        },
+        {
+            align = "center",
+            header = "Value",
+            accessor_key = "value",
+            accessor_fn = function(row)
+                local val = row.value
+                if #val > MAX_LEN then
+                    return __TS__StringSubstring(val, 0, MAX_LEN - 3) .. "..."
+                end
+                return val
+            end,
+            cell = function(cell)
+                return NUI.Line({NUI.Text(
+                    tostring(cell.get_value()),
+                    "DiagnosticHint"
+                )})
+            end
+        }
+    }
+    local data = (function()
+        local result = {}
+        local keys = (function()
+            local result = {}
+            local env = ____exports.getEnvironment()
+            for key in pairs(env) do
+                result[#result + 1] = key
+            end
+            __TS__ArraySort(result)
+            return result
+        end)()
+        for ____, key in ipairs(keys) do
+            do
+                local value = vim.env[key]
+                if value == nil then
+                    goto __continue12
+                end
+                result[#result + 1] = {key = key, value = value}
+            end
+            ::__continue12::
+        end
+        return result
+    end)()
+    local ____table = NUI.Table({bufnr = split.bufnr, columns = columns, data = data})
+    ____table:render()
+    split:mount()
+    local function destroy()
+        split:unmount()
+    end
+    split:map(
+        "n",
+        "q",
+        function()
+            destroy()
+        end
+    )
+    local function getCurrentContext()
+        local cell = ____table:get_cell()
+        if cell ~= nil then
+            if cell.column.accessor_key then
+                local targetKey = cell.row.original[cell.column.accessor_key]
+                local dataEntryIndex = __TS__ArrayFindIndex(
+                    data,
+                    function(____, x) return x.key == targetKey end
+                )
+                local dataEntry
+                if dataEntryIndex ~= -1 then
+                    dataEntry = data[dataEntryIndex + 1]
+                else
+                    error(
+                        __TS__New(Error, "Context attempted to get an environment record which does not exist"),
+                        0
+                    )
+                end
+                return {targetKey = targetKey, cell = cell, dataEntry = dataEntry}
+            else
+                return nil
+            end
+        else
+            return nil
+        end
+    end
+    split:map(
+        "n",
+        "dd",
+        function()
+            local cell = ____table:get_cell()
+            if cell ~= nil then
+                if cell.column.accessor_key then
+                    local targetKey = cell.row.original[cell.column.accessor_key]
+                    vim.env[targetKey] = nil
+                    local index = __TS__ArrayFindIndex(
+                        data,
+                        function(____, x) return x.key == targetKey end
+                    )
+                    __TS__ArraySplice(data, index, 1)
+                    ____table:render()
+                    vim.notify(("Deleted environment variable '" .. targetKey) .. "'", vim.log.levels.INFO)
+                end
+            end
+        end
+    )
+    split:map(
+        "n",
+        "yy",
+        function()
+            local context = getCurrentContext()
+            if context ~= nil then
+                local cellValue = tostring(context.cell.get_value())
+                vim.fn.setreg("x", cellValue)
+            end
+        end
+    )
+    split:map(
+        "n",
+        "o",
+        function()
+            local key = vim.fn.input("Key: ")
+            local value = vim.fn.input("Value: ")
+            if __TS__ArrayFindIndex(
+                data,
+                function(____, x) return x.key == key end
+            ) ~= -1 then
+                vim.notify(("Environment variable '" .. key) .. "' already exists", vim.log.levels.ERROR)
+                return
+            end
+            vim.env[key] = value
+            data[#data + 1] = {key = key, value = value}
+            ____table:render()
+            vim.notify(("Created environment variable '" .. key) .. "'", vim.log.levels.INFO)
+        end
+    )
+    split:map(
+        "n",
+        "r",
+        function()
+            local context = getCurrentContext()
+            if context ~= nil then
+                local oldKey = context.targetKey
+                local newKey = vim.fn.input(("Rename environment variable '" .. oldKey) .. "' to: ", oldKey)
+                if oldKey == newKey then
+                    return
+                end
+                if __TS__ArrayFindIndex(
+                    data,
+                    function(____, x) return x.key == newKey end
+                ) ~= -1 then
+                    vim.notify("Destination environment variable already exists", vim.log.levels.ERROR)
+                    return
+                end
+                context.dataEntry.key = newKey
+                vim.env[newKey] = vim.env[oldKey]
+                vim.env[oldKey] = nil
+                ____table:render()
+                vim.notify(((("Moved environment variable '" .. oldKey) .. "' to '") .. newKey) .. "'", vim.log.levels.INFO)
+            end
+        end
+    )
+    split:map(
+        "n",
+        "i",
+        function()
+            local context = getCurrentContext()
+            if context ~= nil then
+                local input = NUI.Input(
+                    {position = "50%", size = {width = MAX_LEN}, border = {style = "single", text = {top = context.targetKey, top_align = "center"}}, win_options = {winhighlight = "Normal:Normal"}},
+                    {
+                        prompt = "",
+                        default_value = vim.env[context.targetKey] or "the fuck?",
+                        on_submit = function(value)
+                            vim.env[context.targetKey] = value
+                            context.dataEntry.value = value
+                            ____table:render()
+                        end
+                    }
+                )
+                input:mount()
+            end
+        end
+    )
+end
+function ____exports.initCustomEnvManager()
+    vim.api.nvim_create_user_command(
+        "EnvEdit",
+        function()
+            createEnvironmentTableView()
+        end,
+        {nargs = 0}
     )
 end
 return ____exports
@@ -3875,6 +4153,8 @@ local ____custom_2Dopen = require("lua.custom.custom-open.index")
 local initCustomOpen = ____custom_2Dopen.initCustomOpen
 local ____env_2Dload = require("lua.custom.env-load.index")
 local initCustomEnvLoader = ____env_2Dload.initCustomEnvLoader
+local ____env_2Dmanager = require("lua.custom.env-manager.index")
+local initCustomEnvManager = ____env_2Dmanager.initCustomEnvManager
 local ____getpid = require("lua.custom.getpid.index")
 local initCustomGetPIDCommand = ____getpid.initCustomGetPIDCommand
 local ____git = require("lua.custom.git.index")
@@ -3893,6 +4173,7 @@ function ____exports.setupCustomLogic()
     initCustomGit()
     setupCustomProfilerCommands()
     initCustomGetPIDCommand()
+    initCustomEnvManager()
 end
 return ____exports
  end,
@@ -3903,55 +4184,6 @@ function ____exports.isNeovideSession()
 end
 function ____exports.getNeovideExtendedVimContext()
     return vim
-end
-return ____exports
- end,
-["lua.shims.mainLoopCallbacks"] = function(...) 
-local ____exports = {}
-function ____exports.setTimeout(callback, ms)
-    local cancelFlag = false
-    local function cancel()
-        cancelFlag = true
-    end
-    local function wrapper()
-        if not cancelFlag then
-            callback()
-        end
-    end
-    vim.defer_fn(wrapper, ms)
-    return cancel
-end
-function ____exports.setImmediate(callback)
-    return vim.schedule(callback)
-end
-function ____exports.setInterval(callback, interval)
-    local cancelFlag = false
-    local wrapper
-    wrapper = function()
-        if not cancelFlag then
-            callback()
-            ____exports.setTimeout(wrapper, interval)
-        end
-    end
-    local function cancel()
-        cancelFlag = true
-    end
-    ____exports.setTimeout(wrapper, interval)
-    return cancel
-end
-function ____exports.clearTimeout(handle)
-    handle()
-end
-function ____exports.clearInterval(handle)
-    handle()
-end
-function ____exports.insertMainLoopCallbackShims()
-    local global = _G
-    global.setTimeout = ____exports.setTimeout
-    global.clearTimeout = ____exports.clearTimeout
-    global.setInterval = ____exports.setInterval
-    global.clearInterval = ____exports.clearInterval
-    global.setImmediate = ____exports.setImmediate
 end
 return ____exports
  end,
