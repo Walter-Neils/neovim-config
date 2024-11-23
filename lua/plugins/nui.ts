@@ -89,7 +89,7 @@ export type NUILayoutModule = {
   position: string,
   size: NUISize
 }, child: NUIElement) => NUILayoutElement);
-type NUIInputElement = NUIElement & {
+type NUIInputElement = NUIElement & Mappable & {
   on: (this: void, ev: NUIEvent, callback: (this: void) => void) => void
 };
 export type NUIInputModule = {
@@ -122,6 +122,7 @@ type NUITableCell = {
   row: {
     original: unknown
   },
+  range: [start_row: number, start_col: number, end_row: number, end_col: number],
   get_value: (this: void) => unknown
 };
 

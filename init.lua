@@ -3182,55 +3182,6 @@ function ____exports.initCustomEnvLoader()
 end
 return ____exports
  end,
-["lua.shims.mainLoopCallbacks"] = function(...) 
-local ____exports = {}
-function ____exports.setTimeout(callback, ms)
-    local cancelFlag = false
-    local function cancel()
-        cancelFlag = true
-    end
-    local function wrapper()
-        if not cancelFlag then
-            callback()
-        end
-    end
-    vim.defer_fn(wrapper, ms)
-    return cancel
-end
-function ____exports.setImmediate(callback)
-    return vim.schedule(callback)
-end
-function ____exports.setInterval(callback, interval)
-    local cancelFlag = false
-    local wrapper
-    wrapper = function()
-        if not cancelFlag then
-            callback()
-            ____exports.setTimeout(wrapper, interval)
-        end
-    end
-    local function cancel()
-        cancelFlag = true
-    end
-    ____exports.setTimeout(wrapper, interval)
-    return cancel
-end
-function ____exports.clearTimeout(handle)
-    handle()
-end
-function ____exports.clearInterval(handle)
-    handle()
-end
-function ____exports.insertMainLoopCallbackShims()
-    local global = _G
-    global.setTimeout = ____exports.setTimeout
-    global.clearTimeout = ____exports.clearTimeout
-    global.setInterval = ____exports.setInterval
-    global.clearInterval = ____exports.clearInterval
-    global.setImmediate = ____exports.setImmediate
-end
-return ____exports
- end,
 ["lua.custom.env-manager.index"] = function(...) 
 local ____lualib = require("lualib_bundle")
 local __TS__StringSubstring = ____lualib.__TS__StringSubstring
@@ -3325,7 +3276,7 @@ local function createEnvironmentTableView()
         local cell = ____table:get_cell()
         if cell ~= nil then
             if cell.column.accessor_key then
-                local targetKey = cell.row.original[cell.column.accessor_key]
+                local targetKey = cell.row.original.key
                 local dataEntryIndex = __TS__ArrayFindIndex(
                     data,
                     function(____, x) return x.key == targetKey end
@@ -3383,7 +3334,13 @@ local function createEnvironmentTableView()
         "o",
         function()
             local key = vim.fn.input("Key: ")
+            if #key == 0 then
+                return
+            end
             local value = vim.fn.input("Value: ")
+            if #value == 0 then
+                return
+            end
             if __TS__ArrayFindIndex(
                 data,
                 function(____, x) return x.key == key end
@@ -3433,7 +3390,7 @@ local function createEnvironmentTableView()
                     {position = "50%", size = {width = MAX_LEN}, border = {style = "single", text = {top = context.targetKey, top_align = "center"}}, win_options = {winhighlight = "Normal:Normal"}},
                     {
                         prompt = "",
-                        default_value = vim.env[context.targetKey] or "the fuck?",
+                        default_value = vim.env[context.targetKey],
                         on_submit = function(value)
                             vim.env[context.targetKey] = value
                             context.dataEntry.value = value
@@ -3442,6 +3399,13 @@ local function createEnvironmentTableView()
                     }
                 )
                 input:mount()
+                input:map(
+                    "n",
+                    "q",
+                    function()
+                        input:unmount()
+                    end
+                )
             end
         end
     )
@@ -4184,6 +4148,55 @@ function ____exports.isNeovideSession()
 end
 function ____exports.getNeovideExtendedVimContext()
     return vim
+end
+return ____exports
+ end,
+["lua.shims.mainLoopCallbacks"] = function(...) 
+local ____exports = {}
+function ____exports.setTimeout(callback, ms)
+    local cancelFlag = false
+    local function cancel()
+        cancelFlag = true
+    end
+    local function wrapper()
+        if not cancelFlag then
+            callback()
+        end
+    end
+    vim.defer_fn(wrapper, ms)
+    return cancel
+end
+function ____exports.setImmediate(callback)
+    return vim.schedule(callback)
+end
+function ____exports.setInterval(callback, interval)
+    local cancelFlag = false
+    local wrapper
+    wrapper = function()
+        if not cancelFlag then
+            callback()
+            ____exports.setTimeout(wrapper, interval)
+        end
+    end
+    local function cancel()
+        cancelFlag = true
+    end
+    ____exports.setTimeout(wrapper, interval)
+    return cancel
+end
+function ____exports.clearTimeout(handle)
+    handle()
+end
+function ____exports.clearInterval(handle)
+    handle()
+end
+function ____exports.insertMainLoopCallbackShims()
+    local global = _G
+    global.setTimeout = ____exports.setTimeout
+    global.clearTimeout = ____exports.clearTimeout
+    global.setInterval = ____exports.setInterval
+    global.clearInterval = ____exports.clearInterval
+    global.setImmediate = ____exports.setImmediate
 end
 return ____exports
  end,

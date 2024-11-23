@@ -83,7 +83,7 @@ function createEnvironmentTableView() {
       if (cell.column.accessor_key) {
         const targetKey = (cell.row.original as {
           [key: string]: string
-        })[cell.column.accessor_key!];
+        })['key']!;
         const dataEntryIndex = data.findIndex(x => x.key === targetKey);
         let dataEntry: { key: string, value: string };
         if (dataEntryIndex !== -1) {
@@ -133,7 +133,13 @@ function createEnvironmentTableView() {
 
   split.map('n', 'o', () => {
     const key = vim.fn.input("Key: ");
+    if (key.length === 0) {
+      return;
+    }
     const value = vim.fn.input("Value: ");
+    if (value.length === 0) {
+      return;
+    }
     if (data.findIndex(x => x.key === key) !== -1) {
       vim.notify(`Environment variable '${key}' already exists`, vim.log.levels.ERROR);
       return;
@@ -194,6 +200,9 @@ function createEnvironmentTableView() {
         }
       });
       input.mount();
+      input.map('n', 'q', () => {
+        input.unmount();
+      });
       // input.on(NUI.event.event.BufLeave, () => {
       //   input.unmount();
       // });
