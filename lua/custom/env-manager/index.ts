@@ -1,5 +1,4 @@
 import { NUITableColumnDef, useNUI } from "../../plugins/nui";
-import { setImmediate, setTimeout } from "../../shims/mainLoopCallbacks";
 
 export function getEnvironment(): {
   [key: string]: string | undefined
@@ -207,5 +206,5 @@ export function initCustomEnvManager() {
     createEnvironmentTableView();
   }, {
     nargs: 0
-  })
+  });
 }
