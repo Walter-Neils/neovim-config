@@ -14,6 +14,8 @@
     "luaTarget": "JIT",
     "luaBundle": "init.lua",
     "luaBundleEntry": "main.ts",
-    "noImplicitSelf": true
+    "noImplicitSelf": true,
+    "sourceMapTraceback": true,
+    "tstlVerbose": false
   }
 }

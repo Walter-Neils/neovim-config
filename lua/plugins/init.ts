@@ -221,6 +221,9 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (globalConfig.packages.gotoPreview?.enabled) {
     result.push(require("goto-preview").default);
   }
+  if (globalConfig.packages.dropBar?.enabled) {
+    result.push(require("dropbar").default);
+  }
   result.push(require("nui").default);
   return result;
 }

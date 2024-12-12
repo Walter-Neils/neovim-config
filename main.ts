@@ -10,13 +10,14 @@ import { enablePortableAppImageLogic } from "./lua/integrations/portable-appimag
 import { getPlugins } from "./lua/plugins/init";
 import { insertConsoleShims } from "./lua/shims/console";
 import { insertJSONShims } from "./lua/shims/json";
-import { insertMainLoopCallbackShims, setImmediate } from "./lua/shims/mainLoopCallbacks";
+import { insertMainLoopCallbackShims, setImmediate, setTimeout } from "./lua/shims/mainLoopCallbacks";
 import { THEME_APPLIERS } from "./lua/theme";
 
 insertJSONShims();
 insertConsoleShims();
 insertMainLoopCallbackShims();
 enablePortableAppImageLogic();
+
 
 function setupNeovide() {
   const vim = getNeovideExtendedVimContext();

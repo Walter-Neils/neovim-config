@@ -30,6 +30,7 @@ function locateEnvFiles(this: void) {
   }
   const cwd = vim.fn.getcwd();
   const envFiles: string[] = [];
+  const isDebugCrawlEnabled = (vim.g as { debug_env_load?: boolean }).debug_env_load;
   const crawl = (path: string) => {
     const entries = fs.readdirSync(path);
     for (const entry of entries) {
@@ -44,7 +45,7 @@ function locateEnvFiles(this: void) {
         try {
           crawl(`${path}/${entry.path}`);
         } catch {
-          if ((vim.g as any).debug_env_load) {
+          if (isDebugCrawlEnabled) {
             vim.notify(`Failed to crawl directory '${path}/${entry.path}'`);
           }
         }
@@ -52,6 +53,7 @@ function locateEnvFiles(this: void) {
     }
   };
   crawl(cwd);
+  // Cache globally until CWD change
   _locatedEnvFiles = envFiles;
   return envFiles;
 }
@@ -107,7 +109,6 @@ export function initCustomEnvLoader(this: void) {
         vim.notify(file);
       }
     }
-
     if ('pick' in args) {
       resolved = true;
       showEnvSourceDialog();

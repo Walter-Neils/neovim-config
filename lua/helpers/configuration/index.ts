@@ -292,6 +292,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     gotoPreview: {
       enabled: true
+    },
+    dropBar: {
+      enabled: true
     }
   },
   targetEnvironments: {

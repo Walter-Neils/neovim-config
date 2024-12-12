@@ -7,11 +7,11 @@ export function getEnvironment(): {
 }
 
 function createEnvironmentTableView() {
-  const MAX_LEN = 50;
+  const MAX_LEN = 75;
   const NUI = useNUI();
   const split = NUI.Split({
     position: 'bottom',
-    size: 50
+    size: 25
   });
   const columns: NUITableColumnDef[] = [
     {
@@ -156,6 +156,7 @@ function createEnvironmentTableView() {
     const context = getCurrentContext();
     if (context != undefined) {
       const oldKey = context.targetKey;
+      // TODO: Switch all vim.fn.input calls over to NUI input boxes
       const newKey = vim.fn.input(`Rename environment variable '${oldKey}' to: `, oldKey);
       if (oldKey === newKey) {
         return;
@@ -203,6 +204,9 @@ function createEnvironmentTableView() {
       input.map('n', 'q', () => {
         input.unmount();
       });
+      // BUG: The following code is erroring out due to the floating buffer not being found.
+      // Not sure how to fix, might need to upgrade NUI versions or something
+
       // input.on(NUI.event.event.BufLeave, () => {
       //   input.unmount();
       // });
