@@ -295,6 +295,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     dropBar: {
       enabled: true
+    },
+    presence: {
+      enabled: true
     }
   },
   targetEnvironments: {
@@ -303,7 +306,7 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     deno: {
       // TODO: Make this play nice with TypeScript
-      enabled: false,
+      enabled: true,
     },
     "c/c++": {
       enabled: true,

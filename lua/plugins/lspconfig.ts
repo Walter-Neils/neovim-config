@@ -213,13 +213,11 @@ async function configureLSP(this: void) {
       }
       let capabilities = vim.lsp.protocol.make_client_capabilities();
       if (getGlobalConfiguration().packages["cmp"]?.enabled) {
-        let cmp_capabilities = useExternalModule<
-          { default_capabilities: (this: void) => unknown }
-        >("cmp_nvim_lsp").default_capabilities();
+        let cmp_capabilities = useExternalModule<{ default_capabilities: (this: void) => unknown }>("cmp_nvim_lsp").default_capabilities();
         capabilities = {
           ...capabilities,
           ...(cmp_capabilities as any)
-        }
+        };
       }
       const setupConfig = {
         ...config.additionalOptions ?? {},

@@ -224,6 +224,9 @@ export function getPlugins(this: void): LazyPlugin[] {
   if (globalConfig.packages.dropBar?.enabled) {
     result.push(require("dropbar").default);
   }
+  if (globalConfig.packages.presence?.enabled) {
+    result.push(require("presence").default);
+  }
   result.push(require("nui").default);
   return result;
 }
