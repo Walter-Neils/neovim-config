@@ -39,5 +39,9 @@ const plugin: LazyPlugin = {
 
 const nvim = extendNeovimAPIWithFloattermConfig();
 nvim.g.floaterm_title = "";
+nvim.g.floaterm_wintype = 'float';
+nvim.g.floaterm_position = 'center';
+nvim.g.floaterm_width = 0.999;
+nvim.g.floaterm_height = 0.999;
 
 export { plugin as default };
