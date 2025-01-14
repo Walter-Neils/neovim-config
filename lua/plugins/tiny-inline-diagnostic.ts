@@ -14,7 +14,7 @@ function useTinyInlineDiagnostic() {
     }
   };
   type Module = {
-    setup: (this: void, opts?: unknown) => void
+    setup: (this: void, opts?: OptsType) => void
   };
 
   return useExternalModule<Module>("tiny-inline-diagnostic");
@@ -24,7 +24,11 @@ const plugin: LazyPlugin = {
   1: 'rachartier/tiny-inline-diagnostic.nvim',
   event: "VeryLazy", // The plugin page says "LspAttach" also works, but when I tried it the messages would only show for LSP servers after the first one had attached, making it pretty worthless.
   config: () => {
-    useTinyInlineDiagnostic().setup({});
+    useTinyInlineDiagnostic().setup({
+      options: {
+        multilines: true
+      }
+    });
   }
 };
 export { plugin as default };

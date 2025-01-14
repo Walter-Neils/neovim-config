@@ -276,7 +276,7 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
       enabled: true
     },
     tinyInlineDiagnostic: {
-      enabled: true
+      enabled: false
     },
     screenkey: {
       enabled: true
@@ -328,11 +328,14 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     python: {
       enabled: true
+    },
+    go:{
+      enabled: true
     }
   },
   shell: {
     target: "tmux",
-    isolationScope: "isolated",
+    isolationScope: "global",
   },
   integrations: {
     ollama: {

@@ -172,6 +172,9 @@ function environmentKeyToConfig(env: string) {
   }, {
     key: 'python',
     lspKey: 'pyright'
+  }, {
+    key: 'go',
+    lspKey: 'gopls'
   }];
 
   return configs.find((x) => x.key === env);
@@ -233,8 +236,15 @@ async function configureLSP(this: void) {
   }
   vim.diagnostic.config({
     update_in_insert: true,
-    virtual_text:
-      !(getGlobalConfiguration().packages["lspLines"]?.enabled ?? false),
+    virtual_text: (() => {
+      const incompatablePackages = ["lspLines", "tinyInlineDiagnostic"];
+      for (const packageKey of incompatablePackages) {
+        if (getGlobalConfiguration().packages[packageKey]?.enabled ?? false) {
+          return false;
+        }
+      }
+      return true;
+    })(),
   });
 }
 export { plugin as default };
