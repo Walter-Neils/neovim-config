@@ -12,6 +12,10 @@ export function getPlugins(this: void): LazyPlugin[] {
 
   const targets: PluginRef[] = [
     {
+      include: 'copilot-lualine',
+      key: 'copilotLuaLine'
+    },
+    {
       include: 'nui'
     }, {
       key: 'screenkey',

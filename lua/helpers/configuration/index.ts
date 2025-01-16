@@ -59,6 +59,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     key: 'TokyoNight'
   },
   packages: {
+    copilotLuaLine: {
+      enabled: true
+    },
     mason: {
       // Mason doesn't work correctly under NixOS
       enabled: !isRunningUnderNixOS(),
@@ -329,7 +332,7 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     python: {
       enabled: true
     },
-    go:{
+    go: {
       enabled: true
     }
   },

@@ -17,7 +17,7 @@ const plugin: LazyPlugin = {
       options: unknown,
     } & {
       sections: {
-        [key in `lualine_${'a' | 'b' | 'c' | 'd'}`]?: LuaLineSectionConfig[]
+        [key in `lualine_${'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'x' | 'y' | 'z'}`]?: LuaLineSectionConfig[]
       }
     };
     const createStandardComponent = (type: string) => {
@@ -55,6 +55,9 @@ const plugin: LazyPlugin = {
                 }
               }
             }),
+          ],
+          lualine_x: [
+            createStandardComponent('copilot')
           ]
         }
       };
