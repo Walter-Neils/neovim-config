@@ -549,13 +549,7 @@ if (config.packages["nvimDapUI"]) {
   });
 }
 
-if (config.packages["copilot"]?.enabled) {
-  // TODO: Replace with custom remapper
-  vim.keymap.set('i', '<C-J>', 'copilot#Accept("\<CR>")', {
-    expr: true,
-    replace_keycodes: false,
-  });
-}
+
 
 if (config.packages["actionsPreview"]?.enabled) {
   applyKeyMapping({

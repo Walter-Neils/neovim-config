@@ -144,7 +144,7 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
       enabled: true,
     },
     copilot: {
-      enabled: false,
+      enabled: true,
     },
     actionsPreview: {
       enabled: true,

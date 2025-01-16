@@ -177,7 +177,7 @@ type VimFnJobStartOpts = {
 type VimAPI = {
   treesitter: NvimTreeSitterObj,
   cmd: ((this: void, params: string) => void) & {
-  	[key: string]: (this: void, ...args: unknown[]) => unknown
+    [key: string]: (this: void, ...args: unknown[]) => unknown
   },
   notify: (this: void, value: string | [string, string], level?: VimAPI["log"]["levels"][keyof VimAPI["log"]["levels"]]) => void,
   print: (this: void, value: any) => void,
@@ -208,6 +208,7 @@ type VimAPI = {
     }
   },
   api: {
+    nvim_replace_termcodes: (this: void, str: string, from_particular_key: boolean, from_remapped_mode: boolean, from_expr: boolean) => string,
     nvim_get_hl: (this: void, arg1: number, arg2: { name: string }) => NeovimHighlightGroup,
     nvim_call_function: (this: void, command: string, args?: unknown[]) => unknown,
     nvim_get_current_line: (this: void) => number,
@@ -312,6 +313,7 @@ type VimAPI = {
     }>, unknownArg: boolean) => void
   },
   fn: {
+    feedkeys: (this: void, keys: string, mode: string) => void,
     // Returns -1 if a buffer is not currently in a window
     bufwinid: (this: void, buf: NeovimBuffer | number) => number,
     jobstart: (this: void, command: string, opts: VimFnJobStartOpts) => void,
@@ -331,7 +333,9 @@ type VimAPI = {
     setreg: (this: void, register: string, value: string) => void,
     getpid: (this: void) => number,
     getwininfo: (this: void, window: NeovimWindow | number) => NvimWindowInfo[],
-  },
+  } & ({
+    [key: string]: (this: void, ...args: unknown[]) => unknown
+  }),
   loop: {
     fs_stat: (this: void, path: string) => boolean,
     spawn: (this: void, exe: string, opts: {

@@ -54,7 +54,7 @@ const plugin: LazyPlugin = {
                   return `󱈸 Scope Unavailable`;
                 }
               }
-            })
+            }),
           ]
         }
       };
