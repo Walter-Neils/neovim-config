@@ -46,6 +46,7 @@ function setupLazy(this: void) {
 setupNeovide();
 
 setupLazy();
+
 const lazy = useExternalModule<LazyModuleInterface>("lazy");
 lazy.setup(
   getPlugins()

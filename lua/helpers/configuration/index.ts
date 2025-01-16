@@ -270,7 +270,7 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
       enabled: false
     },
     hlchunk: {
-      enabled: true
+      enabled: false 
     },
     rest: {
       enabled: true

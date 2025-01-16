@@ -3830,7 +3830,7 @@ ____exports.CONFIGURATION_DEFAULTS = {
         tsContextCommentString = {enabled = true},
         nvimDapVirtualText = {enabled = true},
         overseer = {enabled = false},
-        hlchunk = {enabled = true},
+        hlchunk = {enabled = false},
         rest = {enabled = true},
         flatten = {enabled = true},
         tinyInlineDiagnostic = {enabled = false},
