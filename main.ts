@@ -5,7 +5,6 @@ import { setGUIFont } from "./lua/helpers/font";
 import { useExternalModule } from "./lua/helpers/module/useModule";
 import { Hyprland, isDesktopHyprland } from "./lua/integrations/hyprland";
 import { getNeovideExtendedVimContext } from "./lua/integrations/neovide";
-import { setupOllamaCopilot } from "./lua/integrations/ollama";
 import { enablePortableAppImageLogic } from "./lua/integrations/portable-appimage";
 import { getPlugins } from "./lua/plugins/init";
 import { insertConsoleShims } from "./lua/shims/console";
@@ -17,7 +16,6 @@ insertJSONShims();
 insertConsoleShims();
 insertMainLoopCallbackShims();
 enablePortableAppImageLogic();
-
 
 function setupNeovide() {
   const vim = getNeovideExtendedVimContext();
@@ -46,13 +44,6 @@ function setupLazy(this: void) {
 }
 
 setupNeovide();
-setupOllamaCopilot();
-
-if (!(getGlobalConfiguration().packages["copilot"]?.enabled ?? false)) {
-  // Once installed by Lazy, Copilot can't be prevented from loading without uninstalling it, so we've gotta do a little hack
-  // It'll still get loaded, but it won't be active for any filetypes, which I consider to be good enough.
-  (vim.g as unknown as { copilot_filetypes: Record<string, boolean> }).copilot_filetypes = { '*': false };
-}
 
 setupLazy();
 const lazy = useExternalModule<LazyModuleInterface>("lazy");

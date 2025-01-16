@@ -1,54 +1,74 @@
 import { LazyPlugin } from "../../ambient/lazy";
-import { getGlobalConfiguration } from "../helpers/configuration";
-import { applyKeyMapping } from "../helpers/keymap";
-import { setTimeout } from "../shims/mainLoopCallbacks";
+import { useExternalModule } from "../helpers/module/useModule";
 
-if (getGlobalConfiguration().packages["copilot"]?.enabled ?? false) {
-  const vim = getCopilotExtendedVimAPI();
-  vim.notify("Copilot is enabled");
-  vim.keymap.set('i', '<C-J>', 'copilot#Accept("<CR>")', {
-    expr: true,
-    replace_keycodes: false,
-  });
-  setTimeout(() => {
-    applyKeyMapping({
-      mode: 'i',
-      inputStroke: '<C-J>',
-      action: () => {
-        // Accept the suggestion
-        //if (config.packages["copilot"]?.enabled) {
-        //  // TODO: Replace with custom remapper
-        //  vim.keymap.set('i', '<C-J>', 'copilot#Accept("\<CR>")', {
-        //    expr: true,
-        //    replace_keycodes: false,
-        //  });
-        //}
-        console.log(`Working`);
-        const acceptFeedback = vim.fn["copilot#Accept"]() as string;
-        vim.fn.feedkeys(vim.api.nvim_replace_termcodes(acceptFeedback, true, true, true), '');
-        //console.log(vim.fn["copilot#TextQueuedForInsertion"]() as string);
-      }
-    });
-  }, 5000);
-  vim.g.copilot_no_tab_map = true;
+type DeepPartial<T> = {
+  [P in keyof T]?: DeepPartial<T[P]>;
+};
+
+type CopilotConfig = {
+  panel: {
+    enabled: boolean,
+    auto_refresh: boolean,
+    keymap: {
+      jump_prev: string | boolean,
+      jump_next: string | boolean,
+      accept: string | boolean,
+      refresh: string | boolean,
+      open: string | boolean,
+    },
+    layout: {
+      position: 'bottom' | 'top' | 'left' | 'right',
+      ratio: number
+    },
+  },
+  suggestion: {
+    enabled: boolean,
+    auto_trigger: boolean,
+    hide_during_completion: boolean,
+    debounce: number,
+    keymap: {
+      accept: string | boolean,
+      accept_word: string | boolean,
+      accept_line: string | boolean,
+      next: string | boolean,
+      prev: string | boolean,
+      dismiss: string | boolean,
+    }
+  },
+  filetypes: {
+    [key: string]: boolean | undefined
+  },
+  copilot_node_command: string,
+  server_opts_overrides: Record<string, unknown>
+};
+
+type CopilotModule = {
+  setup: (this: void, config: DeepPartial<CopilotConfig>) => void,
+};
+
+export function getCopilot() {
+  const copilot = useExternalModule<CopilotModule>('copilot');
+  return copilot;
 }
 
 const plugin: LazyPlugin = {
-  1: 'github/copilot.vim',
-  event: 'VeryLazy',
+  1: 'zbirenbaum/copilot.lua',
+  //dir: '/tmp/copilot.lua',
+  //dev: true,
+  cmd: ["Copilot"],
+  event: 'InsertEnter',
   config: () => {
-
-    // Change accept key to <CTRL-SPACE>
+    getCopilot().setup({
+      panel: {
+        enabled: false,
+      },
+      suggestion: {
+        auto_trigger: true,
+        keymap: {
+          accept: '<M-CR>',
+        }
+      }
+    });
   }
 };
 export { plugin as default };
-
-export function getCopilotExtendedVimAPI(this: void) {
-  return vim as VimAPI & {
-    g: {
-      copilot_proxy: string,
-      copilot_proxy_strict_ssl: boolean,
-      copilot_no_tab_map: boolean,
-    }
-  };
-}
