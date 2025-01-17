@@ -1,4 +1,5 @@
 import { LazyPlugin } from "../../ambient/lazy";
+import { getGlobalConfiguration } from "../helpers/configuration";
 import { useExternalModule } from "../helpers/module/useModule";
 import { globalThemeType, onThemeChange } from "../theme";
 import { getNavic } from "./navic";
@@ -28,6 +29,7 @@ const plugin: LazyPlugin = {
     const createCustomComponent = (func: (this: void) => string, fmt?: (this: void, unformatted: string) => string) => {
       const result: LuaLineSectionConfig = [] as unknown as LuaLineSectionConfig;
       result.fmt = fmt ?? (input => input);
+
       result[0] = func;
       return result;
     };
@@ -36,31 +38,38 @@ const plugin: LazyPlugin = {
     const genConfig = () => {
       const config: LuaLineConfig = {
         options: {
-          theme: globalThemeType() === 'dark' ? 'material' : 'ayu_light'
+          theme: globalThemeType() === 'dark' ? 'material' : 'ayu_light',
+          refresh: {
+            statusline: 1500
+          }
         },
         sections: {
           lualine_b: [createStandardComponent('branch'), createStandardComponent('diff'), createStandardComponent('diagnostics')],
           lualine_c: [
-            createCustomComponent(() => {
-              const navic = getNavic();
-              if (navic === undefined) {
-                return ` Navic`;
-              }
-              else {
-                if (navic.is_available()) {
-                  return navic.get_location();
-                }
-                else {
-                  return `󱈸 Scope Unavailable`;
-                }
-              }
-            }),
+
           ],
           lualine_x: [
-            createStandardComponent('copilot')
           ]
         }
       };
+      {
+        const navic = getNavic();
+        if (navic !== undefined) {
+          config.sections.lualine_c!.push(createCustomComponent(() => {
+            if (navic.is_available()) {
+              return navic.get_location();
+            }
+            else {
+              return '';
+            }
+          }));
+        }
+      }
+      if (getGlobalConfiguration().packages.copilot?.enabled) {
+        if (getGlobalConfiguration().packages["copilotLuaLine"]?.enabled) {
+          config.sections.lualine_x!.push(createStandardComponent('copilot'));
+        }
+      }
       return config;
     }
 

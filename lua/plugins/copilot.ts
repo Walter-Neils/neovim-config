@@ -2,6 +2,7 @@ import { LazyPlugin } from "../../ambient/lazy";
 import { getGlobalConfiguration } from "../helpers/configuration";
 import { applyKeyMapping } from "../helpers/keymap";
 import { useExternalModule } from "../helpers/module/useModule";
+import { isOllamaIntegrationAllowed } from "../integrations/ollama";
 import { setTimeout } from "../shims/mainLoopCallbacks";
 
 type DeepPartial<T> = {
@@ -71,8 +72,15 @@ const plugin: LazyPlugin = {
     };
 
     if (getGlobalConfiguration().integrations["ollama"]?.enabled) {
-      (vim.g as any).copilot_proxy = 'http://localhost:11435';
-      (vim.g as any).copilot_proxy_strict_ssl = false;
+      const result = isOllamaIntegrationAllowed();
+      if (result.success) {
+        //(vim.g as any).copilot_proxy = 'http://localhost:11435';
+        //(vim.g as any).copilot_proxy_strict_ssl = false;
+      }
+      else {
+        vim.notify(`Cannot enable ollama proxy: ${result.reason ?? '[NO REASON PROVIDED]'}`, vim.log.levels.ERROR);
+      }
+
     }
 
     getCopilot().setup({

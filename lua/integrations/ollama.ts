@@ -1,4 +1,5 @@
 import { getGlobalConfiguration } from "../helpers/configuration";
+import { getOpenPorts } from "../helpers/network/getOpenPort";
 
 const targetExecutable = "ollama-copilot";
 export function isOllamaIntegrationAllowed(): ({
@@ -7,6 +8,12 @@ export function isOllamaIntegrationAllowed(): ({
   success: false,
   reason?: string
 }) {
+  if (!(getGlobalConfiguration().integrations["ollama"]?.enabled ?? false)) {
+    return {
+      success: false,
+      reason: 'Ollama integration is not enabled in configuration'
+    };
+  }
   // Locate the ollama-copilot executable and make sure it's available
   if (vim.fn.executable(targetExecutable) == 0) {
     vim.notify(`Ollama integration is enabled, but ${targetExecutable} could not be found.`, vim.log.levels.ERROR);
@@ -14,6 +21,18 @@ export function isOllamaIntegrationAllowed(): ({
       success: false,
       reason: `Could not find ${targetExecutable}.`
     };
+  }
+
+  {
+    // Ensure ollama is running
+    const output = vim.fn.system(["pidof", "ollama"]);
+
+    if (output === "") {
+      return {
+        success: false,
+        reason: `ollama is not running`
+      };
+    }
   }
 
   return {
@@ -37,7 +56,21 @@ export function ollamaIntegration() {
     }
     else {
       const args: string[] = [];
-      const config = getOllamaConfig();
+      const config = { ...getOllamaConfig() };
+      if ('port' in config || config.disableAutoPortAlloc === true) {
+        vim.notify(`Because port is manually specified in ollama integration configuration, a port cannot be automatically allocated. This may lead to conflicts between multiple instances of Neovim`, vim.log.levels.WARN);
+        (vim.g as any).copilot_proxy = `http://localhost:11435`; // Default ollama port
+        (vim.g as any).copilot_proxy_strict_ssl = false;
+      }
+      else {
+        const [port, portSsl, proxyPort, proxyPortSsl] = getOpenPorts({ count: 4 });
+        config.port = `:${port}`;
+        config["port-ssl"] = `:${portSsl}`;
+        config["proxy-port"] = `:${proxyPort}`;
+        config["proxy-port-ssl"] = `:${proxyPortSsl}`;
+        (vim.g as any).copilot_proxy = `http://localhost:${proxyPortSsl}`;
+        (vim.g as any).copilot_proxy_strict_ssl = false;
+      }
       for (const key in config) {
         const value = config[key];
         args.push(`--${key}`);
@@ -45,6 +78,7 @@ export function ollamaIntegration() {
           args.push(value.toString());
         }
       }
+
       const command = `${targetExecutable} ${args.join(" ")}`;
 
       const ioHandler = (_id: number, data: string, name: 'stdin' | 'stdout' | 'stderr') => {

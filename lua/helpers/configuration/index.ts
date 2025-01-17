@@ -231,7 +231,7 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
       enabled: true,
     },
     navic: {
-      enabled: true
+      enabled: false
     },
     illuminate: {
       enabled: false, // Huge latency issues on large files
@@ -345,7 +345,8 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
       enabled: true,
       config: {
         model: "codellama:code",
-        'num-predict': 5
+        'num-predict': 5,
+        //disableAutoPortAlloc: true
       }
     },
   },
