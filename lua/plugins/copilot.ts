@@ -1,6 +1,8 @@
 import { LazyPlugin } from "../../ambient/lazy";
 import { getGlobalConfiguration } from "../helpers/configuration";
+import { applyKeyMapping } from "../helpers/keymap";
 import { useExternalModule } from "../helpers/module/useModule";
+import { setTimeout } from "../shims/mainLoopCallbacks";
 
 type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;
@@ -81,6 +83,8 @@ const plugin: LazyPlugin = {
         auto_trigger: true,
         keymap: {
           accept: '<M-CR>',
+          accept_line: '<M-j>',
+          accept_word: '<M-l>'
         }
       },
       server_opts_overrides: lspConfig
