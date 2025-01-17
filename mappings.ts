@@ -43,6 +43,7 @@ for (const direction in MOVEMENT_DIRECTION_KEYS) {
   });
 }
 
+
 // ----- WINDOW MOVEMENT BINDINGS ----- //
 for (const direction in MOVEMENT_DIRECTION_KEYS) {
   const key = MOVEMENT_DIRECTION_KEYS[direction as keyof typeof MOVEMENT_DIRECTION_KEYS];

@@ -35,6 +35,7 @@ type NeovideAPIGExtensions = {
     neovide_padding_bottom: number,
     neovide_padding_right: number,
     neovide_padding_left: number
+    neovide_floating_corner_radius: number
   } | {
     neovide: false | undefined
   }

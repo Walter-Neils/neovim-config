@@ -270,7 +270,7 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
       enabled: false
     },
     hlchunk: {
-      enabled: false 
+      enabled: false
     },
     rest: {
       enabled: true
@@ -342,7 +342,11 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
   },
   integrations: {
     ollama: {
-      enabled: false,
+      enabled: true,
+      config: {
+        model: "codellama:code",
+        'num-predict': 5
+      }
     },
   },
 };

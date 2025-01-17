@@ -136,9 +136,15 @@ type NvimLspClient = {
   server_capabilities: {
     documentSymbolProvider: boolean,
     inlayHintProvider: boolean
-  }
+  },
+  capabilities: NvimLspClientCapabilities,
+  progress: NvimLspClientProgress,
+  workspaceFolders: NvimLspClientWorkspaceFolders,
+  attached_buffers: NvimLspClientAttachedBuffers,
+  commands: NvimLspClientCommands,
   // WIP
   // :h vim.lsp.client
+
 };
 
 type NvimTreeSitterObj = {
@@ -150,7 +156,7 @@ type NvimTreeSitterObj = {
 type NvimBufOption = '';
 
 type VimRegex = {
-  match_str: (this: VimRegex, str: string) => boolean
+  match_str: (this: VimRegex, str: string) => boolean,
 };
 
 type VimPipe = unknown;
@@ -161,11 +167,12 @@ type VimFnJobStartOpts = {
   clear_env?: boolean,
   cwd?: string,
   detach?: boolean,
-  env: Record<string, string>,
+  env?: Record<string, string>,
   height?: number,
-  on_stdout: (this: void, channel_id: number, data: string, name: 'stdout' | 'stderr' | 'stdin') => void,
-  on_stderr: (this: void, channel_id: number, data: string, name: 'stdout' | 'stderr' | 'stdin') => void,
-  on_stdin: (this: void, channel_id: number, data: string, name: 'stdout' | 'stderr' | 'stdin') => void,
+  on_stdout?: (this: void, channel_id: number, data: string, name: 'stdout' | 'stderr' | 'stdin') => void,
+  on_stderr?: (this: void, channel_id: number, data: string, name: 'stdout' | 'stderr' | 'stdin') => void,
+  on_stdin?: (this: void, channel_id: number, data: string, name: 'stdout' | 'stderr' | 'stdin') => void,
+  on_exit?: (this: void, channel_id: number, code: number, signal: string) => void,
   pty?: boolean
   rpc?: boolean
   stderr_buffered?: boolean,
@@ -192,12 +199,20 @@ type VimAPI = {
   uv: VimUV,
   json: {
     encode: (this: void, value: unknown) => string,
-    decode: (this: void, value: string) => unknown
+    decode: (this: void, value: string) => unknown,
   },
   v: {
     shell_error: number,
     swapname: string,
     afile: string,
+    // Swapchoice values:
+    // 'o' - open read-only
+    // 'e' - edit
+    // 'r' - recover
+    // 'd' - delete
+    // 'q' - quit
+    // 'a' - abandon
+    // '' - do nothing
     swapchoice: 'o' | 'e' | 'r' | 'd' | 'q' | 'a' | ''
   },
   log: {
@@ -208,10 +223,15 @@ type VimAPI = {
     }
   },
   api: {
+    // Replaces termcodes in a string with the appropriate special key codes
     nvim_replace_termcodes: (this: void, str: string, from_particular_key: boolean, from_remapped_mode: boolean, from_expr: boolean) => string,
+    // Returns a highlight group by name
     nvim_get_hl: (this: void, arg1: number, arg2: { name: string }) => NeovimHighlightGroup,
+    // Calls a VimL function
     nvim_call_function: (this: void, command: string, args?: unknown[]) => unknown,
+    // Fetches the current line
     nvim_get_current_line: (this: void) => number,
+    // Fetches the current line number
     nvim_get_all_options_info: (this: void) => { [key: string]: NvimOptionInfo }
     nvim_set_hl: (this: void, arg1: number, arg2: string, params: VimHLColorParams) => void,
     nvim_create_user_command: (this: void, commandName: string, luaFunc: (this: void, args: { fargs: string[] }) => void, options: {
@@ -313,6 +333,7 @@ type VimAPI = {
     }>, unknownArg: boolean) => void
   },
   fn: {
+    systemlist: (this: void, command: string) => string[],
     feedkeys: (this: void, keys: string, mode: string) => void,
     // Returns -1 if a buffer is not currently in a window
     bufwinid: (this: void, buf: NeovimBuffer | number) => number,

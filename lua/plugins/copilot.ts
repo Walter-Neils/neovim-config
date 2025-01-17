@@ -1,4 +1,5 @@
 import { LazyPlugin } from "../../ambient/lazy";
+import { getGlobalConfiguration } from "../helpers/configuration";
 import { useExternalModule } from "../helpers/module/useModule";
 
 type DeepPartial<T> = {
@@ -52,12 +53,26 @@ export function getCopilot() {
 }
 
 const plugin: LazyPlugin = {
-  1: 'zbirenbaum/copilot.lua',
+  1: 'Walter-Neils/copilot.lua',
   //dir: '/tmp/copilot.lua',
   //dev: true,
   cmd: ["Copilot"],
   event: 'InsertEnter',
   config: () => {
+    const lspConfig = {
+      trace: 'verbose',
+      settings: {
+        advanced: {
+          inlineSuggestionCount: 10,
+        } as any
+      }
+    };
+
+    if (getGlobalConfiguration().integrations["ollama"]?.enabled) {
+      (vim.g as any).copilot_proxy = 'http://localhost:11435';
+      (vim.g as any).copilot_proxy_strict_ssl = false;
+    }
+
     getCopilot().setup({
       panel: {
         enabled: false,
@@ -67,7 +82,8 @@ const plugin: LazyPlugin = {
         keymap: {
           accept: '<M-CR>',
         }
-      }
+      },
+      server_opts_overrides: lspConfig
     });
   }
 };
