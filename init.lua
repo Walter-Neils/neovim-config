@@ -6260,7 +6260,7 @@ local plugin = {
             local config = {
                 options = {
                     theme = globalThemeType() == "dark" and "material" or "ayu_light",
-                    refresh = {statusline = 1500}
+                    refresh = {}
                 },
                 sections = {
                     lualine_b = {

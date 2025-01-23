@@ -40,7 +40,7 @@ const plugin: LazyPlugin = {
         options: {
           theme: globalThemeType() === 'dark' ? 'material' : 'ayu_light',
           refresh: {
-            statusline: 1500
+            //statusline: 1500
           }
         },
         sections: {
