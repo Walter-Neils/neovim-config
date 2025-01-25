@@ -1,7 +1,9 @@
 import { getGlobalConfiguration } from "../helpers/configuration";
 import { getOpenPorts } from "../helpers/network/getOpenPort";
+import { setImmediate } from "../shims/mainLoopCallbacks";
 
-const targetExecutable = "ollama-copilot";
+const ollamaCopilotExecutable = "ollama-copilot";
+const ollamaExecutable = "ollama";
 export function isOllamaIntegrationAllowed(): ({
   success: true
 } | {
@@ -15,11 +17,17 @@ export function isOllamaIntegrationAllowed(): ({
     };
   }
   // Locate the ollama-copilot executable and make sure it's available
-  if (vim.fn.executable(targetExecutable) == 0) {
-    vim.notify(`Ollama integration is enabled, but ${targetExecutable} could not be found.`, vim.log.levels.ERROR);
+  if (vim.fn.executable(ollamaCopilotExecutable) == 0) {
     return {
       success: false,
-      reason: `Could not find ${targetExecutable}.`
+      reason: `Could not find ${ollamaCopilotExecutable}.`
+    };
+  }
+
+  if (vim.fn.executable(ollamaExecutable) == 0) {
+    return {
+      success: false,
+      reason: `Could not find ${ollamaExecutable}.`
     };
   }
 
@@ -52,7 +60,9 @@ export function ollamaIntegration() {
   if (getGlobalConfiguration().integrations.ollama?.enabled) {
     const result = isOllamaIntegrationAllowed();
     if (!result.success) {
-      vim.notify(`Ollama integration is enabled, but ${result.reason}.`, vim.log.levels.ERROR);
+      setImmediate(() => {
+        vim.notify(`Ollama integration is enabled, but ${result.reason}.`, vim.log.levels.ERROR);
+      });
     }
     else {
       const args: string[] = [];
@@ -79,7 +89,7 @@ export function ollamaIntegration() {
         }
       }
 
-      const command = `${targetExecutable} ${args.join(" ")}`;
+      const command = `${ollamaCopilotExecutable} ${args.join(" ")}`;
 
       const ioHandler = (_id: number, data: string, name: 'stdin' | 'stdout' | 'stderr') => {
       };

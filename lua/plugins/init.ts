@@ -318,7 +318,12 @@ export function getPlugins(this: void): LazyPlugin[] {
   ];
 
   const activeTargets = targets.filter(x => x.key === undefined || globalConfig.packages[x.key]?.enabled);
-  vim.notify(`Using ${targets.length} plugin definitions, ${activeTargets.length} of which are enabled`, vim.log.levels.INFO);
+
+  vim.api.nvim_create_user_command("WinPlugStats", () => {
+    vim.notify(`Using ${targets.length} plugin definitions, ${activeTargets.length} of which are enabled`, vim.log.levels.INFO);
+  }, {
+    nargs: 0
+  });
 
   for (const target of activeTargets) {
     try {
