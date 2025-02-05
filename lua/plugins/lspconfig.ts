@@ -236,15 +236,16 @@ async function configureLSP(this: void) {
   }
   vim.diagnostic.config({
     update_in_insert: true,
-    virtual_text: (() => {
-      const incompatablePackages = ["lspLines", "tinyInlineDiagnostic"];
-      for (const packageKey of incompatablePackages) {
-        if (getGlobalConfiguration().packages[packageKey]?.enabled ?? false) {
-          return false;
-        }
-      }
-      return true;
-    })(),
+    virtual_lines: true,
+    // virtual_text: (() => {
+    //   const incompatablePackages = ["lspLines", "tinyInlineDiagnostic"];
+    //   for (const packageKey of incompatablePackages) {
+    //     if (getGlobalConfiguration().packages[packageKey]?.enabled ?? false) {
+    //       return false;
+    //     }
+    //   }
+    //   return true;
+    // })(),
   });
 }
 export { plugin as default };

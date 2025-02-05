@@ -346,7 +346,6 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
       config: {
         model: "codellama:code",
         'num-predict': 5,
-        //disableAutoPortAlloc: true
       }
     },
   },

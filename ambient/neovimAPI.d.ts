@@ -1,6 +1,7 @@
 type VIMDiagnosticConfig = {
-  update_in_insert: boolean,
-  virtual_text: boolean
+  update_in_insert?: boolean,
+  virtual_text?: boolean,
+  virtual_lines?: boolean
 };
 type VimHLColorParams = {
   bg?: string,

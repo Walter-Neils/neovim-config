@@ -60,11 +60,16 @@ export function getCMP() {
 
 
 const plugin: LazyPlugin = {
-  1: 'hrsh7th/nvim-cmp',
+  1: 'Walter-Neils/nvim-cmp',
   dependencies: ['hrsh7th/cmp-nvim-lsp', 'neovim/nvim-lspconfig', 'onsails/lspkind.nvim', 'hrsh7th/cmp-vsnip', 'hrsh7th/vim-vsnip'],
   config: () => {
     const cmp = getCMP();
     cmp.setup({
+      view: {
+        entries: {
+          vertical_positioning: 'above'
+        }
+      },
       window: {
         completion: {
           winhighlight: "Normal:Pmenu,FloatBorder:Pmenu,Search:None",
