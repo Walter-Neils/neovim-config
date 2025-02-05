@@ -9,6 +9,7 @@ type PluginRef = {
 export function getPlugins(this: void): LazyPlugin[] {
   const globalConfig = getGlobalConfiguration();
   const result: LazyPlugin[] = [];
+  const unloadedPlugins: LazyPlugin[] = [];
 
   const targets: PluginRef[] = [
     {
@@ -318,6 +319,12 @@ export function getPlugins(this: void): LazyPlugin[] {
   ];
 
   const activeTargets = targets.filter(x => x.key === undefined || globalConfig.packages[x.key]?.enabled);
+  const inactiveTargets = targets.filter(x => {
+    if (x.key === undefined) {
+      return false; // Always enabled
+    }
+    return globalConfig.packages[x.key]?.enabled ?? false;
+  });
 
   vim.api.nvim_create_user_command("WinPlugStats", () => {
     vim.notify(`Using ${targets.length} plugin definitions, ${activeTargets.length} of which are enabled`, vim.log.levels.INFO);
@@ -325,12 +332,36 @@ export function getPlugins(this: void): LazyPlugin[] {
     nargs: 0
   });
 
-  for (const target of activeTargets) {
+  for (const target of targets) {
     try {
-      result.push((require("lua.plugins." + target.include) as { default: any }).default);
+      const plugin = (require("lua.plugins." + target.include) as { default: LazyPlugin }).default;
+      if (target.key != undefined) {
+        if (!globalConfig.packages[target.key]?.enabled) {
+          unloadedPlugins.push(plugin);
+        }
+      }
+      else {
+        result.push(plugin);
+      }
     } catch {
       vim.notify(`Failed to include plugin '${target.key ?? target.include}' (${target.include})`);
     }
   }
+
+  // Scan for incorrect config
+  for (const loadedPlugin of result) {
+    if (loadedPlugin.dependencies != undefined) {
+      for (const requiredDep of loadedPlugin.dependencies) {
+        for (const unloadedPlugin of unloadedPlugins) {
+          if (unloadedPlugin[1] == requiredDep) {
+            console.warn(`Configuration warning: '${unloadedPlugin[1]}' is disabled, but required by '${loadedPlugin[1]}'. It will be loaded anyway.`);
+          }
+        }
+      }
+    }
+  }
+
+
+
   return result;
 }

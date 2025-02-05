@@ -57,7 +57,88 @@ export function getCMP() {
   const cmp = useExternalModule<CMPModule>("cmp");
   return cmp;
 }
+type CompletionItemKindID = 'Variable' | 'Parameter' | 'Snippet' | 'Method' | 'Struct' | 'Constant' | 'Module' | 'Enum' | 'Reference' | 'Function' | 'Interface' | 'Keyword' | 'EnumMember';
+export function getCMPTypes() {
+  type Kind = string;
+  type LspTypes = {
+    CompletionItemKind: {
+      [key: Kind]: CompletionItemKindID
+    }
+  };
+  type CMPTypesModule = {
+    lsp: LspTypes
+  };
+  return useExternalModule<CMPTypesModule>("cmp.types");
+}
 
+function lspKindComparator(this: void) {
+  const lspTypes = getCMPTypes().lsp;
+  type Kind = unknown;
+  type EntryCompletionItem = {
+    label: string
+  };
+  type Entry = {
+    source: {
+      name: string
+    },
+    get_kind(): string,
+    get_completion_item(): EntryCompletionItem
+  };
+  const PRIORITIES: {
+    [key in CompletionItemKindID]: number
+  } = {
+    Parameter: -5,
+    Variable: -5,
+    Snippet: 100,
+    Method: -5,
+    Module: 0,
+    Enum: 0,
+    Struct: 0,
+    Constant: 50,
+    Reference: -5,
+    Function: -5,
+    Interface: 0,
+    Keyword: 0,
+    EnumMember: 0
+  };
+  const alreadyNotified: string[] = [];
+  const getPriority = (key: CompletionItemKindID) => {
+    if (key === null) {
+      return 0;
+    }
+    const priority = PRIORITIES[key];
+    if (priority === undefined && !alreadyNotified.includes(key)) {
+      console.warn(`No priority specified for '${key}'`);
+      alreadyNotified.push(key);
+    }
+    return -(priority ?? 0);
+  };
+  return function(this: void, entry1: Entry, entry2: Entry): boolean | null {
+    //if (entry1.source.name === "nvim_lsp") {
+    //  if (entry2.source.name === "nvim_lsp") {
+    //    return false;
+    //  }
+    //  else {
+    //    return null;
+    //  }
+    //}
+
+    const kindExpander = (kind: CompletionItemKindID, entry: Entry): CompletionItemKindID => {
+      if (kind == 'Variable' && (entry.get_completion_item().label as unknown as { match(pattern: string): boolean }).match("%w*=")) {
+        return 'Parameter';
+      }
+      return kind;
+    };
+    const kind1 = kindExpander(lspTypes.CompletionItemKind[entry1.get_kind()], entry1);
+    const kind2 = kindExpander(lspTypes.CompletionItemKind[entry2.get_kind()], entry2);
+    const priority1 = getPriority(kind1);
+    const priority2 = getPriority(kind2);
+    if (priority1 === priority2) {
+      return null;
+    }
+    return priority2 < priority1;
+  }
+}
 
 const plugin: LazyPlugin = {
   1: 'hrsh7th/nvim-cmp',
@@ -90,6 +171,14 @@ const plugin: LazyPlugin = {
       sources: cmp.config.sources([
         { name: 'nvim_lsp' }
       ]),
+      sorting: {
+        comparators: [
+          lspKindComparator()
+        ]
+      },
+      completion: {
+        autocomplete: false
+      },
       mapping: {
         '<C-b>': cmp.mapping.scroll_docs(-4),
         '<C-f>': cmp.mapping.scroll_docs(1),
