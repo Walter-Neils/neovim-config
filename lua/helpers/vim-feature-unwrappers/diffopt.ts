@@ -38,8 +38,6 @@ export function createDiffOptString(config: DiffOptConfig) {
     addSection('indent-heuristic');
   }
 
-  if (config.)
-
 
 
 
