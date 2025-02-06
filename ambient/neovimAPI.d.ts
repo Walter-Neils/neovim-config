@@ -182,11 +182,23 @@ type VimFnJobStartOpts = {
   width?: number
 };
 
+type VimVersion = {
+  prerelease: string,
+  build: string,
+  api_compatible: number,
+  api_level: number,
+  api_prerelease: boolean,
+  major: number,
+  minor: number,
+  patch: number
+};
+
 type VimAPI = {
   treesitter: NvimTreeSitterObj,
   cmd: ((this: void, params: string) => void) & {
     [key: string]: (this: void, ...args: unknown[]) => unknown
   },
+  version: (this: void) => VimVersion,
   notify: (this: void, value: string | [string, string], level?: VimAPI["log"]["levels"][keyof VimAPI["log"]["levels"]]) => void,
   print: (this: void, value: any) => void,
   schedule: (this: void, callback: (this: void) => void) => void,
@@ -394,6 +406,7 @@ type VimAPI = {
     signcolumn: 'number' | string,
     numberwidth: number,
     ruler: boolean
+    diffopt: string
   }
 }
 

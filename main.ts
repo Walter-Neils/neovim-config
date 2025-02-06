@@ -3,6 +3,7 @@ import { setupCustomLogic } from "./lua/custom";
 import { getGlobalConfiguration } from "./lua/helpers/configuration";
 import { setGUIFont } from "./lua/helpers/font";
 import { useExternalModule } from "./lua/helpers/module/useModule";
+import { createDiffOptString } from "./lua/helpers/vim-feature-unwrappers/diffopt";
 import { Hyprland, isDesktopHyprland } from "./lua/integrations/hyprland";
 import { getNeovideExtendedVimContext } from "./lua/integrations/neovide";
 import { ollamaIntegration } from "./lua/integrations/ollama";
@@ -49,6 +50,15 @@ function setupLazy(this: void) {
   // Append lazy to rtp so it can be loaded by plugins
   vim.opt.rtp.prepend(lazyPath);
 }
+
+vim.opt.diffopt = createDiffOptString({
+  internal: true,
+  filler: true,
+  closeoff: true,
+  indentHeuristic: true,
+  lineMatch: 60,
+  algorithm: 'histogram'
+});
 
 
 setupNeovide();

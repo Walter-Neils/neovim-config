@@ -4,7 +4,8 @@ export type DiffOptConfig = {
   filler?: boolean,
   closeoff?: boolean,
   algorithm?: 'histogram',
-  indentHeuristic?: boolean
+  indentHeuristic?: boolean,
+  foldColumn?: number
 };
 export function createDiffOptString(config: DiffOptConfig) {
   let result = "";
@@ -38,9 +39,9 @@ export function createDiffOptString(config: DiffOptConfig) {
     addSection('indent-heuristic');
   }
 
+  if (config.foldColumn) {
+    addSection(`foldcolumn:${config.foldColumn}`);
+  }
 
-
-
-
-    return result;
+  return result;
 }
