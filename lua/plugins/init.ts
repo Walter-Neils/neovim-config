@@ -314,6 +314,10 @@ export function getPlugins(this: void): LazyPlugin[] {
     {
       key: 'illuminate',
       include: 'illuminate'
+    },
+    {
+      key: 'timerly',
+      include: 'timerly'
     }
   ];
 

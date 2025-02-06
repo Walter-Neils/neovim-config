@@ -301,6 +301,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     presence: {
       enabled: true
+    },
+    timerly: {
+      enabled: true
     }
   },
   targetEnvironments: {
@@ -308,7 +311,6 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
       enabled: true,
     },
     deno: {
-      // TODO: Make this play nice with TypeScript
       enabled: true,
     },
     "c/c++": {
