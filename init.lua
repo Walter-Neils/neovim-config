@@ -6183,7 +6183,7 @@ function environmentKeyToConfig(env)
                     includeInlayParameterNameHints = "all",
                     includeInlayParameterNameHintsWhenArgumentMatchesName = true,
                     includeInlayPropertyDeclarationTypeHints = true,
-                    includeInlayVariableTypeHints = false
+                    includeInlayVariableTypeHints = true
                 }}, typescript = {inlayHints = {
                     includeInlayEnumMemberValueHints = true,
                     includeInlayFunctionLikeReturnTypeHints = true,
@@ -6191,7 +6191,7 @@ function environmentKeyToConfig(env)
                     includeInlayParameterNameHints = "all",
                     includeInlayParameterNameHintsWhenArgumentMatchesName = true,
                     includeInlayPropertyDeclarationTypeHints = true,
-                    includeInlayVariableTypeHints = false
+                    includeInlayVariableTypeHints = true
                 }}}
             }
         },

@@ -152,7 +152,7 @@ function environmentKeyToConfig(env: string) {
             includeInlayParameterNameHints: "all",
             includeInlayParameterNameHintsWhenArgumentMatchesName: true,
             includeInlayPropertyDeclarationTypeHints: true,
-            includeInlayVariableTypeHints: false,
+            includeInlayVariableTypeHints: true,
           },
         },
 
@@ -164,7 +164,7 @@ function environmentKeyToConfig(env: string) {
             includeInlayParameterNameHints: "all",
             includeInlayParameterNameHintsWhenArgumentMatchesName: true,
             includeInlayPropertyDeclarationTypeHints: true,
-            includeInlayVariableTypeHints: false,
+            includeInlayVariableTypeHints: true,
           },
         },
       }
