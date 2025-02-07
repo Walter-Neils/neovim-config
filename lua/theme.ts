@@ -117,6 +117,13 @@ function Midnight(this: void) {
   applyDapSymbols();
 }
 
+function Default(this: void) {
+  updateThemeType('dark');
+  applySymbolUsageStyle();
+  applyDefaultFoldChars();
+  applyDapSymbols();
+}
+
 
 export const THEME_APPLIERS = {
   VSCode,
@@ -126,5 +133,6 @@ export const THEME_APPLIERS = {
   Nord,
   Poimandres,
   Bluloco,
-  Midnight
+  Midnight,
+  Default
 }

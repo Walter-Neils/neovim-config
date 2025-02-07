@@ -12,7 +12,7 @@ const [getGlobalConfig, setGlobalConfig] = usePersistentValue(
 
 function reloadConfiguration() {
   let config = getGlobalConfig();
-  if (Object.keys(config).length < 1 || true) {
+  if (Object.keys(config).length < 1) {
     // Empty, apply default config
     configuration = CONFIGURATION_DEFAULTS;
     saveGlobalConfiguration();
@@ -56,7 +56,7 @@ type GlobalConfiguration = {
 
 export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
   theme: {
-    key: 'Bluloco'
+    key: 'TokyoNight'
   },
   packages: {
     copilotLuaLine: {
