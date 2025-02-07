@@ -92,11 +92,39 @@ function Nord(this: void) {
   applyDapSymbols();
 }
 
+function Poimandres(this: void) {
+  vim.cmd("colorscheme poimandres");
+  updateThemeType('dark');
+  applySymbolUsageStyle();
+  applyDefaultFoldChars();
+  applyDapSymbols();
+}
+
+function Bluloco(this: void) {
+  vim.opt.termguicolors = true;
+  vim.cmd("colorscheme bluloco");
+  updateThemeType('dark');
+  applySymbolUsageStyle();
+  applyDefaultFoldChars();
+  applyDapSymbols();
+}
+
+function Midnight(this: void) {
+  vim.cmd("colorscheme midnight");
+  updateThemeType('dark');
+  applySymbolUsageStyle();
+  applyDefaultFoldChars();
+  applyDapSymbols();
+}
+
 
 export const THEME_APPLIERS = {
   VSCode,
   TokyoNight,
   Catppuccin,
   Kanagawa,
-  Nord
+  Nord,
+  Poimandres,
+  Bluloco,
+  Midnight
 }

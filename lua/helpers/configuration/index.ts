@@ -56,7 +56,7 @@ type GlobalConfiguration = {
 
 export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
   theme: {
-    key: 'TokyoNight'
+    key: 'Bluloco'
   },
   packages: {
     copilotLuaLine: {

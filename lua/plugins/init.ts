@@ -122,6 +122,15 @@ export function getPlugins(this: void): LazyPlugin[] {
       include: 'nord'
     },
     {
+      include: 'poimandres'
+    },
+    {
+      include: 'bluloco'
+    },
+    {
+      include: 'midnight'
+    },
+    {
       key: 'treeSitter',
       include: 'treesitter'
     },

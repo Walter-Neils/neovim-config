@@ -406,7 +406,8 @@ type VimAPI = {
     signcolumn: 'number' | string,
     numberwidth: number,
     ruler: boolean
-    diffopt: string
+    diffopt: string,
+    termguicolors: boolean
   }
 }
 
