@@ -3888,7 +3888,7 @@ ____exports.CONFIGURATION_DEFAULTS = {
         go = {enabled = true}
     },
     shell = {target = "tmux", isolationScope = "global"},
-    integrations = {ollama = {enabled = true, config = {model = "codellama:code", ["num-predict"] = 5}}}
+    integrations = {ollama = {enabled = true, config = {model = "codellama:code", ["num-predict"] = 500}}}
 }
 local watchers = {}
 function ____exports.useConfigWatcher(key, watcher)

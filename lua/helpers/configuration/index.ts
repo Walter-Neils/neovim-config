@@ -347,7 +347,7 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
       enabled: true,
       config: {
         model: "codellama:code",
-        'num-predict': 5,
+        'num-predict': 500,
       }
     },
   },
