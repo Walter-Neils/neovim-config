@@ -1,9 +1,11 @@
 import { LazyPlugin } from "../../ambient/lazy";
+import { getEnvironment } from "../custom/env-manager";
 import { getGlobalConfiguration } from "../helpers/configuration";
 
 type PluginRef = {
   key?: string,
   include: string,
+  runtimeCapabilityChecker?: (this: void) => boolean
 };
 
 export function getPlugins(this: void): LazyPlugin[] {
@@ -133,7 +135,7 @@ export function getPlugins(this: void): LazyPlugin[] {
     },
     {
       key: 'floatTerm',
-      include: 'floatterm'
+      include: 'floatterm',
     },
     {
       key: 'nvimTree',
@@ -331,7 +333,16 @@ export function getPlugins(this: void): LazyPlugin[] {
 
   for (const target of activeTargets) {
     try {
-      result.push((require("lua.plugins." + target.include) as { default: any }).default);
+      let canLoad = true;
+      if (target.runtimeCapabilityChecker != undefined) {
+        if (!target.runtimeCapabilityChecker()) {
+          canLoad = false;
+        }
+      }
+      if (canLoad) {
+
+        result.push((require("lua.plugins." + target.include) as { default: any }).default);
+      }
     } catch {
       vim.notify(`Failed to include plugin '${target.key ?? target.include}' (${target.include})`);
     }

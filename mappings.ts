@@ -11,6 +11,17 @@ vim.g.mapleader = " "; // Use space key as leader
 vim.cmd("map w <Nop>");
 vim.cmd("map W <Nop>");
 
+
+// TESTING
+
+applyKeyMapping({
+  mode: 'n',
+  inputStroke: '<leader>i',
+  action: () => {
+    vim.lsp.inlay_hint.enable(!vim.lsp.inlay_hint.is_enabled([0]), [0]);
+  }
+})
+
 const MOVEMENT_DIRECTION_KEYS = {
   left: {
     key: 'h',

@@ -143,8 +143,34 @@ function environmentKeyToConfig(env: string) {
     additionalOptions: {
       single_file_support: false,
       root_dir: getLSPConfig().util.root_pattern("package.json"),
-    },
-  }, {
+      settings: {
+        javascript: {
+          inlayHints: {
+            includeInlayEnumMemberValueHints: true,
+            includeInlayFunctionLikeReturnTypeHints: true,
+            includeInlayFunctionParameterTypeHints: true,
+            includeInlayParameterNameHints: "all",
+            includeInlayParameterNameHintsWhenArgumentMatchesName: true,
+            includeInlayPropertyDeclarationTypeHints: true,
+            includeInlayVariableTypeHints: false,
+          },
+        },
+
+        typescript: {
+          inlayHints: {
+            includeInlayEnumMemberValueHints: true,
+            includeInlayFunctionLikeReturnTypeHints: true,
+            includeInlayFunctionParameterTypeHints: true,
+            includeInlayParameterNameHints: "all",
+            includeInlayParameterNameHintsWhenArgumentMatchesName: true,
+            includeInlayPropertyDeclarationTypeHints: true,
+            includeInlayVariableTypeHints: false,
+          },
+        },
+      }
+    }
+  },
+  {
     key: "deno",
     lspKey: "denols",
     additionalOptions: {

@@ -280,8 +280,8 @@ type VimAPI = {
   lsp: {
     get_client_by_id: (this: void, client_id: number) => NvimLspClient,
     inlay_hint: {
-      enable: (this: void, enable: boolean, filter?: { bufnr?: number }) => void,
-      is_enabled: (this: void) => void
+      enable: (this: void, enable: boolean, filter?: { bufnr?: number } | unknown) => void,
+      is_enabled: (this: void, filter?: { bufnr?: number } | unknown) => boolean
     },
     buf: {
       format: (this: void, opts: { async?: boolean }) => void,
