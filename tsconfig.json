@@ -15,7 +15,7 @@
     "luaBundle": "init.lua",
     "luaBundleEntry": "main.ts",
     "noImplicitSelf": true,
-    "sourceMapTraceback": true,
+    "sourceMapTraceback": false,
     "tstlVerbose": false
   }
 }

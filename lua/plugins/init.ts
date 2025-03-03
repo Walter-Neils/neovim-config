@@ -1,6 +1,7 @@
 import { LazyPlugin } from "../../ambient/lazy";
 import { getEnvironment } from "../custom/env-manager";
 import { getGlobalConfiguration } from "../helpers/configuration";
+import { parseArgs } from "../helpers/user_command/argparser";
 
 type PluginRef = {
   key?: string,
@@ -13,6 +14,10 @@ export function getPlugins(this: void): LazyPlugin[] {
   const result: LazyPlugin[] = [];
 
   const targets: PluginRef[] = [
+    {
+      include: 'nvim-colorizer',
+      key: 'nvimColorizer'
+    },
     {
       include: 'copilot-lualine',
       key: 'copilotLuaLine'
@@ -340,6 +345,17 @@ export function getPlugins(this: void): LazyPlugin[] {
     nargs: 0
   });
 
+  vim.api.nvim_create_user_command('WinPlugStatus', (_args) => {
+    const args = parseArgs<{
+      '0': string
+    }>(_args.fargs);
+    if (args["0"] != null) {
+      vim.notify(`${globalConfig.packages[args["0"]]?.enabled}` ?? "disabled")
+    }
+  }, {
+    nargs: '*'
+  });
+
   for (const target of activeTargets) {
     try {
       let canLoad = true;
@@ -349,7 +365,6 @@ export function getPlugins(this: void): LazyPlugin[] {
         }
       }
       if (canLoad) {
-
         result.push((require("lua.plugins." + target.include) as { default: any }).default);
       }
     } catch {

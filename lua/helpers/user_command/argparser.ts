@@ -1,5 +1,6 @@
 export function parseArgs<ArgType extends { [key: string]: string | boolean | undefined }>(this: void, args: string[]): ArgType {
   let result: { [key: string]: any } = {};
+  let unnamedKey = 0;
   let primedKey: string | undefined = undefined;
 
   for (let i = 0; i < args.length; i++) {
@@ -12,8 +13,10 @@ export function parseArgs<ArgType extends { [key: string]: string | boolean | un
       primedKey = segment.slice(2); // Manually remove the leading "--"
     } else {
       if (primedKey === undefined) {
-        throw new Error(`Expected a key, got a value`);
-      } else if (segment.startsWith("\"") || segment.startsWith("'")) {
+        primedKey = `${unnamedKey}`;
+        unnamedKey++;
+      }
+      if (segment.startsWith("\"") || segment.startsWith("'")) {
         const delim = segment[0];
         let valueResult = segment.slice(1);
         let end = i;
