@@ -5,7 +5,6 @@ const plugin: LazyPlugin = {
   1: 'catgoose/nvim-colorizer.lua',
   event: "VeryLazy",
   config: () => {
-    vim.notify("Loading colorizer");
     useExternalModule<{ setup: (this: void) => void }>("colorizer").setup();
   }
 };

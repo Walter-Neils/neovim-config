@@ -3829,7 +3829,7 @@ ____exports.CONFIGURATION_DEFAULTS = {
         treesj = {enabled = true},
         iconPicker = {enabled = true},
         todoComments = {enabled = true},
-        crates = {enabled = true, config = {bleedingEdge = false}},
+        crates = {enabled = false, config = {bleedingEdge = false}},
         dbee = {enabled = true},
         lightbulb = {enabled = false},
         neogen = {enabled = true},
@@ -6237,14 +6237,19 @@ return ____exports
 local ____exports = {}
 local ____useModule = require("lua.helpers.module.useModule")
 local useExternalModule = ____useModule.useExternalModule
-local config = {bind = true, always_trigger = true}
+local config = {
+    bind = true,
+    always_trigger = true,
+    max_height = 50,
+    move_cursor_key = "<M-p>",
+    toggle_key = "<M-x>"
+}
 local plugin = {
     [1] = "ray-x/lsp_signature.nvim",
     event = "LspAttach",
     config = function(_, opts)
         local lsp_signature = useExternalModule("lsp_signature")
         lsp_signature.setup(config)
-        vim.notify("LSP Signature loaded")
     end
 }
 ____exports.default = plugin
@@ -6464,7 +6469,6 @@ local plugin = {
     [1] = "catgoose/nvim-colorizer.lua",
     event = "VeryLazy",
     config = function()
-        vim.notify("Loading colorizer")
         useExternalModule("colorizer").setup()
     end
 }

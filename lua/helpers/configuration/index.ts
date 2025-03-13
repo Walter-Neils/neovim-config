@@ -246,7 +246,7 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
       enabled: true,
     },
     crates: {
-      enabled: true,
+      enabled: false,
       config: {
         bleedingEdge: false,
       },
