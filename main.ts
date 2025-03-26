@@ -93,6 +93,7 @@ vim.opt.numberwidth = 2;
 vim.opt.ruler = true;
 vim.o.foldlevel = 99;
 vim.o.foldlevelstart = 99;
+vim.opt.cursorline = true;
 
 require("mappings");
 

@@ -4823,6 +4823,7 @@ vim.opt.numberwidth = 2
 vim.opt.ruler = true
 vim.o.foldlevel = 99
 vim.o.foldlevelstart = 99
+vim.opt.cursorline = true
 require("mappings")
 setImmediate(setupCustomLogic)
 return ____exports
@@ -5348,7 +5349,7 @@ local ____opt_9 = config.packages.actionsPreview
 if ____opt_9 and ____opt_9.enabled then
     applyKeyMapping({
         mode = "n",
-        inputStroke = ".",
+        inputStroke = "<leader>.",
         action = function()
             getActionsPreview().code_actions()
         end,

@@ -565,7 +565,7 @@ if (config.packages["nvimDapUI"]) {
 if (config.packages["actionsPreview"]?.enabled) {
   applyKeyMapping({
     mode: 'n',
-    inputStroke: '.',
+    inputStroke: '<leader>.',
     action: function(this: void) {
       getActionsPreview().code_actions();
     },
