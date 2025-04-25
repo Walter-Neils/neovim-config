@@ -3200,7 +3200,8 @@ local ____exports = {}
 local ____nui = require("lua.plugins.nui")
 local useNUI = ____nui.useNUI
 function ____exports.getEnvironment()
-    return vim.api.nvim_call_function("environ", {})
+    local env = vim.api.nvim_call_function("environ", {})
+    return env
 end
 local function createEnvironmentTableView()
     local MAX_LEN = 75
@@ -4770,6 +4771,8 @@ enablePortableAppImageLogic()
 local function setupNeovide()
     local vim = getNeovideExtendedVimContext()
     if vim.g.neovide then
+        vim.env.TERM_PROGRAM = "neovide"
+        vim.env.TERM = "xterm-256color"
         vim.g.neovide_scale_factor = 0.85
         vim.g.neovide_detach_on_quit = "always_detach"
         if isDesktopHyprland() then

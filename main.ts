@@ -22,6 +22,10 @@ enablePortableAppImageLogic();
 function setupNeovide() {
   const vim = getNeovideExtendedVimContext();
   if (vim.g.neovide) {
+    // If we're in a Neovide instance, we need to ignore TMUX environment variables (because even if they're set, we're not under the TMUX server)
+    vim.env["TERM_PROGRAM"] = "neovide";
+    vim.env["TERM"] = "xterm-256color";
+
     vim.g.neovide_scale_factor = 0.85;
     // Doesn't appear to be doing anything, but should leave remote nvim server instances intact when closing
     vim.g.neovide_detach_on_quit = 'always_detach';

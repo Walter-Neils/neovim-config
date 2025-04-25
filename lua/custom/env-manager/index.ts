@@ -1,9 +1,13 @@
 import { NUITableColumnDef, useNUI } from "../../plugins/nui";
 
+
 export function getEnvironment(): {
   [key: string]: string | undefined
 } {
-  return vim.api.nvim_call_function("environ", []) as any;
+  const env = vim.api.nvim_call_function("environ", []) as {
+    [key: string]: string | undefined
+  };
+  return env;
 }
 
 function createEnvironmentTableView() {
