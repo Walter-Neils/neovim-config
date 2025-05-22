@@ -8,8 +8,10 @@ import { getDap, getDapUI } from "./lua/plugins/nvim-dap-ui";
 
 vim.g.mapleader = " "; // Use space key as leader
 
-vim.cmd("map w <Nop>");
-vim.cmd("map W <Nop>");
+if (false) {
+  vim.cmd("map w <Nop>");
+  vim.cmd("map W <Nop>");
+}
 
 
 // TESTING
@@ -586,5 +588,9 @@ if (config.packages["lazyGit"]?.enabled) {
   });
 }
 
+
 // Disable macro recording
-vim.cmd("map q <Nop>");
+if (false) {
+
+  vim.cmd("map q <Nop>");
+}

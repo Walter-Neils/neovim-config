@@ -23,6 +23,9 @@ export function getPlugins(this: void): LazyPlugin[] {
       key: 'copilotLuaLine'
     },
     {
+      include: 'rose-pine',
+    },
+    {
       include: 'nui'
     }, {
       key: 'screenkey',
@@ -334,6 +337,10 @@ export function getPlugins(this: void): LazyPlugin[] {
     {
       key: 'timerly',
       include: 'timerly'
+    },
+    {
+      key: 'avante',
+      include: 'avante'
     }
   ];
 

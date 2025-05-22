@@ -307,6 +307,9 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
     },
     nvimColorizer: {
       enabled: true
+    },
+    avante: {
+      enabled: true
     }
   },
   targetEnvironments: {

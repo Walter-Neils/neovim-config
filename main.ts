@@ -1,5 +1,6 @@
 import { LazyModuleInterface } from "./ambient/lazy";
 import { setupCustomLogic } from "./lua/custom";
+import { loadEnvironmentSecrets } from "./lua/custom/secrets-loader";
 import { getGlobalConfiguration } from "./lua/helpers/configuration";
 import { setGUIFont } from "./lua/helpers/font";
 import { useExternalModule } from "./lua/helpers/module/useModule";
@@ -18,6 +19,7 @@ insertJSONShims();
 insertConsoleShims();
 insertMainLoopCallbackShims();
 enablePortableAppImageLogic();
+loadEnvironmentSecrets();
 
 function setupNeovide() {
   const vim = getNeovideExtendedVimContext();
@@ -75,6 +77,7 @@ lazy.setup(
 );
 
 THEME_APPLIERS[getGlobalConfiguration().theme.key]();
+
 
 // unnamedplus is the default, but we'll set it here just in case
 vim.opt.clipboard = "unnamedplus"; // System-wide copy & paste

@@ -5,4 +5,5 @@ const plugin: LazyPlugin = {
   dependencies: ["nvim-lua/plenary.nvim"],
   opts: {}
 };
+
 export { plugin as default };

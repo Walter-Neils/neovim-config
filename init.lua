@@ -3631,6 +3631,13 @@ local function Catppuccin()
     applySymbolUsageStyle()
     updateThemeType("dark")
 end
+local function RosePine()
+    vim.cmd("colorscheme rose-pine")
+    applyDefaultFoldChars()
+    applyDapSymbols()
+    applySymbolUsageStyle()
+    updateThemeType("dark")
+end
 local function Kanagawa()
     vim.cmd("colorscheme kanagawa")
     updateThemeType("dark")
@@ -3682,7 +3689,8 @@ ____exports.THEME_APPLIERS = {
     Poimandres = Poimandres,
     Bluloco = Bluloco,
     Midnight = Midnight,
-    Default = Default
+    Default = Default,
+    RosePine = RosePine
 }
 return ____exports
  end,
@@ -3849,7 +3857,8 @@ ____exports.CONFIGURATION_DEFAULTS = {
         dropBar = {enabled = true},
         presence = {enabled = true},
         timerly = {enabled = true},
-        nvimColorizer = {enabled = true}
+        nvimColorizer = {enabled = true},
+        avante = {enabled = true}
     },
     targetEnvironments = {
         typescript = {enabled = true},
@@ -4178,6 +4187,24 @@ function ____exports.setupCustomLogic()
     setupCustomProfilerCommands()
     initCustomGetPIDCommand()
     initCustomEnvManager()
+end
+return ____exports
+ end,
+["lua.custom.secrets-loader.index"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local __TS__ObjectKeys = ____lualib.__TS__ObjectKeys
+local ____exports = {}
+local ____persistent_2Ddata = require("lua.helpers.persistent-data.index")
+local usePersistentValue = ____persistent_2Ddata.usePersistentValue
+function ____exports.loadEnvironmentSecrets()
+    local getEnvironmentSecrets, setEnvironmentSecrets = unpack(usePersistentValue("environment-secrets", {}))
+    if #__TS__ObjectKeys(getEnvironmentSecrets()) < 1 then
+        setEnvironmentSecrets({})
+    end
+    local secrets = getEnvironmentSecrets()
+    for key in pairs(secrets) do
+        vim.env[key] = secrets[key]
+    end
 end
 return ____exports
  end,
@@ -4548,6 +4575,7 @@ function ____exports.getPlugins()
     local targets = {
         {include = "nvim-colorizer", key = "nvimColorizer"},
         {include = "copilot-lualine", key = "copilotLuaLine"},
+        {include = "rose-pine"},
         {include = "nui"},
         {key = "screenkey", include = "screenkey"},
         {key = "outline", include = "outline"},
@@ -4628,7 +4656,8 @@ function ____exports.getPlugins()
         {key = "neotest", include = "neotest"},
         {key = "navic", include = "navic"},
         {key = "illuminate", include = "illuminate"},
-        {key = "timerly", include = "timerly"}
+        {key = "timerly", include = "timerly"},
+        {key = "avante", include = "avante"}
     }
     local activeTargets = __TS__ArrayFilter(
         targets,
@@ -4736,6 +4765,8 @@ local __TS__SparseArraySpread = ____lualib.__TS__SparseArraySpread
 local ____exports = {}
 local ____custom = require("lua.custom.index")
 local setupCustomLogic = ____custom.setupCustomLogic
+local ____secrets_2Dloader = require("lua.custom.secrets-loader.index")
+local loadEnvironmentSecrets = ____secrets_2Dloader.loadEnvironmentSecrets
 local ____configuration = require("lua.helpers.configuration.index")
 local getGlobalConfiguration = ____configuration.getGlobalConfiguration
 local ____font = require("lua.helpers.font.index")
@@ -4768,6 +4799,7 @@ insertJSONShims()
 insertConsoleShims()
 insertMainLoopCallbackShims()
 enablePortableAppImageLogic()
+loadEnvironmentSecrets()
 local function setupNeovide()
     local vim = getNeovideExtendedVimContext()
     if vim.g.neovide then
@@ -5124,8 +5156,10 @@ local ____nvim_2Ddap_2Dui = require("lua.plugins.nvim-dap-ui")
 local getDap = ____nvim_2Ddap_2Dui.getDap
 local getDapUI = ____nvim_2Ddap_2Dui.getDapUI
 vim.g.mapleader = " "
-vim.cmd("map w <Nop>")
-vim.cmd("map W <Nop>")
+if false then
+    vim.cmd("map w <Nop>")
+    vim.cmd("map W <Nop>")
+end
 applyKeyMapping({
     mode = "n",
     inputStroke = "<leader>i",
@@ -5363,7 +5397,9 @@ local ____opt_11 = config.packages.lazyGit
 if ____opt_11 and ____opt_11.enabled then
     applyKeyMapping({mode = "n", inputStroke = "<leader>lg", outputStroke = "<cmd>LazyGit<CR>", options = {desc = "Show code actions"}})
 end
-vim.cmd("map q <Nop>")
+if false then
+    vim.cmd("map q <Nop>")
+end
 return ____exports
  end,
 ["lua.custom.settings.index"] = function(...) 
@@ -5467,6 +5503,32 @@ return ____exports
 ["lua.plugins.autopairs"] = function(...) 
 local ____exports = {}
 local plugin = {[1] = "windwp/nvim-autopairs", event = "InsertEnter", config = true}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.avante"] = function(...) 
+local ____exports = {}
+local plugin = {
+    [1] = "yetone/avante.nvim",
+    event = "VeryLazy",
+    version = false,
+    opts = {provider = "gemini"},
+    build = "make",
+    dependencies = {
+        "nvim-treesitter/nvim-treesitter",
+        "stevearc/dressing.nvim",
+        "nvim-lua/plenary.nvim",
+        "MunifTanjim/nui.nvim",
+        "echasnovski/mini.pick",
+        "nvim-telescope/telescope.nvim",
+        "hrsh7th/nvim-cmp",
+        "ibhagwan/fzf-lua",
+        "nvim-tree/nvim-web-devicons",
+        "zbirenbaum/copilot.lua",
+        {[1] = "HakonHarnes/img-clip.nvim", event = "VeryLazy", opts = {default = {embed_image_as_base64 = false, prompt_for_file_name = false, drag_and_drop = {insert_mode = true}, use_absolute_path = true}}},
+        {[1] = "MeanderingProgrammer/render-markdown.nvim", opts = {file_types = {"markdown", "Avante"}}, ft = {"markdown", "Avante"}}
+    }
+}
 ____exports.default = plugin
 return ____exports
  end,
@@ -6682,6 +6744,22 @@ return ____exports
 ["lua.plugins.rest"] = function(...) 
 local ____exports = {}
 local plugin = {[1] = "rest-nvim/rest.nvim"}
+____exports.default = plugin
+return ____exports
+ end,
+["lua.plugins.rose-pine"] = function(...) 
+local ____exports = {}
+local ____useModule = require("lua.helpers.module.useModule")
+local useExternalModule = ____useModule.useExternalModule
+local plugin = {
+    [1] = "rose-pine/neovim",
+    name = "rose-pine",
+    lazy = false,
+    priority = 1000,
+    config = function()
+        useExternalModule("rose-pine").setup({variant = "auto"})
+    end
+}
 ____exports.default = plugin
 return ____exports
  end,

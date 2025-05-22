@@ -53,6 +53,14 @@ function Catppuccin(this: void) {
   updateThemeType('dark');
 }
 
+function RosePine(this: void) {
+  vim.cmd("colorscheme rose-pine");
+  applyDefaultFoldChars();
+  applyDapSymbols();
+  applySymbolUsageStyle();
+  updateThemeType('dark');
+}
+
 function applySymbolUsageStyle() {
   vim.api.nvim_set_hl(0, 'SymbolUsageRounding', { fg: h('CursorLine').bg, italic: true } as any)
   vim.api.nvim_set_hl(0, 'SymbolUsageContent', { bg: h('CursorLine').bg, fg: h('Comment').fg, italic: true } as any);
@@ -134,5 +142,6 @@ export const THEME_APPLIERS = {
   Poimandres,
   Bluloco,
   Midnight,
-  Default
+  Default,
+  RosePine
 }
