@@ -210,7 +210,7 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
       enabled: true
     },
     surround: {
-      enabled: true
+      enabled: false // Conflicting 'S' bind with 'nvim-surround'
     },
     tsAutoTag: {
       enabled: true

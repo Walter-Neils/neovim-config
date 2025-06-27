@@ -139,6 +139,11 @@ export function getPlugins(this: void): LazyPlugin[] {
       include: 'midnight'
     },
     {
+      // Needs to come before treesitter
+      key: 'markview',
+      include: 'markview'
+    },
+    {
       key: 'treeSitter',
       include: 'treesitter'
     },
@@ -298,7 +303,7 @@ export function getPlugins(this: void): LazyPlugin[] {
       key: 'wakaTime',
       include: 'wakatime'
     },
-    {
+    { 
       key: 'surround',
       include: 'surround'
     },
@@ -313,10 +318,6 @@ export function getPlugins(this: void): LazyPlugin[] {
     {
       key: 'rainbowDelimiters',
       include: 'rainbow-delimiters'
-    },
-    {
-      key: 'markview',
-      include: 'markview'
     },
     {
       key: 'symbolUsage',
