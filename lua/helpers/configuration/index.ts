@@ -191,7 +191,7 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
       enabled: true
     },
     leap: {
-      enabled: false
+      enabled: true
     },
     cSharp: {
       enabled: true
@@ -231,7 +231,7 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
       enabled: true,
     },
     navic: {
-      enabled: false
+      enabled: true
     },
     illuminate: {
       enabled: false, // Huge latency issues on large files

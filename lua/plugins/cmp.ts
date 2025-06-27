@@ -97,7 +97,7 @@ const plugin: LazyPlugin = {
       ]),
       mapping: {
         '<C-b>': cmp.mapping.scroll_docs(-4),
-        '<C-f>': cmp.mapping.scroll_docs(1),
+        '<C-f>': cmp.mapping.scroll_docs(4),
         '<C-Space>': cmp.mapping.complete(),
         '<Tab>': cmp.mapping(function(this: void, fallback: (this: void) => void) {
           if (cmp.visible()) {

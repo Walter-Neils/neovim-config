@@ -3820,7 +3820,7 @@ ____exports.CONFIGURATION_DEFAULTS = {
         obsidian = {enabled = false, config = {workspaces = {{name = "notes", path = "~/Documents/obsidian/notes"}}}},
         undoTree = {enabled = true},
         octo = {enabled = true},
-        leap = {enabled = false},
+        leap = {enabled = true},
         cSharp = {enabled = true},
         telescopeUISelect = {enabled = true},
         masonNvimDap = {enabled = false},
@@ -3833,7 +3833,7 @@ ____exports.CONFIGURATION_DEFAULTS = {
         markview = {enabled = true},
         symbolUsage = {enabled = true},
         neotest = {enabled = true},
-        navic = {enabled = false},
+        navic = {enabled = true},
         illuminate = {enabled = false},
         treesj = {enabled = true},
         iconPicker = {enabled = true},
@@ -4798,17 +4798,17 @@ local insertMainLoopCallbackShims = ____mainLoopCallbacks.insertMainLoopCallback
 local setImmediate = ____mainLoopCallbacks.setImmediate
 local ____theme = require("lua.theme")
 local THEME_APPLIERS = ____theme.THEME_APPLIERS
+enablePortableAppImageLogic()
 insertJSONShims()
 insertConsoleShims()
 insertMainLoopCallbackShims()
-enablePortableAppImageLogic()
 loadEnvironmentSecrets()
 local function setupNeovide()
     local vim = getNeovideExtendedVimContext()
     if vim.g.neovide then
         vim.env.TERM_PROGRAM = "neovide"
         vim.env.TERM = "xterm-256color"
-        vim.g.neovide_scale_factor = 0.85
+        vim.g.neovide_scale_factor = 1
         vim.g.neovide_detach_on_quit = "always_detach"
         if isDesktopHyprland() then
             local ____array_0 = __TS__SparseArrayNew(unpack(Hyprland.getRefreshRates()))
@@ -5637,7 +5637,7 @@ local plugin = {
             sources = cmp.config.sources({{name = "nvim_lsp"}}),
             mapping = {
                 ["<C-b>"] = cmp.mapping.scroll_docs(-4),
-                ["<C-f>"] = cmp.mapping.scroll_docs(1),
+                ["<C-f>"] = cmp.mapping.scroll_docs(4),
                 ["<C-Space>"] = cmp.mapping.complete(),
                 ["<Tab>"] = cmp.mapping(function(fallback)
                     if cmp.visible() then

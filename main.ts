@@ -15,10 +15,11 @@ import { insertJSONShims } from "./lua/shims/json";
 import { insertMainLoopCallbackShims, setImmediate } from "./lua/shims/mainLoopCallbacks";
 import { THEME_APPLIERS } from "./lua/theme";
 
+
+enablePortableAppImageLogic();
 insertJSONShims();
 insertConsoleShims();
 insertMainLoopCallbackShims();
-enablePortableAppImageLogic();
 loadEnvironmentSecrets();
 
 
@@ -29,7 +30,7 @@ function setupNeovide() {
     vim.env["TERM_PROGRAM"] = "neovide";
     vim.env["TERM"] = "xterm-256color";
 
-    vim.g.neovide_scale_factor = 0.85;
+    vim.g.neovide_scale_factor = 1;
     // Doesn't appear to be doing anything, but should leave remote nvim server instances intact when closing
     vim.g.neovide_detach_on_quit = 'always_detach';
     if (isDesktopHyprland()) {
@@ -80,7 +81,6 @@ lazy.setup(
 );
 
 THEME_APPLIERS[getGlobalConfiguration().theme.key]();
-
 
 // unnamedplus is the default, but we'll set it here just in case
 vim.opt.clipboard = "unnamedplus"; // System-wide copy & paste
