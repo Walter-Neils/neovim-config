@@ -4449,7 +4449,7 @@ local getGlobalConfiguration = ____configuration.getGlobalConfiguration
 local ____getOpenPort = require("lua.helpers.network.getOpenPort")
 local getOpenPorts = ____getOpenPort.getOpenPorts
 local ____mainLoopCallbacks = require("lua.shims.mainLoopCallbacks")
-local setImmediate = ____mainLoopCallbacks.setImmediate
+local setTimeout = ____mainLoopCallbacks.setTimeout
 local ollamaCopilotExecutable = "ollama-copilot"
 local ollamaExecutable = "ollama"
 function ____exports.isOllamaIntegrationAllowed()
@@ -4489,12 +4489,15 @@ function ____exports.ollamaIntegration()
     if ____opt_6 and ____opt_6.enabled then
         local result = ____exports.isOllamaIntegrationAllowed()
         if not result.success then
-            setImmediate(function()
-                vim.notify(
-                    ("Ollama integration is enabled, but " .. tostring(result.reason)) .. ".",
-                    vim.log.levels.ERROR
-                )
-            end)
+            setTimeout(
+                function()
+                    vim.notify(
+                        ("Ollama integration is enabled, but " .. tostring(result.reason)) .. ".",
+                        vim.log.levels.ERROR
+                    )
+                end,
+                2500
+            )
         else
             local args = {}
             local config = __TS__ObjectAssign(

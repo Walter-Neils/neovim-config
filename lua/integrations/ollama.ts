@@ -1,6 +1,6 @@
 import { getGlobalConfiguration } from "../helpers/configuration";
 import { getOpenPorts } from "../helpers/network/getOpenPort";
-import { setImmediate } from "../shims/mainLoopCallbacks";
+import { setImmediate, setTimeout } from "../shims/mainLoopCallbacks";
 
 const ollamaCopilotExecutable = "ollama-copilot";
 const ollamaExecutable = "ollama";
@@ -60,9 +60,9 @@ export function ollamaIntegration() {
   if (getGlobalConfiguration().integrations.ollama?.enabled) {
     const result = isOllamaIntegrationAllowed();
     if (!result.success) {
-      setImmediate(() => {
+      setTimeout(() => {
         vim.notify(`Ollama integration is enabled, but ${result.reason}.`, vim.log.levels.ERROR);
-      });
+      }, 2500);
     }
     else {
       const args: string[] = [];
