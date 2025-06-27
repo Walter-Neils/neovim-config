@@ -21,6 +21,7 @@ insertMainLoopCallbackShims();
 enablePortableAppImageLogic();
 loadEnvironmentSecrets();
 
+
 function setupNeovide() {
   const vim = getNeovideExtendedVimContext();
   if (vim.g.neovide) {
@@ -56,6 +57,8 @@ function setupLazy(this: void) {
   // Append lazy to rtp so it can be loaded by plugins
   vim.opt.rtp.prepend(lazyPath);
 }
+
+
 
 vim.opt.diffopt = createDiffOptString({
   internal: true,
