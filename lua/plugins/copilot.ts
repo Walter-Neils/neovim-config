@@ -3,7 +3,7 @@ import { getGlobalConfiguration } from "../helpers/configuration";
 import { applyKeyMapping } from "../helpers/keymap";
 import { useExternalModule } from "../helpers/module/useModule";
 import { isOllamaIntegrationAllowed } from "../integrations/ollama";
-import { setTimeout } from "../shims/mainLoopCallbacks";
+import { setImmediate, setTimeout } from "../shims/mainLoopCallbacks";
 
 type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;
@@ -74,11 +74,14 @@ const plugin: LazyPlugin = {
     if (getGlobalConfiguration().integrations["ollama"]?.enabled) {
       const result = isOllamaIntegrationAllowed();
       if (result.success) {
+        // TODO: Create config options for these settings
+
         //(vim.g as any).copilot_proxy = 'http://localhost:11435';
         //(vim.g as any).copilot_proxy_strict_ssl = false;
       }
       else {
-        vim.notify(`Cannot enable ollama proxy: ${result.reason ?? '[NO REASON PROVIDED]'}`, vim.log.levels.ERROR);
+        setImmediate(() => vim.notify(`Cannot enable ollama proxy: ${result.reason ?? '[NO REASON PROVIDED]'}`, vim.log.levels.ERROR)
+        );
       }
 
     }

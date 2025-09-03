@@ -3838,9 +3838,9 @@ ____exports.CONFIGURATION_DEFAULTS = {
         treesj = {enabled = true},
         iconPicker = {enabled = true},
         todoComments = {enabled = true},
-        crates = {enabled = false, config = {bleedingEdge = false}},
+        crates = {enabled = true, config = {bleedingEdge = false}},
         dbee = {enabled = true},
-        lightbulb = {enabled = false},
+        lightbulb = {enabled = true},
         neogen = {enabled = true},
         tsContextCommentString = {enabled = true},
         nvimDapVirtualText = {enabled = true},
@@ -5703,6 +5703,8 @@ local ____useModule = require("lua.helpers.module.useModule")
 local useExternalModule = ____useModule.useExternalModule
 local ____ollama = require("lua.integrations.ollama")
 local isOllamaIntegrationAllowed = ____ollama.isOllamaIntegrationAllowed
+local ____mainLoopCallbacks = require("lua.shims.mainLoopCallbacks")
+local setImmediate = ____mainLoopCallbacks.setImmediate
 function ____exports.getCopilot()
     local copilot = useExternalModule("copilot")
     return copilot
@@ -5718,7 +5720,7 @@ local plugin = {
             local result = isOllamaIntegrationAllowed()
             if result.success then
             else
-                vim.notify("Cannot enable ollama proxy: " .. (result.reason or "[NO REASON PROVIDED]"), vim.log.levels.ERROR)
+                setImmediate(function() return vim.notify("Cannot enable ollama proxy: " .. (result.reason or "[NO REASON PROVIDED]"), vim.log.levels.ERROR) end)
             end
         end
         ____exports.getCopilot().setup({panel = {enabled = false}, suggestion = {auto_trigger = true, keymap = {accept = "<M-CR>", accept_line = "<M-j>", accept_word = "<M-l>"}}, server_opts_overrides = lspConfig})
@@ -5749,7 +5751,7 @@ local plugin = {
     tag = ____table_bleedingEdge_4,
     event = {"BufRead Cargo.toml"},
     config = function()
-        getCrates().setup()
+        getCrates().setup({completion = {cmp = {enabled = true}}})
     end
 }
 ____exports.default = plugin

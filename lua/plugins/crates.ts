@@ -15,7 +15,13 @@ const plugin: LazyPlugin = {
   tag: (getGlobalConfiguration().packages.crates?.config as { bleedingEdge?: boolean } | undefined)?.bleedingEdge ? undefined : 'stable',
   event: ["BufRead Cargo.toml"],
   config: () => {
-    getCrates().setup();
+    getCrates().setup({
+      completion: {
+        cmp: {
+          enabled: true
+        }
+      }
+    });
   }
 };
 export { plugin as default };

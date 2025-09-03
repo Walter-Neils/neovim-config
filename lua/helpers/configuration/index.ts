@@ -246,7 +246,7 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
       enabled: true,
     },
     crates: {
-      enabled: false,
+      enabled: true,
       config: {
         bleedingEdge: false,
       },
@@ -279,7 +279,7 @@ export const CONFIGURATION_DEFAULTS: GlobalConfiguration = {
       enabled: true
     },
     tinyInlineDiagnostic: {
-      enabled: false
+      enabled: false // Built in to nvim 10+
     },
     screenkey: {
       enabled: true
