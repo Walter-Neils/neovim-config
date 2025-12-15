@@ -3840,7 +3840,7 @@ ____exports.CONFIGURATION_DEFAULTS = {
         todoComments = {enabled = true},
         crates = {enabled = true, config = {bleedingEdge = false}},
         dbee = {enabled = true},
-        lightbulb = {enabled = true},
+        lightbulb = {enabled = false},
         neogen = {enabled = true},
         tsContextCommentString = {enabled = true},
         nvimDapVirtualText = {enabled = true},
@@ -4567,11 +4567,15 @@ return ____exports
 ["lua.plugins.init"] = function(...) 
 local ____lualib = require("lualib_bundle")
 local __TS__ArrayFilter = ____lualib.__TS__ArrayFilter
+local __TS__ArraySort = ____lualib.__TS__ArraySort
 local ____exports = {}
 local ____configuration = require("lua.helpers.configuration.index")
 local getGlobalConfiguration = ____configuration.getGlobalConfiguration
 local ____argparser = require("lua.helpers.user_command.argparser")
 local parseArgs = ____argparser.parseArgs
+local function getPriority(plugin)
+    return plugin.priority or 0
+end
 function ____exports.getPlugins()
     local globalConfig = getGlobalConfiguration()
     local result = {}
@@ -4672,6 +4676,10 @@ function ____exports.getPlugins()
             end
             return ____temp_2
         end
+    )
+    __TS__ArraySort(
+        activeTargets,
+        function(____, a, b) return getPriority(a) - getPriority(b) end
     )
     vim.api.nvim_create_user_command(
         "WinPlugStats",

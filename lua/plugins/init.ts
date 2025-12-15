@@ -6,8 +6,13 @@ import { parseArgs } from "../helpers/user_command/argparser";
 type PluginRef = {
   key?: string,
   include: string,
+  priority?: number,
   runtimeCapabilityChecker?: (this: void) => boolean
 };
+
+function getPriority(plugin: PluginRef): number {
+  return plugin.priority ?? 0;
+}
 
 export function getPlugins(this: void): LazyPlugin[] {
   const globalConfig = getGlobalConfiguration();
@@ -303,7 +308,7 @@ export function getPlugins(this: void): LazyPlugin[] {
       key: 'wakaTime',
       include: 'wakatime'
     },
-    { 
+    {
       key: 'surround',
       include: 'surround'
     },
@@ -346,6 +351,7 @@ export function getPlugins(this: void): LazyPlugin[] {
   ];
 
   const activeTargets = targets.filter(x => x.key === undefined || globalConfig.packages[x.key]?.enabled);
+  activeTargets.sort((a, b) => getPriority(a) - getPriority(b))
 
   vim.api.nvim_create_user_command("WinPlugStats", () => {
     vim.notify(`Using ${targets.length} plugin definitions, ${activeTargets.length} of which are enabled`, vim.log.levels.INFO);
