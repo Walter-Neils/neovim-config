@@ -45,3 +45,9 @@ end, {noremap = true, silent = true})
 vim.keymap.set("i", "<C-i>", "<cmd>Lspsaga signature_help<CR>", { desc = "Signature Help", buffer = vim.api.nvim_get_current_buf() })
 
 vim.keymap.set({ "n", "v" }, "<leader>/", "gcc", { remap = true, desc = "Toggle comment" })
+
+-- Glance binds
+map({"n"}, "<leader>glr", "<cmd>Glance references<CR>", {silent = true})
+map({"n"}, "<leader>gld", "<cmd>Glance definitions<CR>", {silent = true})
+map({"n"}, "<leader>gltd", "<cmd>Glance type_definitions<CR>", {silent = true})
+map({"n"}, "<leader>gli", "<cmd>Glance implementations<CR>", {silent = true})
