@@ -53,11 +53,9 @@ map({"n"}, "<leader>gltd", "<cmd>Glance type_definitions<CR>", {silent = true})
 map({"n"}, "<leader>gli", "<cmd>Glance implementations<CR>", {silent = true})
 
 -- Buffer binds
-map({"n"}, "<leader>x",function()
-	vim.api.nvim_buf_delete(0, { force = false })
-end, {noremap = true, silent = true})
+map({"n"}, "<leader>x","<cmd>BufferClose<CR>", {noremap = true, silent = true})
 
 map({"n"}, "<leader>s", "<cmd>vsplit<CR>", {silent = true})
-map({"n"}, "<Tab>", "<cmd>bnext<CR>", {silent = true})
-map({"n"}, "<A-l>", "<cmd>bnext<CR>", {silent = true})
-map({"n"}, "<A-h>", "<cmd>bprevious<CR>", {silent = true})
+map({"n"}, "<Tab>", "<cmd>BufferNext<CR>", {silent = true})
+map({"n"}, "<A-l>", "<cmd>BufferNext<CR>", {silent = true})
+map({"n"}, "<A-h>", "<cmd>BufferPrevious<CR>", {silent = true})
