@@ -45,3 +45,19 @@ end, {noremap = true, silent = true})
 vim.keymap.set("i", "<C-i>", "<cmd>Lspsaga signature_help<CR>", { desc = "Signature Help", buffer = vim.api.nvim_get_current_buf() })
 
 vim.keymap.set({ "n", "v" }, "<leader>/", "gcc", { remap = true, desc = "Toggle comment" })
+
+-- Glance binds
+map({"n"}, "<leader>glr", "<cmd>Glance references<CR>", {silent = true})
+map({"n"}, "<leader>gld", "<cmd>Glance definitions<CR>", {silent = true})
+map({"n"}, "<leader>gltd", "<cmd>Glance type_definitions<CR>", {silent = true})
+map({"n"}, "<leader>gli", "<cmd>Glance implementations<CR>", {silent = true})
+
+-- Buffer binds
+map({"n"}, "<leader>x",function()
+	vim.api.nvim_buf_delete(0, { force = false })
+end, {noremap = true, silent = true})
+
+map({"n"}, "<leader>s", "<cmd>vsplit<CR>", {silent = true})
+map({"n"}, "<Tab>", "<cmd>bnext<CR>", {silent = true})
+map({"n"}, "<A-l>", "<cmd>bnext<CR>", {silent = true})
+map({"n"}, "<A-h>", "<cmd>bprevious<CR>", {silent = true})
