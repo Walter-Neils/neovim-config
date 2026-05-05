@@ -17,7 +17,7 @@ return {
 
 		-- Default sources for autocomplete
 		sources = {
-			default = { "lsp", "path", "snippets", "buffer" },
+			default = { "lsp", "path" }, -- "snippits", "buffer"
 		},
 	},
 }
