@@ -10,10 +10,10 @@ return {
         python = { "isort", "black" },
         javascript = { "prettierd", "prettier", stop_after_first = true },
       },
-      format_on_save = {
-        timeout_ms = 500,
-        lsp_fallback = true, -- Use LSP if no dedicated formatter is found
-      },
+      -- format_on_save = {
+      --   timeout_ms = 500,
+      --   lsp_fallback = true, -- Use LSP if no dedicated formatter is found
+      -- },
     },
   },
 }
