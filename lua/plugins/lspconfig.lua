@@ -32,8 +32,12 @@ local function apply_configuration_extensions()
 				if not status_ok then
 					vim.notify("Failed to load LSP config: " .. mod_name .. "\n" .. result, vim.log.levels.ERROR)
 				else
-					vim.lsp.config(mod_name, result)
-					vim.lsp.enable(mod_name, true)
+					if result == nil then
+						vim.notify("LSP module '" .. mod_name .. "' used non-standard setup sequence")
+					else
+						vim.lsp.config(mod_name, result)
+						vim.lsp.enable(mod_name, true)
+					end
 				end
 			end
 		end
